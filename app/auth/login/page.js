@@ -1,51 +1,35 @@
-"use client";
-
-import type React from "react";
-
-import Link from "next/link";
+import { useState } from "react";
+import { Link} from "react-router-dom"; 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth();
-  const router = useRouter();
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  const { login: apiLogin, loading: authLoading, error: authError } = useAuth();
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setIsLoading(true);
 
-    // Try to login with each role
-    let loginSuccess = false;
-    let userRole: "volunteer" | "organization" | "admin" | null = null;
-
-    if (login(email, "volunteer")) {
-      loginSuccess = true;
-      userRole = "volunteer";
-    } else if (login(email, "organization")) {
-      loginSuccess = true;
-      userRole = "organization";
-    } else if (login(email, "admin")) {
-      loginSuccess = true;
-      userRole = "admin";
-    }
-
-    if (loginSuccess && userRole) {
-      // Redirect based on detected role
-      if (userRole === "volunteer") {
-        router.push("/");
-      } else if (userRole === "organization") {
-        router.push("/organization/dashboard");
-      } else {
-        router.push("/admin/dashboard");
-      }
-    } else {
-      alert("Email hoặc mật khẩu không đúng");
+    try {
+      const result = await apiLogin(email, password);
+      
+      console.log("Login successful:", result);
+      
+    } catch (err) {
+      console.error("Login error:", err);
+      
+      const errorMessage = err?.message || err?.toString() || "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,8 +44,19 @@ export default function LoginPage() {
             Chào mừng bạn quay trở lại
           </p>
 
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+
+          {authError && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {authError}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
                 Email
@@ -73,10 +68,10 @@ export default function LoginPage() {
                 placeholder="your@email.com"
                 className="w-full px-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6085F0] bg-background text-foreground"
                 required
+                disabled={isLoading || authLoading}
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
                 Mật khẩu
@@ -88,14 +83,16 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 className="w-full px-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6085F0] bg-background text-foreground"
                 required
+                disabled={isLoading || authLoading}
               />
             </div>
 
             <Button
               type="submit"
               className="w-full gradient-primary hover:opacity-90 text-white"
+              disabled={isLoading || authLoading}
             >
-              Đăng nhập
+              {isLoading || authLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
           </form>
 
@@ -103,7 +100,7 @@ export default function LoginPage() {
             <p className="text-muted-foreground">
               Chưa có tài khoản?{" "}
               <Link
-                href="/auth/signup"
+                to="/auth/signup" // Use 'to' instead of 'href' for React Router
                 className="text-[#6085F0] hover:underline font-semibold"
               >
                 Đăng ký ngay
