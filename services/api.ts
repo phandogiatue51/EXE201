@@ -3,7 +3,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'development'
     : process.env.REACT_APP_API_URL || '';
 
 interface ApiRequestOptions extends RequestInit {
-    skipAuth?: boolean;
+    skipAuth?: boolean; 
     headers?: Record<string, string>;
 }
 
@@ -49,6 +49,22 @@ const apiRequest = async (endpoint: string, options: ApiRequestOptions = {}): Pr
 
         if (!response.ok) {
             const errorText = await response.text();
+            let parsedError: any = null;
+            try {
+                parsedError = JSON.parse(errorText);
+            } catch (e) {
+                // ignore parse errors
+            }
+
+            const isMeIdValidation = response.status === 400
+                && parsedError && parsedError.errors && Array.isArray(parsedError.errors.id)
+                && parsedError.errors.id.some((m: any) => typeof m === 'string' && m.includes("'me'"));
+
+            if (isMeIdValidation) {
+                console.warn("API returned validation error treating 'me' as an id; returning null so caller can fallback.");
+                return null;
+            }
+
             console.error('API Error Response:', errorText);
             throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
         }
@@ -89,7 +105,6 @@ export const accountAPI = {
     // Works when server sets an HttpOnly auth cookie and exposes a /Account/me endpoint.
     me: () => apiRequest('/Account/me', {
         method: 'GET',
-        skipAuth: true,
     }),
 
     signUp: (userData: any) => apiRequest('/Account/sign-up', {
@@ -141,7 +156,7 @@ export const applicationAPI = {
     }),
 
     filter: (filterData: any) => apiRequest('/Application/filter', {
-        method: 'GET',
+        method: 'POST',
         body: JSON.stringify(filterData),
     }),
 };
@@ -268,11 +283,19 @@ export const certificateAPI = {
 };
 
 export const organizationAPI = {
-    getAll: () => apiRequest('/Organ'),
+    getAll: () => apiRequest('/Organization'),
 
-    getById: (id: any) => apiRequest(`/Organ/${id}`),
+    getById: (id: any) => apiRequest(`/Organization/${id}`),
 
     create: (organData: any) => {
+        // Accept either a FormData instance (when caller builds it) or a plain object
+        if (organData instanceof FormData) {
+            return apiRequest('/Organization', {
+                method: 'POST',
+                body: organData,
+            });
+        }
+
         const formData = new FormData();
 
         Object.keys(organData).forEach(key => {
@@ -285,13 +308,20 @@ export const organizationAPI = {
             formData.append('imageFile', organData.imageFile);
         }
 
-        return apiRequest('/Organ', {
+        return apiRequest('/Organization', {
             method: 'POST',
             body: formData,
         });
     },
 
     createWithManager: (organData: any) => {
+        if (organData instanceof FormData) {
+            return apiRequest('/Organization/create-with-manager', {
+                method: 'POST',
+                body: organData,
+            });
+        }
+
         const formData = new FormData();
 
         Object.keys(organData).forEach(key => {
@@ -304,13 +334,20 @@ export const organizationAPI = {
             formData.append('imageFile', organData.imageFile);
         }
 
-        return apiRequest('/Organ/create-with-manager', {
+        return apiRequest('/Organization/create-with-manager', {
             method: 'POST',
             body: formData,
         });
     },
 
     update: (id: any, organData: any) => {
+        if (organData instanceof FormData) {
+            return apiRequest(`/Organization/${id}`, {
+                method: 'PUT',
+                body: organData,
+            });
+        }
+
         const formData = new FormData();
 
         Object.keys(organData).forEach(key => {
@@ -323,19 +360,19 @@ export const organizationAPI = {
             formData.append('imageFile', organData.imageFile);
         }
 
-        return apiRequest(`/Organ/${id}`, {
+        return apiRequest(`/Organization/${id}`, {
             method: 'PUT',
             body: formData,
         });
     },
 
-    delete: (id: any) => apiRequest(`/Organ/${id}`, {
+    delete: (id: any) => apiRequest(`/Organization/${id}`, {
         method: 'DELETE',
     }),
 
-    verify: (id: any, formData: any) => apiRequest(`/Organ/${id}`, {
+    verify: (id: number, status: number, rejectionReason?: string) => apiRequest(`/Organization/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ status, rejectionReason }),
     }),
 };
 

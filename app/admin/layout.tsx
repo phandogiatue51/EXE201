@@ -23,12 +23,11 @@ import {
 
 const navItems = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Tình nguyện viên", href: "/admin/volunteers", icon: Users },
   { name: "Tổ chức", href: "/admin/organizations", icon: Building },
-  { name: "Chương trình", href: "/admin/programs", icon: Calendar },
+  { name: "Chương trình", href: "/admin/projects", icon: Calendar },
   { name: "Chứng chỉ", href: "/admin/certificates", icon: Award },
-  { name: "Bài viết", href: "/admin/blog", icon: Newspaper },
-  { name: "Người dùng", href: "/admin/users", icon: UserCog },
+  { name: "Bài viết", href: "/admin/blogs", icon: Newspaper },
+  { name: "Người dùng", href: "/admin/users", icon: Users },
   { name: "Cài đặt", href: "/admin/settings", icon: Settings },
 ];
 
