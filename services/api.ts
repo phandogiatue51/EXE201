@@ -1,22 +1,29 @@
 const API_BASE_URL = process.env.NODE_ENV === 'development'
-    ? 'https://localhost:7230/api'
+    ? 'https://localhost:7085/api'
     : process.env.REACT_APP_API_URL || '';
 
-const apiRequest = async (endpoint, options = {}) => {
+interface ApiRequestOptions extends RequestInit {
+    skipAuth?: boolean;
+    headers?: Record<string, string>;
+}
+
+const apiRequest = async (endpoint: string, options: ApiRequestOptions = {}): Promise<any> => {
     const url = `${API_BASE_URL}${endpoint}`;
 
     const isFormData = options.body instanceof FormData;
 
     const token = typeof window !== 'undefined' ? localStorage.getItem('jwtToken') : null;
-    const config = {
+    const config: ApiRequestOptions = {
         headers: {
             ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
             'accept': '*/*',
             ...(!options.skipAuth && token ? { 'Authorization': `Bearer ${token}` } : {}),
             ...options.headers,
-        },
+        } as Record<string, string>,
         mode: 'cors',
-        credentials: 'omit',
+            // include credentials by default so browser cookies (HttpOnly auth cookies)
+            // will be sent to the API when present. Callers may override via options.
+            credentials: (options.credentials as RequestCredentials) || 'include',
         ...options,
     };
 
@@ -35,10 +42,10 @@ const apiRequest = async (endpoint, options = {}) => {
                     });
                 }
             }
-            console.log('Content-Type header:', config.headers['Content-Type']);
+            console.log('Content-Type header:', config.headers?.['Content-Type']);
         }
 
-        const response = await fetch(url, config);
+        const response = await fetch(url, config as RequestInit);
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -64,7 +71,7 @@ const apiRequest = async (endpoint, options = {}) => {
     } catch (error) {
         console.error('API request failed:', error);
 
-        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        if (error instanceof TypeError && error.message.includes('fetch')) {
             throw new Error('Unable to connect to the server. Please check if the backend is running and accessible.');
         }
 
@@ -73,30 +80,37 @@ const apiRequest = async (endpoint, options = {}) => {
 };
 
 export const accountAPI = {
-    login: (loginData) => apiRequest('/Account/login', {
+    login: (loginData: any) => apiRequest('/Account/login', {
         method: 'POST',
         body: JSON.stringify(loginData),
     }),
 
-    signUp: (userData) => apiRequest('/Account/sign-up', {
+    // Try to fetch the currently authenticated user from the server.
+    // Works when server sets an HttpOnly auth cookie and exposes a /Account/me endpoint.
+    me: () => apiRequest('/Account/me', {
+        method: 'GET',
+        skipAuth: true,
+    }),
+
+    signUp: (userData: any) => apiRequest('/Account/sign-up', {
         method: 'POST',
         body: JSON.stringify(userData),
     }),
 
     getAll: () => apiRequest('/Account'),
 
-    getById: (id) => apiRequest(`/Account/${id}`),
+    getById: (id: any) => apiRequest(`/Account/${id}`),
 
-    update: (id, userData) => apiRequest(`/Account/${id}`, {
+    update: (id: any, userData: any) => apiRequest(`/Account/${id}`, {
         method: 'PUT',
         body: JSON.stringify(userData),
     }),
 
-    delete: (id) => apiRequest(`/Account/${id}`, {
+    delete: (id: any) => apiRequest(`/Account/${id}`, {
         method: 'DELETE',
     }),
 
-    changePassword: (id, passwordData) => apiRequest(`/Account/change-password/${id}`, {
+    changePassword: (id: any, passwordData: any) => apiRequest(`/Account/change-password/${id}`, {
         method: 'PUT',
         body: JSON.stringify(passwordData),
     }),
@@ -105,28 +119,28 @@ export const accountAPI = {
 export const applicationAPI = {
     getAll: () => apiRequest('/Application'),
 
-    getById: (id) => apiRequest(`/Application/${id}`),
+    getById: (id: any) => apiRequest(`/Application/${id}`),
 
-    create: (appData) => apiRequest('/Application', {
+    create: (appData: any) => apiRequest('/Application', {
         method: 'POST',
         body: JSON.stringify(appData),
     }),
 
-    update: (id, appData) => apiRequest(`/Application/${id}`, {
+    update: (id: any, appData: any) => apiRequest(`/Application/${id}`, {
         method: 'PUT',
         body: JSON.stringify(appData),
     }),
 
-    review: (id, reviewData) => apiRequest(`/Application/review/${id}`, {
+    review: (id: any, reviewData: any) => apiRequest(`/Application/review/${id}`, {
         method: 'PUT',
         body: JSON.stringify(reviewData),
     }),
 
-    delete: (id) => apiRequest(`/Application/${id}`, {
+    delete: (id: any) => apiRequest(`/Application/${id}`, {
         method: 'DELETE',
     }),
 
-    filter: (filterData) => apiRequest('/Application/filter', {
+    filter: (filterData: any) => apiRequest('/Application/filter', {
         method: 'GET',
         body: JSON.stringify(filterData),
     }),
@@ -135,9 +149,9 @@ export const applicationAPI = {
 export const blogAPI = {
     getAll: () => apiRequest('/Blog'),
 
-    getById: (id) => apiRequest(`/Blog/${id}`),
+    getById: (id: any) => apiRequest(`/Blog/${id}`),
 
-    create: (blogData) => {
+    create: (blogData: any) => {
         const formData = new FormData();
 
         Object.keys(blogData).forEach(key => {
@@ -156,7 +170,7 @@ export const blogAPI = {
         });
     },
 
-    update: (id, blogData, accountId) => {
+    update: (id: any, blogData: any, accountId: any) => {
         const formData = new FormData();
 
         Object.keys(blogData).forEach(key => {
@@ -175,7 +189,7 @@ export const blogAPI = {
         });
     },
 
-    delete: (id, accountId) => apiRequest(`/Blog/${id}?accountId=${accountId}`, {
+    delete: (id: any, accountId: any) => apiRequest(`/Blog/${id}?accountId=${accountId}`, {
         method: 'DELETE',
     }),
 };
@@ -187,11 +201,11 @@ export const categoryAPI = {
 export const certificateAPI = {
     getAll: () => apiRequest('/Certificate'),
 
-    getById: (id) => apiRequest(`/Certificate/${id}`),
+    getById: (id: any) => apiRequest(`/Certificate/${id}`),
 
-    getByAccountId: (accountId) => apiRequest(`/Certificate/account/${accountId}`),
+    getByAccountId: (accountId: any) => apiRequest(`/Certificate/account/${accountId}`),
 
-    create: (certificateData) => {
+    create: (certificateData: any) => {
         const formData = new FormData();
 
         Object.keys(certificateData).forEach(key => {
@@ -210,7 +224,7 @@ export const certificateAPI = {
         });
     },
 
-    update: (id, certificateData) => {
+    update: (id: any, certificateData: any) => {
         const formData = new FormData();
 
         Object.keys(certificateData).forEach(key => {
@@ -229,16 +243,16 @@ export const certificateAPI = {
         });
     },
 
-    delete: (id) => apiRequest(`/Certificate/${id}`, {
+    delete: (id: any) => apiRequest(`/Certificate/${id}`, {
         method: 'DELETE',
     }),
 
-    verify: (id, verifyData) => apiRequest(`/Certificate/${id}/verify`, {
+    verify: (id: any, verifyData: any) => apiRequest(`/Certificate/${id}/verify`, {
         method: 'POST',
         body: JSON.stringify(verifyData),
     }),
 
-    filter: (filterDto) => {
+    filter: (filterDto: any) => {
         const queryParams = new URLSearchParams();
         Object.keys(filterDto).forEach(key => {
             if (filterDto[key] !== undefined && filterDto[key] !== null) {
@@ -256,9 +270,9 @@ export const certificateAPI = {
 export const organizationAPI = {
     getAll: () => apiRequest('/Organ'),
 
-    getById: (id) => apiRequest(`/Organ/${id}`),
+    getById: (id: any) => apiRequest(`/Organ/${id}`),
 
-    create: (organData) => {
+    create: (organData: any) => {
         const formData = new FormData();
 
         Object.keys(organData).forEach(key => {
@@ -277,7 +291,7 @@ export const organizationAPI = {
         });
     },
 
-    createWithManager: (organData) => {
+    createWithManager: (organData: any) => {
         const formData = new FormData();
 
         Object.keys(organData).forEach(key => {
@@ -296,7 +310,7 @@ export const organizationAPI = {
         });
     },
 
-    update: (id, organData) => {
+    update: (id: any, organData: any) => {
         const formData = new FormData();
 
         Object.keys(organData).forEach(key => {
@@ -315,11 +329,11 @@ export const organizationAPI = {
         });
     },
 
-    delete: (id) => apiRequest(`/Organ/${id}`, {
+    delete: (id: any) => apiRequest(`/Organ/${id}`, {
         method: 'DELETE',
     }),
 
-    verify: (id, formData) => apiRequest(`/Organ/${id}`, {
+    verify: (id: any, formData: any) => apiRequest(`/Organ/${id}`, {
         method: 'PUT',
         body: JSON.stringify(formData),
     }),
@@ -328,9 +342,9 @@ export const organizationAPI = {
 export const projectAPI = {
     getAll: () => apiRequest('/Projects'),
 
-    getById: (id) => apiRequest(`/Projects/${id}`),
+    getById: (id: any) => apiRequest(`/Projects/${id}`),
 
-    create: (projectData) => {
+    create: (projectData: any) => {
         const formData = new FormData();
 
         Object.keys(projectData).forEach(key => {
@@ -349,7 +363,7 @@ export const projectAPI = {
         });
     },
 
-    update: (id, projectData) => {
+    update: (id: any, projectData: any) => {
         const formData = new FormData();
 
         Object.keys(projectData).forEach(key => {
@@ -368,7 +382,7 @@ export const projectAPI = {
         });
     },
 
-    delete: (id) => apiRequest(`/Projects/${id}`, {
+    delete: (id: any) => apiRequest(`/Projects/${id}`, {
         method: 'DELETE',
     }),
 };
@@ -376,21 +390,21 @@ export const projectAPI = {
 export const staffAPI = {
     getAll: () => apiRequest('/Staff'),
 
-    getById: (id) => apiRequest(`/Staff/${id}`),
+    getById: (id: any) => apiRequest(`/Staff/${id}`),
 
-    getByOrganId: (organId) => apiRequest(`/Staff/organization/${organId}`),
+    getByOrganId: (organId: any) => apiRequest(`/Staff/organization/${organId}`),
 
-    create: (staffData) => apiRequest('/Staff', {
+    create: (staffData: any) => apiRequest('/Staff', {
         method: 'POST',
         body: JSON.stringify(staffData),
     }),
 
-    update: (id, staffData) => apiRequest(`/Staff/${id}`, {
+    update: (id: any, staffData: any) => apiRequest(`/Staff/${id}`, {
         method: 'PUT',
         body: JSON.stringify(staffData),
     }),
 
-    delete: (staffId) => {
+    delete: (staffId: any) => {
         return apiRequest(`/Staff/${staffId}?staffId=${staffId}`, {
             method: 'DELETE',
         });

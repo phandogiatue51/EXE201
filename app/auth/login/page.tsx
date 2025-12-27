@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { Link} from "react-router-dom"; 
+"use client";
+
+import { useState, FormEvent, ChangeEvent } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -13,7 +15,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   
   const { login: apiLogin, loading: authLoading, error: authError } = useAuth();
-  const handleSubmit = async (e) => {
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
@@ -26,7 +29,7 @@ export default function LoginPage() {
     } catch (err) {
       console.error("Login error:", err);
       
-      const errorMessage = err?.message || err?.toString() || "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.";
+      const errorMessage = (err as any)?.message || (err as any)?.toString() || "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -62,9 +65,8 @@ export default function LoginPage() {
                 Email
               </label>
               <input
-                type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 placeholder="your@email.com"
                 className="w-full px-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6085F0] bg-background text-foreground"
                 required
@@ -79,7 +81,7 @@ export default function LoginPage() {
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="w-full px-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6085F0] bg-background text-foreground"
                 required
@@ -100,7 +102,7 @@ export default function LoginPage() {
             <p className="text-muted-foreground">
               Chưa có tài khoản?{" "}
               <Link
-                to="/auth/signup" // Use 'to' instead of 'href' for React Router
+                href="/auth/signup"
                 className="text-[#6085F0] hover:underline font-semibold"
               >
                 Đăng ký ngay

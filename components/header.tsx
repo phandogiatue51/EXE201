@@ -280,12 +280,6 @@ export function Header() {
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-[#77E5C8]/10 transition-all duration-200 border border-transparent hover:border-[#77E5C8] hover:shadow-sm"
                 >
-                  <div className="w-9 h-9 bg-gradient-to-br from-[#77E5C8] to-[#6085F0] rounded-full flex items-center justify-center text-white text-sm font-semibold shadow-md">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-                  <span className="text-foreground font-medium">
-                    {user.name}
-                  </span>
                 <svg
                     className={`w-4 h-4 text-foreground transition-transform duration-200 ${
                       isDropdownOpen ? "rotate-180" : ""
@@ -307,11 +301,8 @@ export function Header() {
               {isDropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-64 bg-white/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl z-50 pointer-events-auto animate-in slide-in-from-top-2 duration-200">
                     <div className="px-4 py-4 border-b border-border/50">
-                      <p className="text-sm font-semibold text-foreground">
-                        {user.name}
-                      </p>
                       <p className="text-xs text-muted-foreground">
-                        {user.email}
+                        {user?.email || ""}
                       </p>
                       <span className="inline-block mt-2 px-2 py-1 text-xs text-[#6085F0] bg-[#77E5C8]/10 rounded-full font-medium capitalize">
                         {user.role}

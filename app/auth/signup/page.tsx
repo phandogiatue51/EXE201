@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+"use client";
+
+import { useState, FormEvent, ChangeEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
@@ -7,7 +10,7 @@ import { Footer } from "@/components/footer";
 import { accountAPI } from "@/services/api";
 
 export default function SignupPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [role] = useState("volunteer");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -20,7 +23,7 @@ export default function SignupPage() {
     isFemale: false,
   });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
@@ -40,12 +43,12 @@ export default function SignupPage() {
       console.log("Signup successful:", result);
       
       alert("Đăng ký thành công! Bạn có thể đăng nhập ngay.");
-      navigate("/auth/login");
+      router.push("/auth/login");
       
     } catch (err) {
       console.error("Signup error:", err);
       
-      const errorMessage = err?.message || err?.toString() || "Đăng ký thất bại. Vui lòng thử lại.";
+      const errorMessage = (err as any)?.message || (err as any)?.toString() || "Đăng ký thất bại. Vui lòng thử lại.";
       setError(errorMessage);
       alert(errorMessage);
     } finally {
@@ -53,7 +56,7 @@ export default function SignupPage() {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     
     setFormData({
@@ -215,7 +218,7 @@ export default function SignupPage() {
             <p className="text-muted-foreground">
               Đã có tài khoản?{" "}
               <Link
-                to="/auth/login"
+                href="/auth/login"
                 className="text-[#6085F0] hover:underline font-semibold"
               >
                 Đăng nhập ngay

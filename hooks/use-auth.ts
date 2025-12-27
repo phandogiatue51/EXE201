@@ -1,9 +1,11 @@
-import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { accountAPI } from "../services/api";
-import { useToast } from "@chakra-ui/react";
+'use client';
 
-const decodeJWT = (token) => {
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { accountAPI } from "../services/api";
+import { useToast } from "@/components/ui/use-toast";
+
+const decodeJWT = (token: string | null): any => {
     try {
         if (!token) return null;
 
@@ -47,120 +49,29 @@ const decodeJWT = (token) => {
 export function useAuth() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const navigate = useNavigate();
+    const [userState, setUserState] = useState<any | null>(null);
+    const router = useRouter();
     const toast = useToast();
 
-    const login = async (email, password) => {
-        setError("");
-        setLoading(true);
-
+    // Fetch current user from server (cookie-based) or decode token (fallback)
+    const fetchCurrentUser = useCallback(async () => {
         try {
-            const data = await accountAPI.login({
-                email: email,
-                password: password
-            });
-
-            console.log('✅ Login successful:', data);
-
-            localStorage.setItem("jwtToken", data.token);
-
-            const userInfo = decodeJWT(data.token);
-            let role = null;
-
-            if (userInfo) {
-                console.log("🔍 Decoded JWT user info:", userInfo);
-
-                localStorage.setItem("userData", JSON.stringify(userInfo));
-                localStorage.setItem("accountId", userInfo.AccountId?.toString() || "");
-                localStorage.setItem("email", userInfo.Email || "");
-                localStorage.setItem("role", userInfo.Role?.toString() || "");
-                localStorage.setItem("staffId", userInfo.StaffId?.toString() || "");
-                localStorage.setItem("organizationId", userInfo.OrganizationId?.toString() || "");
-                localStorage.setItem("staffRole", userInfo.StaffRole?.toString() || "");
-
-                role = userInfo.Role?.toString();
-            }
-
-            console.log("✅ JWT token and user data stored");
-
-            toast({
-                title: "Login Successful!",
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-                position: "top"
-            });
-
-            window.dispatchEvent(new CustomEvent('authStateChanged'));
-
-            console.log("🎯 Navigation role:", role);
-
-            switch (role) {
-                case "Admin":
-                    navigate("/admin");
-                    break;
-                case "Staff":
-                    navigate("/staff");
-                    break;
-                case "Volunteer":
-                    navigate("/volunteer");
-                    break;
-                case "User":
-                default:
-                    navigate("/");
-                    break;
-            }
-
-            return data;
-
-        } catch (err) {
-            const errorMessage = err.message || "Login failed. Please check your credentials.";
-            setError(errorMessage);
-            console.error("❌ Login error:", err);
-
-            let displayMessage = "Login failed. Please check your credentials.";
+            if (typeof window === 'undefined') return null;
             try {
-                const errorJsonString = err.message.match(/\{.*\}/);
-                if (errorJsonString) {
-                    const errorObj = JSON.parse(errorJsonString[0]);
-                    displayMessage = errorObj.message || displayMessage;
+                const serverUser = await accountAPI.me();
+                if (serverUser) {
+                    setUserState(serverUser);
+                    return serverUser;
                 }
-            } catch (e) { /* silent fail */ }
+            } catch (e) {
+                // server may not expose /Account/me; fall back to token
+            }
 
-            throw err;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const logout = useCallback(() => {
-        const itemsToRemove = [
-            "jwtToken", "userData", "accountId", "email", "role",
-            "staffId", "organizationId", "staffRole"
-        ];
-        itemsToRemove.forEach(item => localStorage.removeItem(item));
-
-        toast({
-            title: "Logged out successfully!",
-            status: "info",
-            duration: 3000,
-            isClosable: true,
-            position: "top",
-        });
-
-        window.dispatchEvent(new CustomEvent('authStateChanged'));
-        setTimeout(() => {
-            navigate("/login");
-        }, 1000);
-    }, [navigate, toast]);
-
-    const getCurrentUser = useCallback(() => {
-        try {
             const token = localStorage.getItem("jwtToken");
             if (token) {
                 const userData = decodeJWT(token);
                 if (userData) {
-                    return {
+                    const derived = {
                         accountId: userData.AccountId,
                         email: userData.Email,
                         role: userData.Role,
@@ -170,38 +81,125 @@ export function useAuth() {
                         isStaff: !!userData.StaffId,
                         isAdmin: userData.Role === "Admin"
                     };
+                    setUserState(derived);
+                    return derived;
                 }
             }
 
-            const role = localStorage.getItem("role");
-            if (role) {
-                return {
-                    accountId: localStorage.getItem("accountId"),
-                    email: localStorage.getItem("email"),
-                    role: role,
-                    staffId: localStorage.getItem("staffId"),
-                    organizationId: localStorage.getItem("organizationId"),
-                    staffRole: localStorage.getItem("staffRole"),
-                    isStaff: !!localStorage.getItem("staffId"),
-                    isAdmin: role === "Admin"
-                };
-            }
-
+            setUserState(null);
             return null;
         } catch (error) {
-            console.error("❌ Error getting current user:", error);
+            console.error("❌ Error fetching current user:", error);
             return null;
         }
     }, []);
 
+    useEffect(() => {
+        // try to populate user state on mount
+        fetchCurrentUser();
+    }, [fetchCurrentUser]);
+
+    const login = async (email: string, password: string) => {
+        setError("");
+        setLoading(true);
+
+        try {
+            if (typeof window === 'undefined') {
+                setLoading(false);
+                setError("Login is only available in the browser");
+                return;
+            }
+            
+            const data = await accountAPI.login({
+                email: email,
+                password: password
+            });
+
+            console.log('✅ Login successful:', data);
+
+            // If server returns a token, keep it for backward compatibility
+            if (data && data.token) {
+                localStorage.setItem("jwtToken", data.token);
+            }
+
+            // refresh user state from server or token
+            await fetchCurrentUser();
+
+            toast.toast({
+                title: "Login Successful!",
+                description: "Welcome back!",
+                duration: 3000,
+            });
+
+            window.dispatchEvent(new CustomEvent('authStateChanged'));
+
+            const role = (userState && userState.role) || (data && data.role) || null;
+
+            switch (role) {
+                case "Admin":
+                    router.push("/admin");
+                    break;
+                case "Staff":
+                    router.push("/staff");
+                    break;
+                case "Volunteer":
+                    router.push("/volunteer");
+                    break;
+                case "User":
+                default:
+                    router.push("/");
+                    break;
+            }
+
+            return data;
+
+        } catch (err) {
+            const error = err as Error;
+            const errorMessage = error.message || "Login failed. Please check your credentials.";
+            setError(errorMessage);
+            console.error("❌ Login error:", err);
+
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const logout = useCallback(() => {
+        if (typeof window === 'undefined') return;
+        // clear client-side state and storage; server should clear cookies on its own
+        const itemsToRemove = [
+            "jwtToken", "userData", "accountId", "email", "role",
+            "staffId", "organizationId", "staffRole"
+        ];
+        itemsToRemove.forEach(item => localStorage.removeItem(item));
+        setUserState(null);
+
+        toast.toast({
+            title: "Logged out successfully!",
+            description: "See you next time!",
+            duration: 3000,
+        });
+
+        window.dispatchEvent(new CustomEvent('authStateChanged'));
+        setTimeout(() => {
+            router.push("/login");
+        }, 1000);
+    }, [router, toast]);
+
+    const getCurrentUser = useCallback(() => {
+        return userState;
+    }, [userState]);
+
     const isAuthenticated = useCallback(() => {
         try {
+            if (userState) return true;
+
+            if (typeof window === 'undefined') return false;
             const token = localStorage.getItem("jwtToken");
             if (!token) return false;
-
             const userData = decodeJWT(token);
             if (!userData) return false;
-
             const expiration = userData.exp;
             if (expiration) {
                 const currentTime = Date.now() / 1000;
@@ -211,20 +209,20 @@ export function useAuth() {
                     return false;
                 }
             }
-
             return true;
         } catch (error) {
             console.error("❌ Authentication check error:", error);
             return false;
         }
-    }, [logout]);
+    }, [logout, userState]);
 
     const getAuthHeader = () => {
+        if (typeof window === 'undefined') return {};
         const token = localStorage.getItem("jwtToken");
         return token ? { 'Authorization': `Bearer ${token}` } : {};
     };
 
-    const hasRole = (role) => {
+    const hasRole = (role: string) => {
         const user = getCurrentUser();
         if (!user || !user.role) return false;
         return user.role.toString() === role.toString();
@@ -245,7 +243,10 @@ export function useAuth() {
         return user?.staffRole;
     };
 
+    const user = getCurrentUser();
+
     return {
+        user,
         login,
         logout,
         getCurrentUser,
@@ -255,6 +256,7 @@ export function useAuth() {
         isStaffMember,
         getOrganizationId,
         getStaffRole,
+        fetchCurrentUser,
         loading,
         error,
         setError

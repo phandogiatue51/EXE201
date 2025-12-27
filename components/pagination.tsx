@@ -1,8 +1,20 @@
 import React, { useMemo } from 'react';
-import { Flex, Button, HStack, Text, Select, Icon } from '@chakra-ui/react';
-import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const pagination = ({
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+  startIndex: number;
+  endIndex: number;
+}
+
+const Pagination: React.FC<PaginationProps> = ({
   currentPage,
   totalPages,
   totalItems,
@@ -50,66 +62,55 @@ const pagination = ({
   if (totalItems === 0) return null; 
 
   return (
-    <Flex
-      justify="space-between"
-      align="center"
-      w="100%"
-      px="24px"
-      py="16px"
-      borderTop="1px"
-      borderColor="gray.200"
-      flexDirection={{ base: 'column', md: 'row' }}
-      gap={4}
-    >
-      <Flex align="center">
-        <Text fontSize="sm" mr={2}>
+    <div className="flex justify-between items-center w-full px-6 py-4 border-t border-gray-200 gap-4 flex-col md:flex-row">
+      <div className="flex items-center gap-2">
+        <span className="text-sm">
           Show:
-        </Text>
-        <Select
-          value={pageSize}
-          onChange={(e) => onPageSizeChange(parseInt(e.target.value))}
-          size="sm"
-          w="auto"
-        >
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
+        </span>
+        <Select value={pageSize.toString()} onValueChange={(value) => onPageSizeChange(parseInt(value))}>
+          <SelectTrigger className="w-auto">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="5">5</SelectItem>
+            <SelectItem value="10">10</SelectItem>
+            <SelectItem value="20">20</SelectItem>
+            <SelectItem value="50">50</SelectItem>
+          </SelectContent>
         </Select>
-        <Text fontSize="sm" ml={2}>
+        <span className="text-sm">
           rows per page
-        </Text>
-      </Flex>
+        </span>
+      </div>
 
-      <Flex align="center" gap={2}>
-        <Text fontSize="sm">
+      <div className="flex items-center gap-2">
+        <span className="text-sm">
           Showing {startIndex + 1} - {Math.min(endIndex, totalItems)} of {totalItems}
-        </Text>
-        <HStack spacing={1}>
+        </span>
+        <div className="flex gap-1">
           <Button
             size="sm"
             variant="outline"
             onClick={goToFirstPage}
-            isDisabled={currentPage === 1}
+            disabled={currentPage === 1}
           >
-            <Icon as={MdChevronLeft} />
-            <Icon as={MdChevronLeft} />
+            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
             size="sm"
             variant="outline"
             onClick={goToPreviousPage}
-            isDisabled={currentPage === 1}
+            disabled={currentPage === 1}
           >
-            <Icon as={MdChevronLeft} />
+            <ChevronLeft className="h-4 w-4" />
           </Button>
 
           {pageNumbers.map((page) => (
             <Button
               key={page}
               size="sm"
-              variant={currentPage === page ? 'solid' : 'outline'}
-              colorScheme={currentPage === page ? 'blue' : 'gray'}
+              variant={currentPage === page ? 'default' : 'outline'}
               onClick={() => onPageChange(page)}
             >
               {page}
@@ -120,23 +121,23 @@ const pagination = ({
             size="sm"
             variant="outline"
             onClick={goToNextPage}
-            isDisabled={currentPage === totalPages}
+            disabled={currentPage === totalPages}
           >
-            <Icon as={MdChevronRight} />
+            <ChevronRight className="h-4 w-4" />
           </Button>
           <Button
             size="sm"
             variant="outline"
             onClick={goToLastPage}
-            isDisabled={currentPage === totalPages}
+            disabled={currentPage === totalPages}
           >
-            <Icon as={MdChevronRight} />
-            <Icon as={MdChevronRight} />
+            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" />
           </Button>
-        </HStack>
-      </Flex>
-    </Flex>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default pagination;
+export default Pagination;
