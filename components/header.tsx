@@ -110,6 +110,16 @@ export function Header() {
               )}
             </>
           )}
+          <Link
+            href="/blog"
+            className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
+              isActive("/blog")
+                ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
+                : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
+            }`}
+          >
+            Blog
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">
