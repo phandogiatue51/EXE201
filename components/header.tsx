@@ -314,9 +314,9 @@ export function Header() {
                       href={
                         user.role === "volunteer"
                           ? "/volunteer/dashboard"
-                          : user.role === "organization"
-                            ? "/organization/dashboard"
-                            : "/admin/dashboard"
+                          : user.role === "Staff"
+                            ? "/organization"
+                            : "/admin"
                       }
                         className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-[#77E5C8]/10 transition-colors duration-150"
                         onClick={() => setIsDropdownOpen(false)}

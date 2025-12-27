@@ -5,260 +5,331 @@ import { useRouter } from "next/navigation";
 import { accountAPI } from "../services/api";
 import { useToast } from "@/components/ui/use-toast";
 
-const decodeJWT = (token: string | null): any => {
-    try {
-        if (!token) return null;
+const decodeJWT = (token: string): DecodedJWT | null => {
+  try {
+    if (!token) return null;
 
-        const parts = token.split('.');
-        if (parts.length !== 3) {
-            console.error('❌ Invalid JWT token format: expected 3 parts');
-            return null;
-        }
-
-        const payload = parts[1];
-
-        let base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-        switch (base64.length % 4) {
-            case 2: base64 += '=='; break;
-            case 3: base64 += '='; break;
-        }
-
-        const decodedPayload = atob(base64);
-        const userData = JSON.parse(decodedPayload);
-
-        return {
-            AccountId: userData.AccountId || userData["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
-            Email: userData.Email || userData["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
-            Role: userData.Role || userData["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
-
-            StaffId: userData.StaffId,
-            OrganizationId: userData.OrganizationId,
-            StaffRole: userData.StaffRole,
-
-            exp: userData.exp,
-            iss: userData.iss,
-            aud: userData.aud
-        };
-
-    } catch (error) {
-        console.error("❌ JWT decoding error:", error);
-        return null;
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      console.error('Invalid JWT token format: expected 3 parts');
+      return null;
     }
+
+    const payload = parts[1];
+    
+    // Base64 decode with proper padding
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const paddedBase64 = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+    
+    const decodedPayload = atob(paddedBase64);
+    const userData = JSON.parse(decodedPayload);
+
+    return {
+      AccountId: userData.AccountId || userData["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
+      Email: userData.Email || userData["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+      Role: userData.Role || userData["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+      StaffId: userData.StaffId,
+      OrganizationId: userData.OrganizationId,
+      StaffRole: userData.StaffRole,
+      exp: userData.exp,
+      iss: userData.iss,
+      aud: userData.aud,
+      ...userData
+    };
+  } catch (error) {
+    console.error("JWT decoding error:", error);
+    return null;
+  }
+};
+
+const isTokenExpired = (token: string): boolean => {
+  const decoded = decodeJWT(token);
+  if (!decoded || !decoded.exp) return true;
+  
+  const currentTime = Math.floor(Date.now() / 1000);
+  return currentTime >= decoded.exp;
 };
 
 export function useAuth() {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [userState, setUserState] = useState<any | null>(null);
-    const router = useRouter();
-    const toast = useToast();
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+  const [user, setUser] = useState<UserData | null>(null);
+  const router = useRouter();
+  const { toast } = useToast();
 
-    // Fetch current user from server (cookie-based) or decode token (fallback)
-    const fetchCurrentUser = useCallback(async () => {
-        try {
-            if (typeof window === 'undefined') return null;
-            try {
-                const serverUser = await accountAPI.me();
-                if (serverUser) {
-                    setUserState(serverUser);
-                    return serverUser;
-                }
-            } catch (e) {
-                // server may not expose /Account/me; fall back to token
-            }
-
-            const token = localStorage.getItem("jwtToken");
-            if (token) {
-                const userData = decodeJWT(token);
-                if (userData) {
-                    const derived = {
-                        accountId: userData.AccountId,
-                        email: userData.Email,
-                        role: userData.Role,
-                        staffId: userData.StaffId,
-                        organizationId: userData.OrganizationId,
-                        staffRole: userData.StaffRole,
-                        isStaff: !!userData.StaffId,
-                        isAdmin: userData.Role === "Admin"
-                    };
-                    setUserState(derived);
-                    return derived;
-                }
-            }
-
-            setUserState(null);
-            return null;
-        } catch (error) {
-            console.error("❌ Error fetching current user:", error);
-            return null;
-        }
-    }, []);
-
-    useEffect(() => {
-        // try to populate user state on mount
-        fetchCurrentUser();
-    }, [fetchCurrentUser]);
-
-    const login = async (email: string, password: string) => {
-        setError("");
-        setLoading(true);
-
-        try {
-            if (typeof window === 'undefined') {
-                setLoading(false);
-                setError("Login is only available in the browser");
-                return;
-            }
-            
-            const data = await accountAPI.login({
-                email: email,
-                password: password
-            });
-
-            console.log('✅ Login successful:', data);
-
-            // If server returns a token, keep it for backward compatibility
-            if (data && data.token) {
-                localStorage.setItem("jwtToken", data.token);
-            }
-
-            // refresh user state from server or token
-            await fetchCurrentUser();
-
-            toast.toast({
-                title: "Login Successful!",
-                description: "Welcome back!",
-                duration: 3000,
-            });
-
-            window.dispatchEvent(new CustomEvent('authStateChanged'));
-
-            const role = (userState && userState.role) || (data && data.role) || null;
-
-            switch (role) {
-                case "Admin":
-                    router.push("/admin");
-                    break;
-                case "Staff":
-                    router.push("/staff");
-                    break;
-                case "Volunteer":
-                    router.push("/volunteer");
-                    break;
-                case "User":
-                default:
-                    router.push("/");
-                    break;
-            }
-
-            return data;
-
-        } catch (err) {
-            const error = err as Error;
-            const errorMessage = error.message || "Login failed. Please check your credentials.";
-            setError(errorMessage);
-            console.error("❌ Login error:", err);
-
-            throw err;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const logout = useCallback(() => {
-        if (typeof window === 'undefined') return;
-        // clear client-side state and storage; server should clear cookies on its own
-        const itemsToRemove = [
-            "jwtToken", "userData", "accountId", "email", "role",
-            "staffId", "organizationId", "staffRole"
-        ];
-        itemsToRemove.forEach(item => localStorage.removeItem(item));
-        setUserState(null);
-
-        toast.toast({
-            title: "Logged out successfully!",
-            description: "See you next time!",
-            duration: 3000,
-        });
-
-        window.dispatchEvent(new CustomEvent('authStateChanged'));
-        setTimeout(() => {
-            router.push("/login");
-        }, 1000);
-    }, [router, toast]);
-
-    const getCurrentUser = useCallback(() => {
-        return userState;
-    }, [userState]);
-
-    const isAuthenticated = useCallback(() => {
-        try {
-            if (userState) return true;
-
-            if (typeof window === 'undefined') return false;
-            const token = localStorage.getItem("jwtToken");
-            if (!token) return false;
-            const userData = decodeJWT(token);
-            if (!userData) return false;
-            const expiration = userData.exp;
-            if (expiration) {
-                const currentTime = Date.now() / 1000;
-                if (currentTime >= expiration) {
-                    console.log("❌ Token expired");
-                    logout();
-                    return false;
-                }
-            }
-            return true;
-        } catch (error) {
-            console.error("❌ Authentication check error:", error);
-            return false;
-        }
-    }, [logout, userState]);
-
-    const getAuthHeader = () => {
-        if (typeof window === 'undefined') return {};
-        const token = localStorage.getItem("jwtToken");
-        return token ? { 'Authorization': `Bearer ${token}` } : {};
-    };
-
-    const hasRole = (role: string) => {
-        const user = getCurrentUser();
-        if (!user || !user.role) return false;
-        return user.role.toString() === role.toString();
-    };
-
-    const isStaffMember = () => {
-        const user = getCurrentUser();
-        return !!(user && user.staffId);
-    };
-
-    const getOrganizationId = () => {
-        const user = getCurrentUser();
-        return user?.organizationId;
-    };
-
-    const getStaffRole = () => {
-        const user = getCurrentUser();
-        return user?.staffRole;
-    };
-
-    const user = getCurrentUser();
-
+  // Transform decoded JWT to user data
+  const transformUserData = useCallback((decoded: DecodedJWT): UserData => {
     return {
-        user,
-        login,
-        logout,
-        getCurrentUser,
-        isAuthenticated,
-        getAuthHeader,
-        hasRole,
-        isStaffMember,
-        getOrganizationId,
-        getStaffRole,
-        fetchCurrentUser,
-        loading,
-        error,
-        setError
+      accountId: decoded.AccountId,
+      email: decoded.Email,
+      role: decoded.Role,
+      staffId: decoded.StaffId,
+      organizationId: decoded.OrganizationId,
+      staffRole: decoded.StaffRole,
+      isStaff: !!decoded.StaffId,
+      isAdmin: decoded.Role === "Admin",
+      exp: decoded.exp
     };
+  }, []);
+
+  // Sync user from token (client-side only)
+  const syncUserFromToken = useCallback((): UserData | null => {
+    if (typeof window === 'undefined') return null;
+    
+    const token = localStorage.getItem("jwtToken") || sessionStorage.getItem("jwtToken");
+    if (!token) {
+      setUser(null);
+      return null;
+    }
+
+    // Check token expiration
+    if (isTokenExpired(token)) {
+      console.warn("Token expired, clearing auth");
+      localStorage.removeItem("jwtToken");
+      sessionStorage.removeItem("jwtToken");
+      setUser(null);
+      return null;
+    }
+
+    const decoded = decodeJWT(token);
+    if (!decoded) {
+      setUser(null);
+      return null;
+    }
+
+    const userData = transformUserData(decoded);
+    setUser(userData);
+    return userData;
+  }, [transformUserData]);
+
+  // Initialize auth state on mount
+  useEffect(() => {
+    const initAuth = () => {
+      const userData = syncUserFromToken();
+      setInitialLoading(false);
+      return userData;
+    };
+
+    const userData = initAuth();
+
+    // Set up auto-logout when token expires
+    if (userData?.exp) {
+      const expirationTime = userData.exp * 1000 - Date.now();
+      if (expirationTime > 0) {
+        const timer = setTimeout(() => {
+          console.log("Token expired, auto-logout");
+          logout();
+        }, expirationTime);
+        
+        return () => clearTimeout(timer);
+      } else {
+        logout();
+      }
+    }
+
+    // Listen for auth changes from other tabs/windows
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'jwtToken') {
+        syncUserFromToken();
+      }
+    };
+
+    // Listen for custom auth events
+    const handleAuthStateChanged = () => {
+      syncUserFromToken();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('authStateChanged', handleAuthStateChanged);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authStateChanged', handleAuthStateChanged);
+    };
+  }, [syncUserFromToken]);
+
+  const login = async (email: string, password: string, rememberMe?: boolean) => {
+    setError("");
+    setLoading(true);
+
+    try {
+      if (typeof window === 'undefined') {
+        throw new Error("Login is only available in the browser");
+      }
+
+      const data: LoginResponse = await accountAPI.login({
+        email,
+        password,
+        rememberMe
+      });
+
+      console.log('Login successful:', data);
+
+      if (!data.token) {
+        throw new Error("No token received from server");
+      }
+
+      // Store token based on rememberMe preference
+      const storage = rememberMe ? localStorage : sessionStorage;
+      storage.setItem("jwtToken", data.token);
+
+      // Decode token to get user info
+      const decoded = decodeJWT(data.token);
+      if (!decoded) {
+        throw new Error("Failed to decode authentication token");
+      }
+
+      const userData = transformUserData(decoded);
+      setUser(userData);
+
+      toast({
+        title: "Login Successful!",
+        description: "Welcome back!",
+        duration: 3000,
+      });
+
+      // Dispatch auth change event
+      window.dispatchEvent(new CustomEvent('authStateChanged'));
+
+      // Navigate based on role
+      const role = userData.role || data.role || 'User';
+      switch (role) {
+        case "Admin":
+          router.push("/admin");
+          break;
+        case "Staff":
+          router.push("/organization");
+          break;
+        case "Volunteer":
+          router.push("/volunteer");
+          break;
+        case "User":
+        default:
+          router.push("/");
+          break;
+      }
+
+      return data;
+    } catch (err: any) {
+      const errorMessage = err?.message || 
+                         err?.data?.message || 
+                         "Login failed. Please check your credentials.";
+      setError(errorMessage);
+      
+      toast({
+        title: "Login Failed",
+        description: errorMessage,
+        variant: "destructive",
+        duration: 5000,
+      });
+      
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = useCallback(() => {
+    // Clear all auth storage (no server-side logout needed)
+    localStorage.removeItem("jwtToken");
+    sessionStorage.removeItem("jwtToken");
+    
+    // Clear state
+    setUser(null);
+    setError("");
+
+    toast({
+      title: "Logged out successfully!",
+      description: "See you next time!",
+      duration: 3000,
+    });
+
+    // Dispatch auth change event
+    window.dispatchEvent(new CustomEvent('authStateChanged'));
+
+    // Redirect to login
+    router.push("/login");
+  }, [router, toast]);
+
+  const isAuthenticated = useCallback(() => {
+    if (!user) {
+      // Check token directly if user state is not set
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem("jwtToken") || sessionStorage.getItem("jwtToken");
+        if (!token) return false;
+        
+        if (isTokenExpired(token)) {
+          logout();
+          return false;
+        }
+        
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }, [user, logout]);
+
+  const getAuthHeader = useCallback(() => {
+    if (typeof window === 'undefined') return {};
+    
+    // Check both storage locations
+    const token = localStorage.getItem("jwtToken") || sessionStorage.getItem("jwtToken");
+    if (!token) return {};
+    
+    // Check expiration before returning header
+    if (isTokenExpired(token)) {
+      logout();
+      return {};
+    }
+    
+    return { 'Authorization': `Bearer ${token}` };
+  }, [logout]);
+
+  const hasRole = useCallback((role: string | string[]): boolean => {
+    if (!user?.role) return false;
+    
+    if (Array.isArray(role)) {
+      return role.includes(user.role);
+    }
+    return user.role === role;
+  }, [user]);
+
+  const isStaffMember = useCallback(() => {
+    return !!(user && user.staffId);
+  }, [user]);
+
+  const getOrganizationId = useCallback(() => {
+    return user?.organizationId;
+  }, [user]);
+
+  const getStaffRole = useCallback(() => {
+    return user?.staffRole;
+  }, [user]);
+
+  const getCurrentUser = useCallback(() => {
+    return user;
+  }, [user]);
+
+  const refreshUser = useCallback(() => {
+    return syncUserFromToken();
+  }, [syncUserFromToken]);
+
+  return {
+    user,
+    login,
+    logout,
+    isAuthenticated,
+    getAuthHeader,
+    hasRole,
+    isStaffMember,
+    getOrganizationId,
+    getStaffRole,
+    getCurrentUser,
+    refreshUser,
+    loading: loading || initialLoading,
+    error,
+    setError
+  };
 }

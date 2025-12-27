@@ -10,26 +10,27 @@ import {
   Users,
   Building,
   Calendar,
+  FileText,
   Award,
   Settings,
   LogOut,
   Menu,
   X,
+  UserCog,
   Newspaper,
   ChevronRight,
 } from "lucide-react";
 
 const navItems = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Tổ chức", href: "/admin/organizations", icon: Building },
-  { name: "Chương trình", href: "/admin/projects", icon: Calendar },
-  { name: "Chứng chỉ", href: "/admin/certificates", icon: Award },
-  { name: "Bài viết", href: "/admin/blogs", icon: Newspaper },
-  { name: "Người dùng", href: "/admin/users", icon: Users },
-  { name: "Cài đặt", href: "/admin/settings", icon: Settings },
+  { name: "Dashboard", href: "/organization", icon: LayoutDashboard },
+  { name: "Chương trình", href: "/organization/projects", icon: Calendar },
+  { name: "Đơn đăng ký", href: "/organization/applications", icon: FileText },
+  { name: "Bài viết", href: "/organization/blogs", icon: Newspaper },
+  { name: "Nhân viên", href: "/organization/employee", icon: Users },
+  { name: "Cài đặt", href: "/organization/settings", icon: Settings },
 ];
 
-export default function AdminLayout({
+export default function StaffLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -38,46 +39,27 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { 
-    user, 
-    isAuthenticated, 
-    logout, 
-    hasRole, 
-    loading: authLoading 
-  } = useAuth();
+  const { user, isAuthenticated, logout, hasRole, loading: authLoading } = useAuth();
 
-  // Check admin authentication
   useEffect(() => {
-    const checkAdminAccess = () => {
-      if (authLoading) {
-        // Still checking authentication
-        return;
-      }
+    // Check if user is staff and authenticated
+    const checkAuth = () => {
+      if (authLoading) return; // Still loading auth state
 
-      // If not authenticated at all
       if (!isAuthenticated()) {
         router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
         return;
       }
 
-      // If authenticated but not admin
-      if (!hasRole("Admin")) {
-        // Check what role they have and redirect accordingly
-        if (hasRole("Staff")) {
-          router.push("/organization");
-        } else if (hasRole("Volunteer")) {
-          router.push("/volunteer");
-        } else {
-          router.push("/");
-        }
+      if (!hasRole(["Staff", "Admin"])) {
+        router.push("/unauthorized");
         return;
       }
 
-      // User is authenticated and is an admin
       setIsLoading(false);
     };
 
-    checkAdminAccess();
+    checkAuth();
   }, [router, pathname, isAuthenticated, hasRole, authLoading]);
 
   const handleLogout = () => {
@@ -85,25 +67,16 @@ export default function AdminLayout({
     router.push("/login");
   };
 
-  const navigateToHome = () => {
-    router.push("/");
-  };
-
-  // Show loading state while checking authentication
   if (isLoading || authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Đang xác thực quyền truy cập...</p>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile sidebar toggle */}
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <Button
           variant="outline"
@@ -128,7 +101,7 @@ export default function AdminLayout({
               <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
                 <span className="text-white font-bold">A</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">Admin Panel</span>
+              <span className="text-xl font-bold text-gray-900">Organization Panel</span>
             </Link>
             <p className="text-sm text-gray-500 mt-1">Together Platform</p>
           </div>
@@ -138,7 +111,7 @@ export default function AdminLayout({
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href || 
-                (item.href !== "/admin" && pathname.startsWith(item.href));
+                (item.href !== "/staff" && pathname.startsWith(item.href));
               
               return (
                 <Link
@@ -169,7 +142,7 @@ export default function AdminLayout({
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {user?.email || localStorage.getItem("userEmail") || "Admin"}
                 </p>
-                <p className="text-xs text-gray-500">Quản trị viên</p>
+                <p className="text-xs text-gray-500">Nhân viên</p>
               </div>
             </div>
             <Button
@@ -194,11 +167,11 @@ export default function AdminLayout({
                 <h1 className="text-2xl font-bold text-gray-900">
                   {navItems.find(item => 
                     pathname === item.href || 
-                    (item.href !== "/admin" && pathname.startsWith(item.href))
+                    (item.href !== "/staff" && pathname.startsWith(item.href))
                   )?.name || "Dashboard"}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
-                  Quản lý hệ thống Together
+                  Quản lý tổ chức
                 </p>
               </div>
               <div className="flex items-center gap-4">

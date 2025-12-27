@@ -3,113 +3,236 @@ const API_BASE_URL = process.env.NODE_ENV === 'development'
     : process.env.REACT_APP_API_URL || '';
 
 interface ApiRequestOptions extends RequestInit {
-    skipAuth?: boolean; 
+    skipAuth?: boolean;
     headers?: Record<string, string>;
+    timeout?: number;
 }
 
-const apiRequest = async (endpoint: string, options: ApiRequestOptions = {}): Promise<any> => {
-    const url = `${API_BASE_URL}${endpoint}`;
+interface ApiError extends Error {
+    status?: number;
+    data?: any;
+}
 
-    const isFormData = options.body instanceof FormData;
+// Add request timeout helper
+const fetchWithTimeout = async (url: string, options: RequestInit & { timeout?: number } = {}): Promise<Response> => {
+    const { timeout = 30000, ...fetchOptions } = options;
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('jwtToken') : null;
-    const config: ApiRequestOptions = {
-        headers: {
-            ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-            'accept': '*/*',
-            ...(!options.skipAuth && token ? { 'Authorization': `Bearer ${token}` } : {}),
-            ...options.headers,
-        } as Record<string, string>,
-        mode: 'cors',
-            // include credentials by default so browser cookies (HttpOnly auth cookies)
-            // will be sent to the API when present. Callers may override via options.
-            credentials: (options.credentials as RequestCredentials) || 'include',
-        ...options,
-    };
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
-        console.log('Making API request to:', url, 'with config:', config);
-
-        if (config.body instanceof FormData) {
-            console.log('Sending FormData with entries:');
-            for (let [key, value] of config.body.entries()) {
-                console.log(`${key}:`, value);
-                if (value instanceof File) {
-                    console.log(`  File details:`, {
-                        name: value.name,
-                        size: value.size,
-                        type: value.type
-                    });
-                }
-            }
-            console.log('Content-Type header:', config.headers?.['Content-Type']);
-        }
-
-        const response = await fetch(url, config as RequestInit);
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            let parsedError: any = null;
-            try {
-                parsedError = JSON.parse(errorText);
-            } catch (e) {
-                // ignore parse errors
-            }
-
-            const isMeIdValidation = response.status === 400
-                && parsedError && parsedError.errors && Array.isArray(parsedError.errors.id)
-                && parsedError.errors.id.some((m: any) => typeof m === 'string' && m.includes("'me'"));
-
-            if (isMeIdValidation) {
-                console.warn("API returned validation error treating 'me' as an id; returning null so caller can fallback.");
-                return null;
-            }
-
-            console.error('API Error Response:', errorText);
-            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
-        }
-
-        const contentType = response.headers.get('content-type');
-
-        if (contentType && contentType.includes('application/json')) {
-            try {
-                const data = await response.json();
-                console.log('API Response (JSON):', data);
-                return data;
-            } catch (e) {
-                console.warn('Warning: Response was application/json but parsing failed. Assuming success with generic message.', e);
-                return { message: 'Operation successful, but response format was unexpected.', status: response.status };
-            }
-        } else {
-            console.log('API Response (Non-JSON/Empty):', response);
-            return { message: 'Operation successful', status: response.status };
-        }
+        const response = await fetch(url, {
+            ...fetchOptions,
+            signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        return response;
     } catch (error) {
-        console.error('API request failed:', error);
-
-        if (error instanceof TypeError && error.message.includes('fetch')) {
-            throw new Error('Unable to connect to the server. Please check if the backend is running and accessible.');
-        }
-
+        clearTimeout(timeoutId);
         throw error;
     }
 };
 
+// Generic API request function
+const apiRequest = async <T = any>(
+    endpoint: string,
+    options: ApiRequestOptions = {}
+): Promise<T> => {
+    const url = `${API_BASE_URL}${endpoint}`;
+
+    // Determine the body type and process accordingly
+    const isFormData = options.body instanceof FormData;
+    const isSearchParams = options.body instanceof URLSearchParams;
+    const isStringBody = typeof options.body === 'string';
+
+    // Process body based on type
+    let processedBody: BodyInit | null | undefined;
+    let contentType: string | undefined;
+
+    if (isFormData) {
+        // FormData - browser will set Content-Type with boundary
+        processedBody = options.body as FormData;
+        contentType = undefined;
+    } else if (isSearchParams) {
+        // URLSearchParams
+        processedBody = options.body as URLSearchParams;
+        contentType = 'application/x-www-form-urlencoded';
+    } else if (options.body !== undefined && options.body !== null) {
+        // If body exists and is not FormData/URLSearchParams, stringify it as JSON
+        processedBody = JSON.stringify(options.body);
+        contentType = 'application/json';
+    } else {
+        // No body or null/undefined
+        processedBody = options.body;
+        contentType = options.headers?.['Content-Type'];
+    }
+
+    // Token handling
+    let token: string | null = null;
+    if (typeof window !== 'undefined') {
+        token = localStorage.getItem('jwtToken') || sessionStorage.getItem('jwtToken');
+    }
+
+    // Build headers
+    const headers: Record<string, string> = {
+        'accept': 'application/json',
+        ...options.headers,
+    };
+
+    // Add Content-Type header if we determined it and it's not already set
+    if (contentType && !headers['Content-Type']) {
+        headers['Content-Type'] = contentType;
+    }
+
+    // Add Authorization header if needed
+    if (!options.skipAuth && token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // For FormData, remove Content-Type header to let browser set it with boundary
+    if (isFormData && headers['Content-Type'] && headers['Content-Type'].startsWith('application/json')) {
+        delete headers['Content-Type'];
+    }
+
+    const config: RequestInit = {
+        method: options.method || 'GET',
+        headers,
+        mode: 'cors',
+        credentials: options.credentials || (options.skipAuth ? 'omit' : 'include'),
+        ...options,
+        body: processedBody,
+    };
+
+    // Development logging
+    if (process.env.NODE_ENV === 'development') {
+        console.log(`%cAPI Request: ${config.method} ${url}`, 'color: #4CAF50; font-weight: bold');
+        console.log('Headers:', headers);
+        console.log('Body type:', typeof processedBody);
+
+        if (processedBody instanceof FormData) {
+            console.log('FormData entries:');
+            for (const [key, value] of processedBody.entries()) {
+                console.log(`  ${key}:`, value instanceof File ?
+                    `File(${value.name}, ${value.size} bytes, ${value.type})` :
+                    value);
+            }
+        } else if (processedBody) {
+            console.log('Request body:', processedBody);
+        }
+    }
+
+    try {
+        const response = await fetchWithTimeout(url, {
+            ...config,
+            timeout: options.timeout || 30000,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            let parsedError: any = null;
+
+            try {
+                parsedError = JSON.parse(errorText);
+            } catch {
+                // Not JSON, use text as error
+            }
+
+            // Special handling for 'me' validation errors
+            const isMeIdValidation = response.status === 400 &&
+                parsedError?.errors?.id?.some((m: any) =>
+                    typeof m === 'string' && m.includes("'me'"));
+
+            if (isMeIdValidation) {
+                console.warn("API returned validation error for 'me' id; returning null for fallback handling");
+                return null as T;
+            }
+
+            // Create structured error
+            const error: ApiError = new Error(
+                parsedError?.title || parsedError?.message || errorText || `HTTP ${response.status}`
+            );
+            error.status = response.status;
+            error.data = parsedError;
+
+            throw error;
+        }
+
+        // Handle empty responses (204 No Content)
+        if (response.status === 204) {
+            return undefined as T;
+        }
+
+        // Parse response based on content type
+        const contentTypeHeader = response.headers.get('content-type');
+
+        if (contentTypeHeader && contentTypeHeader.includes('application/json')) {
+            try {
+                const data = await response.json();
+
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(`%cAPI Response: ${response.status} ${url}`, 'color: #2196F3; font-weight: bold', data);
+                }
+
+                return data;
+            } catch (e) {
+                console.warn('Failed to parse JSON response:', e);
+                return null as T;
+            }
+        }
+
+        // Handle non-JSON responses
+        const text = await response.text();
+
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`%cAPI Response (non-JSON): ${response.status} ${url}`, 'color: #FF9800; font-weight: bold', text);
+        }
+
+        // Try to parse as JSON anyway
+        if (text && (text.trim().startsWith('{') || text.trim().startsWith('['))) {
+            try {
+                return JSON.parse(text);
+            } catch {
+                return text as T;
+            }
+        }
+
+        return text as T;
+
+    } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+            const timeoutError: ApiError = new Error('Request timeout - the server took too long to respond');
+            timeoutError.status = 408;
+            throw timeoutError;
+        }
+
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+            const networkError: ApiError = new Error(
+                'Unable to connect to the server. Please check your internet connection and ensure the backend is running.'
+            );
+            networkError.status = 0;
+            throw networkError;
+        }
+
+        if ((error as ApiError).status !== undefined) {
+            throw error;
+        }
+
+        const apiError: ApiError = new Error('An unexpected error occurred');
+        apiError.status = 500;
+        apiError.data = error;
+        throw apiError;
+    }
+}
+
 export const accountAPI = {
     login: (loginData: any) => apiRequest('/Account/login', {
         method: 'POST',
-        body: JSON.stringify(loginData),
-    }),
-
-    // Try to fetch the currently authenticated user from the server.
-    // Works when server sets an HttpOnly auth cookie and exposes a /Account/me endpoint.
-    me: () => apiRequest('/Account/me', {
-        method: 'GET',
+        body: loginData,
     }),
 
     signUp: (userData: any) => apiRequest('/Account/sign-up', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: userData,
     }),
 
     getAll: () => apiRequest('/Account'),
@@ -118,7 +241,7 @@ export const accountAPI = {
 
     update: (id: any, userData: any) => apiRequest(`/Account/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(userData),
+        body: userData,
     }),
 
     delete: (id: any) => apiRequest(`/Account/${id}`, {
@@ -127,8 +250,22 @@ export const accountAPI = {
 
     changePassword: (id: any, passwordData: any) => apiRequest(`/Account/change-password/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(passwordData),
+        body: passwordData,
     }),
+
+    filter: (UserFilterDto: any) => {
+        const queryParams = new URLSearchParams();
+        Object.keys(UserFilterDto).forEach(key => {
+            if (UserFilterDto[key] !== undefined && UserFilterDto[key] !== null) {
+                queryParams.append(key, UserFilterDto[key]);
+            }
+        });
+
+        const queryString = queryParams.toString();
+        const url = queryString ? `/Account/filter?${queryString}` : '/Account/filter';
+
+        return apiRequest(url);
+    },
 };
 
 export const applicationAPI = {
@@ -138,27 +275,36 @@ export const applicationAPI = {
 
     create: (appData: any) => apiRequest('/Application', {
         method: 'POST',
-        body: JSON.stringify(appData),
+        body: appData,
     }),
 
     update: (id: any, appData: any) => apiRequest(`/Application/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(appData),
+        body: appData,
     }),
 
     review: (id: any, reviewData: any) => apiRequest(`/Application/review/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(reviewData),
+        body: reviewData,
     }),
 
     delete: (id: any) => apiRequest(`/Application/${id}`, {
         method: 'DELETE',
     }),
 
-    filter: (filterData: any) => apiRequest('/Application/filter', {
-        method: 'POST',
-        body: JSON.stringify(filterData),
-    }),
+    filter: (ApplicationFilterDto: any) => {
+        const queryParams = new URLSearchParams();
+        Object.keys(ApplicationFilterDto).forEach(key => {
+            if (ApplicationFilterDto[key] !== undefined && ApplicationFilterDto[key] !== null) {
+                queryParams.append(key, ApplicationFilterDto[key]);
+            }
+        });
+
+        const queryString = queryParams.toString();
+        const url = queryString ? `/Application/filter?${queryString}` : '/Application/filter';
+
+        return apiRequest(url);
+    },
 };
 
 export const blogAPI = {
@@ -207,6 +353,20 @@ export const blogAPI = {
     delete: (id: any, accountId: any) => apiRequest(`/Blog/${id}?accountId=${accountId}`, {
         method: 'DELETE',
     }),
+
+    filter: (BlogFilterDto: any) => {
+        const queryParams = new URLSearchParams();
+        Object.keys(BlogFilterDto).forEach(key => {
+            if (BlogFilterDto[key] !== undefined && BlogFilterDto[key] !== null) {
+                queryParams.append(key, BlogFilterDto[key]);
+            }
+        });
+
+        const queryString = queryParams.toString();
+        const url = queryString ? `/Blog/filter?${queryString}` : '/Blog/filter';
+
+        return apiRequest(url);
+    },
 };
 
 export const categoryAPI = {
@@ -264,14 +424,14 @@ export const certificateAPI = {
 
     verify: (id: any, verifyData: any) => apiRequest(`/Certificate/${id}/verify`, {
         method: 'POST',
-        body: JSON.stringify(verifyData),
+        body: verifyData,
     }),
 
-    filter: (filterDto: any) => {
+    filter: (CertificateFilterDto: any) => {
         const queryParams = new URLSearchParams();
-        Object.keys(filterDto).forEach(key => {
-            if (filterDto[key] !== undefined && filterDto[key] !== null) {
-                queryParams.append(key, filterDto[key]);
+        Object.keys(CertificateFilterDto).forEach(key => {
+            if (CertificateFilterDto[key] !== undefined && CertificateFilterDto[key] !== null) {
+                queryParams.append(key, CertificateFilterDto[key]);
             }
         });
 
@@ -370,10 +530,19 @@ export const organizationAPI = {
         method: 'DELETE',
     }),
 
-    verify: (id: number, status: number, rejectionReason?: string) => apiRequest(`/Organization/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ status, rejectionReason }),
-    }),
+    filter: (OrganizationFilterDto: any) => {
+        const queryParams = new URLSearchParams();
+        Object.keys(OrganizationFilterDto).forEach(key => {
+            if (OrganizationFilterDto[key] !== undefined && OrganizationFilterDto[key] !== null) {
+                queryParams.append(key, OrganizationFilterDto[key]);
+            }
+        });
+
+        const queryString = queryParams.toString();
+        const url = queryString ? `/Organization/filter?${queryString}` : '/Organization/filter';
+
+        return apiRequest(url);
+    },
 };
 
 export const projectAPI = {
@@ -422,6 +591,20 @@ export const projectAPI = {
     delete: (id: any) => apiRequest(`/Projects/${id}`, {
         method: 'DELETE',
     }),
+
+    filter: (ProjectFilterDto: any) => {
+        const queryParams = new URLSearchParams();
+        Object.keys(ProjectFilterDto).forEach(key => {
+            if (ProjectFilterDto[key] !== undefined && ProjectFilterDto[key] !== null) {
+                queryParams.append(key, ProjectFilterDto[key]);
+            }
+        });
+
+        const queryString = queryParams.toString();
+        const url = queryString ? `/Projects/filter?${queryString}` : '/Projects/filter';
+
+        return apiRequest(url);
+    },
 };
 
 export const staffAPI = {
@@ -433,12 +616,12 @@ export const staffAPI = {
 
     create: (staffData: any) => apiRequest('/Staff', {
         method: 'POST',
-        body: JSON.stringify(staffData),
+        body: staffData,
     }),
 
     update: (id: any, staffData: any) => apiRequest(`/Staff/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(staffData),
+        body: staffData,
     }),
 
     delete: (staffId: any) => {
@@ -446,7 +629,20 @@ export const staffAPI = {
             method: 'DELETE',
         });
     },
-};
 
+    filter: (StaffFilterDto: any) => {
+        const queryParams = new URLSearchParams();
+        Object.keys(StaffFilterDto).forEach(key => {
+            if (StaffFilterDto[key] !== undefined && StaffFilterDto[key] !== null) {
+                queryParams.append(key, StaffFilterDto[key]);
+            }
+        });
+
+        const queryString = queryParams.toString();
+        const url = queryString ? `/Staff/filter?${queryString}` : '/Staff/filter';
+
+        return apiRequest(url);
+    },
+};
 
 export default apiRequest;
