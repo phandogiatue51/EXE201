@@ -66,8 +66,12 @@ export interface Staff {
   accountId: number;
   role: number;
   roleName?: string;
-  joinedAt: Date;
-  leftAt?: Date;
+  name: string;
+  email: string;
+  phoneNumber?: string;
+  profileImageUrl?: string;
+  joinedDate: Date;
+  leftDate?: Date;
   isActive: boolean;
   organization?: Organization;
   account?: Account;

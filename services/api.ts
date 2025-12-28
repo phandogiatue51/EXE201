@@ -1,3 +1,5 @@
+import { ProjectFilterDto } from "@/lib/filter-type";
+
 const API_BASE_URL = process.env.NODE_ENV === 'development'
     ? 'https://localhost:7085/api'
     : process.env.REACT_APP_API_URL || '';
@@ -553,14 +555,27 @@ export const projectAPI = {
     create: (projectData: any) => {
         const formData = new FormData();
 
+        if (projectData.categoryIds && Array.isArray(projectData.categoryIds)) {
+            projectData.categoryIds.forEach((id: number) => {
+                formData.append('CategoryIds', id.toString());
+            });
+        }
+
+        // Handle other fields
         Object.keys(projectData).forEach(key => {
-            if (key !== 'imageUrl' && projectData[key] !== undefined) {
-                formData.append(key, projectData[key]);
+            if (key !== 'imageUrl' && key !== 'categoryIds' && projectData[key] !== undefined) {
+                // Capitalize first letter for C# DTO property names
+                const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+                const value = projectData[key];
+
+                if (value !== null && value !== undefined) {
+                    formData.append(capitalizedKey, value.toString());
+                }
             }
         });
 
         if (projectData.imageUrl instanceof File) {
-            formData.append('imageUrl', projectData.imageUrl);
+            formData.append('ImageUrl', projectData.imageUrl);
         }
 
         return apiRequest('/Projects', {
@@ -592,11 +607,22 @@ export const projectAPI = {
         method: 'DELETE',
     }),
 
-    filter: (ProjectFilterDto: any) => {
+    filter: async (filter: ProjectFilterDto & { categoryIds?: number[] }) => {
         const queryParams = new URLSearchParams();
-        Object.keys(ProjectFilterDto).forEach(key => {
-            if (ProjectFilterDto[key] !== undefined && ProjectFilterDto[key] !== null) {
-                queryParams.append(key, ProjectFilterDto[key]);
+
+        Object.keys(filter).forEach(key => {
+            const value = filter[key as keyof typeof filter];
+
+            if (value !== undefined && value !== null) {
+                if (key === 'categoryIds' && Array.isArray(value)) {
+                    value.forEach(id => {
+                        queryParams.append('categoryIds', id.toString());
+                    });
+                } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+                    queryParams.append(key, value.toString());
+                } else if (value instanceof Date) {
+                    queryParams.append(key, value.toISOString());
+                }
             }
         });
 

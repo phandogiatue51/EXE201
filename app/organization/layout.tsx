@@ -26,7 +26,7 @@ const navItems = [
   { name: "Chương trình", href: "/organization/projects", icon: Calendar },
   { name: "Đơn đăng ký", href: "/organization/applications", icon: FileText },
   { name: "Bài viết", href: "/organization/blogs", icon: Newspaper },
-  { name: "Nhân viên", href: "/organization/employee", icon: Users },
+  { name: "Nhân viên", href: "/organization/employees", icon: Users },
   { name: "Cài đặt", href: "/organization/settings", icon: Settings },
 ];
 

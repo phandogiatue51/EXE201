@@ -30,9 +30,9 @@ export interface ProjectFilterDto {
     endDate?: string;
     location?: string;
     status?: number;
-    requiredVolunteers?: number;
-    currentVolunteers?: number;
     createdAt?: string;
+    organizationId?: number;
+    categoryIds?: number[];
 }
 
 export interface OrganizationFilterDto {

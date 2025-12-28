@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 export default function ProjectsPage() {
-  const { user } = useAuth();
+  useAuth();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
