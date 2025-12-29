@@ -27,6 +27,12 @@ export default function CreateProjectPage() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    challenges: "",
+    goals: "",
+    activities: "",
+    impacts: "",
+    benefits: "",
+    requirements: "",
     type: 0,
     location: "",
     startDate: "",
@@ -118,19 +124,19 @@ export default function CreateProjectPage() {
 
     // Validate required fields
     if (!formData.title.trim()) {
-      alert("Vui lòng nhập tên dự án");
+      alert("Vui lòng nhập tên chương trình");
       setLoading(false);
       return;
     }
 
     if (!formData.description.trim()) {
-      alert("Vui lòng nhập mô tả dự án");
+      alert("Vui lòng nhập mô tả chương trình");
       setLoading(false);
       return;
     }
 
     if (formData.categories.length === 0) {
-      alert("Vui lòng chọn ít nhất một danh mục cho dự án");
+      alert("Vui lòng chọn ít nhất một danh mục cho chương trình");
       setLoading(false);
       return;
     }
@@ -151,6 +157,12 @@ export default function CreateProjectPage() {
       const projectData: any = {
         title: formData.title,
         description: formData.description,
+        challenges: formData.challenges,
+        goals: formData.goals,
+        activities: formData.activities,
+        impacts: formData.impacts,
+        benefits: formData.benefits,
+        requirements: formData.requirements,
         type: formData.type,
         organizationId: organizationId,
         location: formData.location || null,
@@ -167,13 +179,13 @@ export default function CreateProjectPage() {
       console.log('Sending project data:', projectData);
       await projectAPI.create(projectData);
 
-      alert("Tạo dự án thành công!");
+      alert("Tạo chương trình thành công!");
       router.push("/organization/projects");
       router.refresh();
     } catch (error: any) {
       console.error("Error creating project:", error);
       
-      let errorMessage = "Không thể tạo dự án. Vui lòng thử lại.";
+      let errorMessage = "Không thể tạo chương trình. Vui lòng thử lại.";
       
       if (error?.data?.errors) {
         const validationErrors = error.data.errors;
@@ -218,7 +230,7 @@ export default function CreateProjectPage() {
 
           <div className="max-w-2xl mx-auto">
             <Card className="p-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Thêm dự án mới</h1>
+              <h1 className="text-2xl font-bold text-foreground mb-2">Thêm chương trình mới</h1>
               
               <ProjectForm
                 formData={formData}
@@ -232,7 +244,7 @@ export default function CreateProjectPage() {
                 onImageRemove={handleImageRemove}
                 onSubmit={handleSubmit}
                 loading={loading}
-                submitText="Tạo dự án"
+                submitText="Tạo chương trình"
               />
             </Card>
           </div>

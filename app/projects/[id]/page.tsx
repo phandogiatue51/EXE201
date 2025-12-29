@@ -42,7 +42,6 @@ export default function ProgramDetailPage({
   const allRegistrations = [...mockRegistrations, ...customRegistrations];
   const registrations = allRegistrations.filter((r) => r.programId === id);
   
-  // Check if current user already registered
   const userRegistration = user 
     ? allRegistrations.find((r) => r.programId === id && r.volunteerId === user.id)
     : null;

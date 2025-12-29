@@ -33,7 +33,6 @@ export default function EditEmployeePage({
     phoneNumber: "",
     dateOfBirth: "",
     isFemale: false,
-    bio: "",
     role: 2,
     isActive: true,
   });
@@ -54,7 +53,6 @@ export default function EditEmployeePage({
             ? new Date(data.dateOfBirth).toISOString().split('T')[0]
             : "",
           isFemale: data.isFemale || false,
-          bio: data.bio || "",
           role: data.role || 2,
           isActive: data.isActive ?? true,
         });
@@ -130,31 +128,55 @@ export default function EditEmployeePage({
     setLoading(true);
 
     try {
-      const updateData: any = {
-        name: formData.name,
-        email: formData.email,
-        phoneNumber: formData.phoneNumber || null,
-        dateOfBirth: formData.dateOfBirth || null,
-        isFemale: formData.isFemale,
-        bio: formData.bio || null,
-        role: formData.role,
-        isActive: formData.isActive,
-      };
-
-      // Add image file if it exists
+      const formDataToSend = new FormData();
+      
+      formDataToSend.append('Name', formData.name);
+      formDataToSend.append('Email', formData.email);
+      
+      if (formData.phoneNumber) {
+        formDataToSend.append('PhoneNumber', formData.phoneNumber);
+      }
+      
+      if (formData.dateOfBirth) {
+        formDataToSend.append('DateOfBirth', formData.dateOfBirth);
+      }
+      
+      formDataToSend.append('IsFemale', formData.isFemale.toString());
+      
+      formDataToSend.append('Role', formData.role.toString());
+      formDataToSend.append('IsActive', formData.isActive.toString());
+      
       if (imageFile) {
-        updateData.profileImageUrl = imageFile;
+        formDataToSend.append('ProfileImageUrl', imageFile);
+      } else if (imagePreview && !imageFile) {
       }
 
-      console.log('Updating employee with data:', updateData);
-      await staffAPI.update(parseInt(id), updateData);
+      console.log('Updating employee with FormData:');
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(key, value instanceof File ? `File: ${value.name}` : value);
+      }
 
-      alert("Cập nhật nhân sự thành công!");
+      await staffAPI.update(parseInt(id), formDataToSend);
+
+      alert("Employee updated successfully!");
       router.push("/organization/employees");
       router.refresh();
     } catch (error: any) {
       console.error("Error updating employee:", error);
-      const errorMessage = error?.message || error?.data?.message || "Không thể cập nhật nhân sự. Vui lòng thử lại.";
+      
+      let errorMessage = "Unable to update employee. Please try again.";
+      
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        if (typeof errorData === 'string') {
+          errorMessage = errorData;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       alert(errorMessage);
     } finally {
       setLoading(false);
@@ -163,7 +185,7 @@ export default function EditEmployeePage({
 
   const staffRoles = [
     { value: 0, label: "Quản lý", description: "Quản lý toàn bộ tổ chức và nhân sự" },
-    { value: 1, label: "Người duyệt", description: "Duyệt đơn đăng ký dự án" },
+    { value: 1, label: "Người duyệt", description: "Duyệt đơn đăng ký chương trình" },
     { value: 2, label: "Nhân viên", description: "Thành viên thông thường" },
   ];
 

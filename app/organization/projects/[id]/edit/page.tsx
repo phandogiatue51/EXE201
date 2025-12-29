@@ -19,19 +19,25 @@ export default function EditProjectPage({
   const { id } = use(params);
   const router = useRouter();
   const { user } = useAuth();
-
+  const userOrganizationId = user?.organizationId;
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [initialData, setInitialData] = useState<any>(null);
   const [loadingProject, setLoadingProject] = useState(true);
-  
+  const [organizationId, setOrganizationId] = useState<number>(0);
   const [categories, setCategories] = useState<any[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    challenges: "",
+    goals: "",
+    activities: "",
+    impacts: "",
+    benefits: "",
+    requirements: "",
     type: 0,
     location: "",
     startDate: "",
@@ -41,7 +47,15 @@ export default function EditProjectPage({
     status: 0,
   });
 
-  // Fetch project data
+  useEffect(() => {
+    if (userOrganizationId) {
+      const orgIdNumber = parseInt(userOrganizationId);
+      if (!isNaN(orgIdNumber)) {
+        setOrganizationId(orgIdNumber);
+      }
+    }
+  }, [userOrganizationId]);
+
   useEffect(() => {
     const fetchProject = async () => {
       try {
@@ -52,6 +66,12 @@ export default function EditProjectPage({
         setFormData({
           title: data.title,
           description: data.description,
+          challenges: data.challenges,
+          goals: data.goals,
+          activities: data.activities,
+          impacts: data.impacts,
+          benefits: data.benefits,
+          requirements: data.requirements,
           type: data.type,
           location: data.location || "",
           startDate: data.startDate 
@@ -150,58 +170,67 @@ export default function EditProjectPage({
     e.preventDefault();
     setLoading(true);
 
-    // Validate required fields
     if (!formData.title.trim()) {
-      alert("Vui lòng nhập tên dự án");
+      alert("Vui lòng nhập tên chương trình");
       setLoading(false);
       return;
     }
 
     if (!formData.description.trim()) {
-      alert("Vui lòng nhập mô tả dự án");
+      alert("Vui lòng nhập mô tả chương trình");
       setLoading(false);
       return;
     }
 
     if (formData.categories.length === 0) {
-      alert("Vui lòng chọn ít nhất một danh mục cho dự án");
+      alert("Vui lòng chọn ít nhất một danh mục cho chương trình");
       setLoading(false);
       return;
     }
 
     try {
-      const toUTCISOString = (dateString: string) => {
-        if (!dateString) return null;
-        const date = new Date(dateString);
-        return date.toISOString();
-      };
-
       const projectData: any = {
         title: formData.title,
         description: formData.description,
+        challenges: formData.challenges,
+        goals: formData.goals,
+        activities: formData.activities,
+        impacts: formData.impacts,
+        benefits: formData.benefits,
+        requirements: formData.requirements,
         type: formData.type,
-        location: formData.location || null,
-        startDate: toUTCISOString(formData.startDate),
-        endDate: toUTCISOString(formData.endDate),
-        requiredVolunteers: formData.requiredVolunteers,
-        categoryIds: formData.categories,
+        location: formData.location || '',
         status: formData.status,
+        organizationId: organizationId,
+        requiredVolunteers: formData.requiredVolunteers,
+        categoryIds: formData.categories, 
       };
 
+      if (formData.startDate) {
+        projectData.startDate = new Date(formData.startDate).toISOString();
+      }
+      
+      if (formData.endDate) {
+        projectData.endDate = new Date(formData.endDate).toISOString();
+      }
+
+      // Handle image
       if (imageFile) {
         projectData.imageUrl = imageFile;
       }
 
-      console.log('Updating project data:', projectData);
+      console.log('Updating project with data:', projectData);
+      console.log('Categories array:', projectData.categoryIds);
+      
       await projectAPI.update(parseInt(id), projectData);
 
-      alert("Cập nhật dự án thành công!");
+      alert("Cập nhật chương trình thành công!");
       router.push("/organization/projects");
       router.refresh();
     } catch (error: any) {
       console.error("Error updating project:", error);
       
-      let errorMessage = "Không thể cập nhật dự án. Vui lòng thử lại.";
+      let errorMessage = "Không thể cập nhật chương trình. Vui lòng thử lại.";
       
       if (error?.data?.errors) {
         const validationErrors = error.data.errors;
@@ -245,7 +274,7 @@ export default function EditProjectPage({
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-1 container mx-auto px-4 py-12">
-          <p className="text-muted-foreground">Đang tải dự án...</p>
+          <p className="text-muted-foreground">Đang tải chương trình...</p>
         </main>
       </div>
     );
@@ -256,7 +285,7 @@ export default function EditProjectPage({
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-1 container mx-auto px-4 py-12">
-          <p className="text-muted-foreground">Không tìm thấy dự án</p>
+          <p className="text-muted-foreground">Không tìm thấy chương trình</p>
         </main>
       </div>
     );
@@ -277,7 +306,7 @@ export default function EditProjectPage({
 
           <div className="max-w-2xl mx-auto">
             <Card className="p-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Chỉnh sửa dự án</h1>
+              <h1 className="text-2xl font-bold text-foreground mb-2">Chỉnh sửa chương trình</h1>
               
               <ProjectForm
                 formData={formData}

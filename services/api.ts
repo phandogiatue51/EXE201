@@ -1,4 +1,5 @@
 import { ProjectFilterDto } from "@/lib/filter-type";
+import { mapToCreateDtoField, mapToUpdateDtoField, ReviewAppDto } from "@/lib/type"
 
 const API_BASE_URL = process.env.NODE_ENV === 'development'
     ? 'https://localhost:7085/api'
@@ -285,9 +286,9 @@ export const applicationAPI = {
         body: appData,
     }),
 
-    review: (id: any, reviewData: any) => apiRequest(`/Application/review/${id}`, {
+    review: (id: number, appData: any) => apiRequest(`/Application/review/${id}`, {
         method: 'PUT',
-        body: reviewData,
+        body: appData,
     }),
 
     delete: (id: any) => apiRequest(`/Application/${id}`, {
@@ -318,14 +319,17 @@ export const blogAPI = {
         const formData = new FormData();
 
         Object.keys(blogData).forEach(key => {
-            if (key !== 'imageFile' && blogData[key] !== undefined) {
-                formData.append(key, blogData[key]);
+            if (blogData[key] !== null && blogData[key] !== undefined) {
+                const formDataKey = mapToCreateDtoField(key);
+                if (blogData[key] instanceof File) {
+                    formData.append(formDataKey, blogData[key]);
+                } else if (typeof blogData[key] === 'string') {
+                    formData.append(formDataKey, blogData[key]);
+                } else if (typeof blogData[key] === 'number') {
+                    formData.append(formDataKey, blogData[key].toString());
+                }
             }
         });
-
-        if (blogData.imageFile) {
-            formData.append('imageFile', blogData.imageFile);
-        }
 
         return apiRequest('/Blog', {
             method: 'POST',
@@ -337,14 +341,20 @@ export const blogAPI = {
         const formData = new FormData();
 
         Object.keys(blogData).forEach(key => {
-            if (key !== 'imageFile' && blogData[key] !== undefined) {
-                formData.append(key, blogData[key]);
+            if (blogData[key] !== null && blogData[key] !== undefined) {
+                const formDataKey = mapToUpdateDtoField(key);
+
+                if (blogData[key] instanceof File) {
+                    formData.append(formDataKey, blogData[key]);
+                } else if (typeof blogData[key] === 'string') {
+                    formData.append(formDataKey, blogData[key]);
+                } else if (typeof blogData[key] === 'number') {
+                    formData.append(formDataKey, blogData[key].toString());
+                } else if (typeof blogData[key] === 'boolean') {
+                    formData.append(formDataKey, blogData[key].toString());
+                }
             }
         });
-
-        if (blogData.imageFile) {
-            formData.append('imageFile', blogData.imageFile);
-        }
 
         return apiRequest(`/Blog/${id}`, {
             method: 'PUT',
@@ -455,7 +465,6 @@ export const organizationAPI = {
     getById: (id: any) => apiRequest(`/Organization/${id}`),
 
     create: (organData: any) => {
-        // Accept either a FormData instance (when caller builds it) or a plain object
         if (organData instanceof FormData) {
             return apiRequest('/Organization', {
                 method: 'POST',
@@ -566,10 +575,8 @@ export const projectAPI = {
             });
         }
 
-        // Handle other fields
         Object.keys(projectData).forEach(key => {
             if (key !== 'imageUrl' && key !== 'categoryIds' && projectData[key] !== undefined) {
-                // Capitalize first letter for C# DTO property names
                 const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
                 const value = projectData[key];
 
@@ -592,16 +599,33 @@ export const projectAPI = {
     update: (id: any, projectData: any) => {
         const formData = new FormData();
 
+        if (projectData.categoryIds && Array.isArray(projectData.categoryIds)) {
+            projectData.categoryIds.forEach((id: number) => {
+                formData.append('CategoryIds', id.toString());
+            });
+        }
+
         Object.keys(projectData).forEach(key => {
-            if (key !== 'imageUrl' && projectData[key] !== undefined) {
-                formData.append(key, projectData[key]);
+            if (key !== 'imageUrl' && key !== 'categoryIds' && projectData[key] !== undefined) {
+                const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+                const value = projectData[key];
+
+                if (value !== null && value !== undefined) {
+                    if (key.toLowerCase().includes('date') && value) {
+                        const dateValue = new Date(value);
+                        if (!isNaN(dateValue.getTime())) {
+                            formData.append(capitalizedKey, dateValue.toISOString());
+                        }
+                    } else {
+                        formData.append(capitalizedKey, value.toString());
+                    }
+                }
             }
         });
 
         if (projectData.imageUrl instanceof File) {
-            formData.append('imageUrl', projectData.imageUrl);
+            formData.append('ImageUrl', projectData.imageUrl);
         }
-
         return apiRequest(`/Projects/${id}`, {
             method: 'PUT',
             body: formData,
@@ -645,15 +669,18 @@ export const staffAPI = {
 
     getByOrganId: (organId: any) => apiRequest(`/Staff/organization/${organId}`),
 
-    create: (staffData: any) => apiRequest('/Staff', {
-        method: 'POST',
-        body: staffData,
-    }),
+    create: (formData: FormData) => { return apiRequest("/Staff", {
+        method: "POST",
+        body: formData,
+        });
+    },
 
-    update: (id: any, staffData: any) => apiRequest(`/Staff/${id}`, {
-        method: 'PUT',
-        body: staffData,
-    }),
+ 
+    update: (id: number, formData: FormData) => { return apiRequest(`/Staff/${id}`, {
+        method: "PUT", 
+        body: formData,
+        });
+    },
 
     delete: (staffId: any) => {
         return apiRequest(`/Staff/${staffId}?staffId=${staffId}`, {

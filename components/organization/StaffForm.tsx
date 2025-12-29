@@ -15,34 +15,6 @@ import {
   Loader2,
 } from "lucide-react";
 
-interface StaffFormProps {
-  formData: {
-    name: string;
-    email: string;
-    password?: string;
-    confirmPassword?: string;
-    phoneNumber: string;
-    dateOfBirth: string;
-    isFemale: boolean;
-    role: number;
-    bio?: string;
-    isActive?: boolean;
-  };
-  imagePreview: string | null;
-  isEdit: boolean;
-  showPassword: boolean;
-  loading: boolean;
-  staffRoles: Array<{ value: number; label: string; description: string }>;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onGenderChange: (isFemale: boolean) => void;
-  onRoleChange: (role: number) => void;
-  onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onImageRemove: () => void;
-  onPasswordToggle: () => void;
-  onSubmit: (e: React.FormEvent) => void;
-  submitText?: string;
-}
-
 export default function StaffForm({
   formData,
   imagePreview,
@@ -61,7 +33,6 @@ export default function StaffForm({
 }: StaffFormProps) {
   return (
     <form onSubmit={onSubmit} className="space-y-8">
-      {/* Profile Image */}
       <div>
         <label className="block text-sm font-medium text-foreground mb-3">
           Ảnh đại diện {!isEdit && "(tùy chọn)"}
@@ -260,20 +231,6 @@ export default function StaffForm({
               </label>
             </div>
           </div>
-
-          {/* Bio field */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Tiểu sử
-            </label>
-            <Textarea
-              name="bio"
-              value={formData.bio || ""}
-              onChange={onInputChange}
-              placeholder="Giới thiệu về bản thân..."
-              rows={3}
-            />
-          </div>
         </div>
       </div>
 
@@ -361,8 +318,8 @@ export default function StaffForm({
               </p>
               <ul className="text-sm text-yellow-700 mt-2 space-y-1">
                 <li>• <strong>Quản lý</strong>: Có quyền quản lý toàn bộ tổ chức, bao gồm thêm/xóa nhân sự</li>
-                <li>• <strong>Người duyệt</strong>: Có quyền duyệt đơn đăng ký dự án từ tình nguyện viên</li>
-                <li>• <strong>Nhân viên</strong>: Thành viên thông thường, có thể tham gia quản lý dự án</li>
+                <li>• <strong>Người duyệt</strong>: Có quyền duyệt đơn đăng ký chương trình từ tình nguyện viên</li>
+                <li>• <strong>Nhân viên</strong>: Thành viên thông thường, có thể tham gia quản lý chương trình</li>
               </ul>
             </div>
           </div>

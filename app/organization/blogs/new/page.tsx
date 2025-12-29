@@ -1,4 +1,4 @@
-import { BlogForm } from "../../../../components/organization/BlogForm";
+import { BlogForm } from "../../../../components/organization/blogs/BlogForm";
 import { Header } from "@/components/header";
 import { Metadata } from "next";
 

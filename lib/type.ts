@@ -23,6 +23,12 @@ export interface Project {
   id: number;
   title: string;
   description: string;
+  challenges: string;
+  goals: string;
+  activities: string;
+  impacts: string;
+  benefits: string;
+  requirements: string;
   type: number;
   typeName: string;
   startDate: string;
@@ -48,16 +54,33 @@ export interface Project {
 export interface VolunteerApplication {
   id: number;
   projectId: number;
+  projectTitle: string; 
+  organizationId: number; 
+  organizationName: string; 
   volunteerId: number;
+  volunteerName: string;
   status: number;
   statusName: string;
+  relevantExperience?: string; 
   appliedAt: Date;
+  reviewedAt?: Date; 
+  reviewedByStaffId?: number; 
+  rejectionReason?: string; 
+  feedback?: string; 
   notes?: string;
-  volunteer?: {
+  selectedCertificates?: { 
     id: number;
-    name: string;
-    email: string;
-  };
+    accountId: number;
+    certificateName: string;
+    categoryId: number;
+    categoryName: string;
+    issuingOrganization: string;
+    certificateNumber: string;
+    issueDate: string;
+    expiryDate?: string;
+    description?: string;
+    imageUrl?: string;
+  }[];
 }
 
 export interface Staff {
@@ -156,4 +179,69 @@ export interface ProjectCategory {
   id: number;
   projectId: number;
   categoryId: number;
+}
+
+export const mapToCreateDtoField = (key: string): string => {
+  const mapping: Record<string, string> = {
+    // Text fields - same
+    title: 'Title',
+    subtitle: 'Subtitle',
+    excerpt: 'Excerpt',
+    status: 'Status',
+    authorId: 'AuthorId',
+    organizationId: 'OrganizationId',
+    paragraph1: 'Paragraph1',
+    paragraph2: 'Paragraph2',
+    paragraph3: 'Paragraph3',
+    paragraph4: 'Paragraph4',
+    paragraph5: 'Paragraph5',
+    
+    // Image fields - different naming convention
+    featuredImage: 'FeaturedImageUrl', // For create
+    image1: 'ImageUrl1',
+    image2: 'ImageUrl2',
+    image3: 'ImageUrl3',
+    image4: 'ImageUrl4',
+    image5: 'ImageUrl5',
+  };
+  
+  return mapping[key] || key;
+};
+
+export const mapToUpdateDtoField = (key: string): string => {
+  const mapping: Record<string, string> = {
+    // Text fields - same
+    title: 'Title',
+    subtitle: 'Subtitle',
+    excerpt: 'Excerpt',
+    status: 'Status',
+    authorId: 'AuthorId',
+    organizationId: 'OrganizationId',
+    paragraph1: 'Paragraph1',
+    paragraph2: 'Paragraph2',
+    paragraph3: 'Paragraph3',
+    paragraph4: 'Paragraph4',
+    paragraph5: 'Paragraph5',
+    
+    featuredImage: 'FeaturedImageFile', 
+    removeFeaturedImage: 'RemoveFeaturedImage',
+    image1: 'ImageFile1',
+    removeImage1: 'RemoveImage1',
+    image2: 'ImageFile2',
+    removeImage2: 'RemoveImage2',
+    image3: 'ImageFile3',
+    removeImage3: 'RemoveImage3',
+    image4: 'ImageFile4',
+    removeImage4: 'RemoveImage4',
+    image5: 'ImageFile5',
+    removeImage5: 'RemoveImage5',
+  };
+  
+  return mapping[key] || key;
+};
+
+export interface ReviewAppDto {
+  status: number;
+  rejectionReason?: string;
+  reviewedByStaffId?: number;
 }

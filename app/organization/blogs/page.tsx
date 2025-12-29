@@ -296,13 +296,13 @@ export default function BlogsPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b bg-gray-50">
-                      <th className="text-left p-4 font-medium text-gray-700">ID</th>
-                      <th className="text-left p-4 font-medium text-gray-700">Tiêu đề</th>
-                      <th className="text-left p-4 font-medium text-gray-700">Tác giả</th>
-                      <th className="text-left p-4 font-medium text-gray-700">Ngày đăng</th>
-                      <th className="text-left p-4 font-medium text-gray-700">Cập nhật</th>
-                      <th className="text-left p-4 font-medium text-gray-700">Trạng thái</th>
-                      <th className="text-left p-4 font-medium text-gray-700">Hành động</th>
+                      <th className="text-center p-4 font-medium text-gray-700">ID</th>
+                      <th className="text-center p-4 font-medium text-gray-700">Tiêu đề</th>
+                      <th className="text-center p-4 font-medium text-gray-700">Tác giả</th>
+                      <th className="text-center p-4 font-medium text-gray-700">Ngày đăng</th>
+                      <th className="text-center p-4 font-medium text-gray-700">Cập nhật</th>
+                      <th className="text-center p-4 font-medium text-gray-700">Trạng thái</th>
+                      <th className="text-center p-4 font-medium text-gray-700">Hành động</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -323,14 +323,10 @@ export default function BlogsPage() {
                         {/* Author */}
                         <td className="p-4">
                           <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-gray-400" />
                             <div>
                               <p className="text-sm">
-                                {blog.author?.name || `ID: ${blog.authorId}`}
+                                {blog.authorName || `ID: ${blog.authorId}`}
                               </p>
-                              {blog.author?.email && (
-                                <p className="text-xs text-gray-500">{blog.author.email}</p>
-                              )}
                             </div>
                           </div>
                         </td>

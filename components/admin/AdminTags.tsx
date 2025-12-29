@@ -8,7 +8,7 @@ export default function AdminTags() {
   const defaultTags = [
     "Giáo dục AI",
     "Lập trình",
-    "Dự án AI",
+    "Chương trình AI",
     "Robotics & AI",
     "Machine Learning",
   ];

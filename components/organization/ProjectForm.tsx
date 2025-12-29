@@ -5,33 +5,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Upload, Calendar, MapPin, Users, Tag, Building2, Loader2 } from "lucide-react";
 
-interface ProjectFormProps {
-  formData: {
-    title: string;
-    description: string;
-    type: number;
-    location: string;
-    startDate: string;
-    endDate: string;
-    requiredVolunteers: number;
-    categories: number[];
-    status?: number;
-  };
-  imagePreview: string | null;
-  categories: any[];
-  loadingCategories: boolean;
-  projectTypes: Array<{ value: number; label: string }>;
-  statusOptions?: Array<{ value: number; label: string; color: string }>;
-  isEdit?: boolean;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onCategoryToggle: (categoryId: number, checked: boolean) => void;
-  onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onImageRemove: () => void;
-  onSubmit: (e: React.FormEvent) => void;
-  loading: boolean;
-  submitText?: string;
-}
-
 export default function ProjectForm({
   formData,
   imagePreview,
@@ -46,14 +19,13 @@ export default function ProjectForm({
   onImageRemove,
   onSubmit,
   loading,
-  submitText = "Tạo dự án"
+  submitText = "Tạo chương trình"
 }: ProjectFormProps) {
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      {/* Image Upload */}
       <div>
         <label className="block text-sm font-medium text-foreground mb-2">
-          Hình ảnh dự án
+          Hình ảnh chương trình
         </label>
         <div className="flex items-center gap-6">
           <div className="w-48 h-32 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
@@ -106,13 +78,13 @@ export default function ProjectForm({
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Tên dự án *
+            Tên chương trình *
           </label>
           <Input
             name="title"
             value={formData.title}
             onChange={onInputChange}
-            placeholder="Nhập tên dự án"
+            placeholder="Nhập tên chương trình"
             required
           />
         </div>
@@ -125,17 +97,102 @@ export default function ProjectForm({
             name="description"
             value={formData.description}
             onChange={onInputChange}
-            placeholder="Mô tả chi tiết về dự án..."
+            placeholder="Mô tả chi tiết về chương trình..."
             rows={4}
             required
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Thử thách 
+          </label>
+          <Textarea
+            name="challenges"
+            value={formData.challenges}
+            onChange={onInputChange}
+            placeholder="Thử thách của chương trình..."
+            rows={4}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Mục tiêu *
+          </label>
+          <Textarea
+            name="goals"
+            value={formData.goals}
+            onChange={onInputChange}
+            placeholder="Mục tiêu của chương trình..."
+            rows={4}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Hoạt động *
+          </label>
+          <Textarea
+            name="activities"
+            value={formData.activities}
+            onChange={onInputChange}
+            placeholder="Hoạt động diễn ra trong chương trình..."
+            rows={4}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Sự ảnh hưởng 
+          </label>
+          <Textarea
+            name="impacts"
+            value={formData.impacts}
+            onChange={onInputChange}
+            placeholder=" Sự ảnh hưởng cua chương trình..."
+            rows={4}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Quyền lợi 
+          </label>
+          <Textarea
+            name="benefits"
+            value={formData.benefits}
+            onChange={onInputChange}
+            placeholder="Quyền lợi của tình nguyện viên..."
+            rows={4}
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Yêu cầu 
+          </label>
+          <Textarea
+            name="requirements"
+            value={formData.requirements}
+            onChange={onInputChange}
+            placeholder="Yêu cầu về tình nguyện viên..."
+            rows={4}
+            required
+          />
+        </div>
+    
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
               <Tag className="w-4 h-4 inline mr-2" />
-              Loại dự án *
+              Loại chương trình *
             </label>
             <select
               name="type"
@@ -144,7 +201,7 @@ export default function ProjectForm({
               className="w-full px-3 py-2 border rounded-lg bg-background"
               required
             >
-              <option value="">Chọn loại dự án</option>
+              <option value="">Chọn loại chương trình</option>
               {projectTypes.map((type) => (
                 <option key={type.value} value={type.value}>
                   {type.label}
@@ -190,7 +247,7 @@ export default function ProjectForm({
             name="location"
             value={formData.location}
             onChange={onInputChange}
-            placeholder="Nhập địa điểm thực hiện dự án"
+            placeholder="Nhập địa điểm thực hiện chương trình"
           />
         </div>
 
@@ -255,7 +312,7 @@ export default function ProjectForm({
           )}
         </div>
         <p className="text-sm text-muted-foreground mb-2">
-          Chọn ít nhất một danh mục phù hợp với dự án
+          Chọn ít nhất một danh mục phù hợp với chương trình
         </p>
         
         {loadingCategories ? (

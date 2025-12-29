@@ -1,7 +1,6 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
-import { Inter } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { ClientLayout } from "@/components/client-layout";
 import "./globals.css";
@@ -17,12 +16,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning className={`font-sans antialiased`}>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        />
+      </head>
+      <body suppressHydrationWarning className="font-sans antialiased">
         <ClientLayout>{children}</ClientLayout>
         <Analytics />
       </body>

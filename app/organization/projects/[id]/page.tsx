@@ -52,14 +52,14 @@ export default function ProjectDetailPage({
   };
 
   const handleDelete = async () => {
-    if (!confirm("Bạn có chắc chắn muốn xóa dự án này?")) return;
+    if (!confirm("Bạn có chắc chắn muốn xóa chương trình này?")) return;
     
     try {
       await projectAPI.delete(parseInt(id));
       window.location.href = "/admin/projects";
     } catch (error) {
       console.error("Error deleting project:", error);
-      alert("Không thể xóa dự án");
+      alert("Không thể xóa chương trình");
     }
   };
 
@@ -79,7 +79,7 @@ export default function ProjectDetailPage({
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-1 container mx-auto px-4 py-12">
-          <p className="text-muted-foreground">Không tìm thấy dự án</p>
+          <p className="text-muted-foreground">Không tìm thấy chương trình</p>
         </main>
       </div>
     );
@@ -210,9 +210,51 @@ export default function ProjectDetailPage({
 
                 {/* Description */}
                 <div className="mb-8">
-                  <h2 className="text-lg font-semibold text-foreground mb-3">Mô tả dự án</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-3">Mô tả chương trình</h2>
                   <p className="text-muted-foreground whitespace-pre-line">
                     {project.description}
+                  </p>
+                </div>
+
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold text-foreground mb-3">Thử thách</h2>
+                  <p className="text-muted-foreground whitespace-pre-line">
+                    {project.challenges}
+                  </p>
+                </div>
+
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold text-foreground mb-3">Mục tiêu của chương trình</h2>
+                  <p className="text-muted-foreground whitespace-pre-line">
+                    {project.goals}
+                  </p>
+                </div>
+
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold text-foreground mb-3">Hoạt động diễn ra trong chương trình</h2>
+                  <p className="text-muted-foreground whitespace-pre-line">
+                    {project.activities}
+                  </p>
+                </div>
+
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold text-foreground mb-3">Sự ảnh hưởng của chương trình</h2>
+                  <p className="text-muted-foreground whitespace-pre-line">
+                    {project.impacts}
+                  </p>
+                </div>
+
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold text-foreground mb-3">Quyền lợi của tình nguyện viên</h2>
+                  <p className="text-muted-foreground whitespace-pre-line">
+                    {project.benefits}
+                  </p>
+                </div>
+
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold text-foreground mb-3">Yêu cầu từ tình nguyện viên</h2>
+                  <p className="text-muted-foreground whitespace-pre-line">
+                    {project.requirements}
                   </p>
                 </div>
 

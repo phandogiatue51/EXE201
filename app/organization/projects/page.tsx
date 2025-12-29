@@ -104,7 +104,7 @@ export default function ProjectsPage() {
   }, [organizationId, fetchProjects]);
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa dự án này?")) return;
+    if (!confirm("Bạn có chắc chắn muốn xóa chương trình này?")) return;
 
     try {
       await projectAPI.delete(id);
@@ -112,7 +112,7 @@ export default function ProjectsPage() {
       fetchProjects();
     } catch (error) {
       console.error("Error deleting project:", error);
-      alert("Không thể xóa dự án");
+      alert("Không thể xóa chương trình");
     }
   };
 
@@ -141,16 +141,16 @@ export default function ProjectsPage() {
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Quản lý dự án</h1>
+              <h1 className="text-3xl font-bold text-foreground">Quản lý chương trình</h1>
               <p className="text-muted-foreground mt-2">
-                Quản lý tất cả các dự án tình nguyện
+                Quản lý tất cả các chương trình tình nguyện
               </p>
             </div>
 
             <Button asChild className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]">
               <Link href="/organization/projects/new">
                 <PlusCircle className="w-4 h-4 mr-2" />
-                Thêm dự án
+                Thêm chương trình
               </Link>
             </Button>
           </div>
@@ -323,17 +323,17 @@ export default function ProjectsPage() {
                 <Building2 className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
-                Không tìm thấy dự án
+                Không tìm thấy chương trình
               </h3>
               <p className="text-muted-foreground mb-4">
                 {search || statusFilter !== "all" || typeFilter !== "all" || categoryFilter.length > 0
                   ? "Thử thay đổi bộ lọc tìm kiếm"
-                  : "Chưa có dự án nào trong hệ thống"}
+                  : "Chưa có chương trình nào trong hệ thống"}
               </p>
               <Button asChild>
                 <Link href="/organization/projects/new">
                   <PlusCircle className="w-4 h-4 mr-2" />
-                  Thêm dự án đầu tiên
+                  Thêm chương trình đầu tiên
                 </Link>
               </Button>
             </div>

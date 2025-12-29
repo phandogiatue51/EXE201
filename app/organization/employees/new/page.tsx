@@ -28,8 +28,8 @@ export default function CreateEmployeePage() {
     confirmPassword: "",
     phoneNumber: "",
     dateOfBirth: "",
+    imageFile: "",
     isFemale: false,
-    bio: "",
     organizationId: 0,
     role: 2,
   });
@@ -45,6 +45,25 @@ export default function CreateEmployeePage() {
       }
     }
   }, [OrganizationId]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageRemove = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -82,66 +101,55 @@ export default function CreateEmployeePage() {
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleImageRemove = () => {
-    setImageFile(null);
-    setImagePreview(null);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      alert("Mật khẩu xác nhận không khớp");
+      alert("Password confirmation does not match");
       setLoading(false);
       return;
     }
 
-    // Validate password strength
     if (formData.password.length < 6) {
-      alert("Mật khẩu phải có ít nhất 6 ký tự");
+      alert("Password must be at least 6 characters");
       setLoading(false);
       return;
     }
 
     try {
-      const requestData = {
-        newAccount: {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          phoneNumber: formData.phoneNumber || null,
-          dateOfBirth: formData.dateOfBirth || null,
-          isFemale: formData.isFemale,
-          bio: formData.bio || null,
-        },
-        organizationId: formData.organizationId,
-        role: formData.role
-      };
+      const formDataToSend = new FormData();
+      
+      formDataToSend.append('NewAccount.Name', formData.name);
+      formDataToSend.append('NewAccount.Email', formData.email);
+      formDataToSend.append('NewAccount.Password', formData.password);
+      formDataToSend.append('NewAccount.IsFemale', formData.isFemale.toString());
+      
+      if (formData.phoneNumber) {
+        formDataToSend.append('NewAccount.PhoneNumber', formData.phoneNumber);
+      }
+      
+      if (formData.dateOfBirth) {
+        formDataToSend.append('NewAccount.DateOfBirth', formData.dateOfBirth);
+      }
+      
+      if (imageFile) {
+        formDataToSend.append('NewAccount.ProfileImageUrl', imageFile);
+      } else {
+        formDataToSend.append('NewAccount.ProfileImageUrl', '');
+      }
+      
+      formDataToSend.append('OrganizationId', formData.organizationId.toString());
+      formDataToSend.append('Role', formData.role.toString());
 
-      console.log('Creating employee with data:', requestData);
-      const response = await staffAPI.create(requestData);
+      await staffAPI.create(formDataToSend);
 
-      alert("Thêm nhân sự thành công!");
+      alert("Employee added successfully!");
       router.push("/organization/employees");
       router.refresh();
     } catch (error: any) {
       console.error("Error creating employee:", error);
-      const errorMessage = error?.message || error?.data?.message || "Không thể thêm nhân sự. Vui lòng thử lại.";
-      alert(errorMessage);
+  
     } finally {
       setLoading(false);
     }
@@ -149,7 +157,7 @@ export default function CreateEmployeePage() {
 
   const staffRoles = [
     { value: 0, label: "Quản lý", description: "Quản lý toàn bộ tổ chức và nhân sự" },
-    { value: 1, label: "Người duyệt", description: "Duyệt đơn đăng ký dự án" },
+    { value: 1, label: "Người duyệt", description: "Duyệt đơn đăng ký chương trình" },
     { value: 2, label: "Nhân viên", description: "Thành viên thông thường" },
   ];
 
@@ -194,7 +202,7 @@ export default function CreateEmployeePage() {
                 onImageRemove={handleImageRemove}
                 onPasswordToggle={() => setShowPassword(!showPassword)}
                 onSubmit={handleSubmit}
-                submitText="Thêm nhân sự"
+                submitText="Add Staff"
               />
             </Card>
           </div>

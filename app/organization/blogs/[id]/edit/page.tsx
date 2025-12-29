@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { BlogForm } from "../../../../../components/organization/BlogForm";
+import { BlogForm } from "../../../../../components/organization/blogs/BlogForm";
 import { Header } from "@/components/header";
 import { BlogPost } from "@/lib/type";
 import { blogAPI } from "@/services/api";

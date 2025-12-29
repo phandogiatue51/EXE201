@@ -103,7 +103,7 @@ export default function StaffPage() {
     if (!confirm("Bạn có chắc chắn muốn xóa nhân sự này?")) return;
 
     try {
-      // await staffAPI.delete(id);
+      await staffAPI.delete(id);
       setStaff(staff.filter(member => member.id !== id));
       alert("Đã xóa nhân sự thành công");
     } catch (error) {
@@ -128,11 +128,9 @@ export default function StaffPage() {
   };
 
   const filteredStaff = staff.filter(member => {
-    // Convert to numbers for comparison
     const orgIdNumber = parseInt(OrganizationId || '0');
     const memberOrgId = parseInt(member.organizationId || '0');
 
-    // First, filter by organization
     const matchesOrganization = memberOrgId === orgIdNumber;
 
     if (!matchesOrganization) return false;
@@ -149,14 +147,13 @@ export default function StaffPage() {
   });
 
   const STAFF_ROLES: Record<number, { name: string; color: string; bgColor: string }> = {
-    0: { name: "Quản lý", color: "text-orange-700", bgColor: "bg-orange-100" },   // Manager
-    1: { name: "Người đánh giá", color: "text-purple-700", bgColor: "bg-purple-100" }, // Reviewer
-    2: { name: "Nhân viên", color: "text-blue-700", bgColor: "bg-blue-100" },     // Employee
+    0: { name: "Quản lý", color: "text-orange-700", bgColor: "bg-orange-100" },  
+    1: { name: "Người đánh giá", color: "text-purple-700", bgColor: "bg-purple-100" }, 
+    2: { name: "Nhân viên", color: "text-blue-700", bgColor: "bg-blue-100" },    
   };
 
-  // Build unique roles list using staffRole string
   const uniqueRoles = staff
-    .map(s => ({ value: s.role, label: s.staffRole })) // use both role int and friendly name
+    .map(s => ({ value: s.role, label: s.staffRole }))
     .filter((role, index, self) =>
       role.value !== undefined &&
       role.value !== null &&
@@ -166,31 +163,24 @@ export default function StaffPage() {
 
 
   const canEditStaff = (staffMember: any) => {
-    // Admin can edit all
     if (StaffRole === "Manager") return true;
 
-    // Managers can edit staff with lower roles
     if (StaffRole === "Manager") {
-      return staffMember.role > 2; // Can edit employees (3) and volunteers (4)
+      return staffMember.role > 2; 
     }
 
-    // Others cannot edit
     return false;
   };
 
   const canDeleteStaff = (staffMember: any) => {
-    // Only admin can delete
     return StaffRole === "Manager";
   };
 
   const canChangeStatus = (staffMember: any) => {
-    // Can't change own status
     if (staffMember.accountId === AccountId) return false;
 
-    // Admin can change anyone's status
     if (StaffRole === "Manager") return true;
 
-    // Managers can change status of employees and volunteers
     if (StaffRole === "Manager") {
       return staffMember.role > 2;
     }

@@ -55,7 +55,7 @@ export function ProjectFilters({
           <div className="md:col-span-4 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              placeholder="Tìm kiếm dự án..."
+              placeholder="Tìm kiếm chương trình..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -109,7 +109,7 @@ export function ProjectFilters({
           {/* Counter */}
           <div className="md:col-span-2 flex items-center justify-end">
             <span className="text-muted-foreground">
-              {filteredCount} dự án
+              {filteredCount} chương trình
             </span>
           </div>
         </div>
@@ -140,26 +140,20 @@ export function ProjectFilters({
                   <button
                     key={category.id}
                     onClick={() => handleCategoryToggle(category.id)}
-                    className={`px-3 py-1.5 text-sm rounded-full transition-all flex items-center gap-1.5 ${
-                      isSelected 
-                        ? 'border-2' 
-                        : 'border hover:border-2'
+                    className={`px-3 py-1.5 text-sm rounded-full transition-all flex items-center gap-1.5 border ${
+                      isSelected ? "border-2" : "hover:border-2"
                     }`}
                     style={{
-                      backgroundColor: isSelected ? `${category.color}15` : 'transparent',
-                      borderColor: isSelected ? category.color : '#e5e7eb',
-                      color: isSelected ? category.color : '#6b7280'
+                      color: isSelected ? "white" : category.color,
+                      borderColor: category.color,
+                      backgroundColor: isSelected ? `${category.color}` : "transparent",
                     }}
                   >
                     {category.icon && (
-                      <span className="text-xs">{category.icon}</span>
+                      <i className={`${category.icon} text-xs`} />
                     )}
-                    {category.name}
-                    {isSelected && (
-                      <span className="ml-1 text-xs font-medium">
-                        ({categoryFilter.filter(id => id === category.id).length})
-                      </span>
-                    )}
+
+                    <span>{category.name}</span>
                   </button>
                 );
               })}
