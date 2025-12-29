@@ -80,26 +80,26 @@ export default function BlogsPage() {
   const handleDelete = async (id: number) => {
     if (!confirm("Bạn có chắc muốn xóa bài viết này?")) return;
 
-    // try {
-    //   await blogAPI.delete(id);
-    //   setBlogs(blogs.filter(blog => blog.id !== id));
-    //   alert("Đã xóa bài viết!");
-    // } catch (error) {
-    //   console.error("Error deleting blog:", error);
-    //   alert("Có lỗi xảy ra!");
-    // }
+    try {
+      await blogAPI.delete(id);
+      setBlogs(blogs.filter(blog => blog.id !== id));
+      alert("Đã xóa bài viết!");
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+      alert("Có lỗi xảy ra!");
+    }
   };
 
   const handleStatusChange = async (id: number, newStatus: number) => {
-    // try {
-    //   await blogAPI.changeStatus(id, newStatus);
-    //   setBlogs(blogs.map(blog =>
-    //     blog.id === id ? { ...blog, status: newStatus } : blog
-    //   ));
-    //   alert("Đã cập nhật trạng thái!");
-    // } catch (error) {
-    //   console.error("Error updating status:", error);
-    // }
+    try {
+      await blogAPI.updateStatus(id, newStatus);
+      setBlogs(blogs.map(blog =>
+        blog.id === id ? { ...blog, status: newStatus } : blog
+      ));
+      alert("Đã cập nhật trạng thái!");
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
   };
 
   const getStatusIcon = (status: number) => {
@@ -162,7 +162,7 @@ export default function BlogsPage() {
             </div>
             
             <Button asChild className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]">
-              <Link href="/admin/blogs/new">
+              <Link href="//blogs/new">
                 <PlusCircle className="w-4 h-4 mr-2" />
                 Thêm bài viết
               </Link>

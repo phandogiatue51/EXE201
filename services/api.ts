@@ -333,7 +333,7 @@ export const blogAPI = {
         });
     },
 
-    update: (id: any, blogData: any, accountId: any) => {
+    update: (id: any, blogData: any) => {
         const formData = new FormData();
 
         Object.keys(blogData).forEach(key => {
@@ -346,14 +346,19 @@ export const blogAPI = {
             formData.append('imageFile', blogData.imageFile);
         }
 
-        return apiRequest(`/Blog/${id}?accountId=${accountId}`, {
+        return apiRequest(`/Blog/${id}`, {
             method: 'PUT',
             body: formData,
         });
     },
 
-    delete: (id: any, accountId: any) => apiRequest(`/Blog/${id}?accountId=${accountId}`, {
+    delete: (id: any) => apiRequest(`/Blog/${id}`, {
         method: 'DELETE',
+    }),
+
+    updateStatus: (id: any, statusData: any) => apiRequest(`/Blog/${id}/status`, {
+        method: 'PUT',
+        body: statusData,
     }),
 
     filter: (BlogFilterDto: any) => {

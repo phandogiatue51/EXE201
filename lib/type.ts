@@ -142,6 +142,7 @@ export interface BlogPost {
   paragraph5?: string;
   featuredImageUrl?: string;
   authorId?: number;
+  authorName?: string;
   organizationId?: number;
   author?: Account;
   organization?: Organization;
