@@ -1,5 +1,5 @@
 import { ProjectFilterDto } from "@/lib/filter-type";
-import { mapToCreateDtoField, mapToUpdateDtoField, ReviewAppDto } from "@/lib/type"
+import { mapToCreateDtoField, mapToUpdateDtoField, VolunteerApplication } from "@/lib/type"
 
 const API_BASE_URL = process.env.NODE_ENV === 'development'
     ? 'https://localhost:7085/api'
@@ -306,7 +306,7 @@ export const applicationAPI = {
         const queryString = queryParams.toString();
         const url = queryString ? `/Application/filter?${queryString}` : '/Application/filter';
 
-        return apiRequest(url);
+        return apiRequest<VolunteerApplication[]>(url);    
     },
 };
 

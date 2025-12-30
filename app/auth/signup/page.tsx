@@ -29,16 +29,23 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      const signupData = {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        phoneNumber: formData.phoneNumber || null,
-        dateOfBirth: formData.dateOfBirth || null,
-        isFemale: formData.isFemale,
-      };
+      const formDataObj = new FormData();
+      
+      formDataObj.append('Name', formData.name);
+      formDataObj.append('Email', formData.email);
+      formDataObj.append('Password', formData.password);
+      
+      if (formData.phoneNumber) {
+        formDataObj.append('PhoneNumber', formData.phoneNumber);
+      }
+      
+      if (formData.dateOfBirth) {
+        formDataObj.append('DateOfBirth', formData.dateOfBirth);
+      }
+      
+      formDataObj.append('IsFemale', formData.isFemale.toString());
 
-      const result = await accountAPI.signUp(signupData);
+      const result = await accountAPI.signUp(formDataObj);
       
       console.log("Signup successful:", result);
       
