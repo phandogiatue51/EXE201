@@ -110,6 +110,16 @@ export function Header() {
               )}
             </>
           )}
+          <Link
+            href="/blog"
+            className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
+              isActive("/blog")
+                ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
+                : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
+            }`}
+          >
+            Blog
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -310,6 +320,26 @@ export function Header() {
                   </div>
 
                   <div className="py-2">
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-[#77E5C8]/10 transition-colors duration-150"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                      Hồ sơ của tôi
+                    </Link>
                     <Link
                       href={
                         user.role === "volunteer"
