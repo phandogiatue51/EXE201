@@ -167,10 +167,11 @@ export interface BlogPost {
   authorId?: number;
   authorName?: string;
   organizationId?: number;
+  organizationName?: string
   author?: Account;
   organization?: Organization;
-  publishedDate: Date;
-  updatedDate?: Date;
+  publishedDate: string;
+  updatedDate?: string;
   status: number;
   statusName?: string;
 }

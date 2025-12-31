@@ -225,7 +225,7 @@ export default function EditProjectPage({
       await projectAPI.update(parseInt(id), projectData);
 
       alert("Cập nhật chương trình thành công!");
-      router.push("/organization/projects");
+      router.push("/organization/programs");
       router.refresh();
     } catch (error: any) {
       console.error("Error updating project:", error);
@@ -298,7 +298,7 @@ export default function EditProjectPage({
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <Button variant="ghost" asChild className="mb-6">
-            <Link href="/organization/projects">
+            <Link href="/organization/programs">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Quay lại danh sách
             </Link>

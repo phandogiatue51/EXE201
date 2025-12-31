@@ -56,7 +56,7 @@ export default function ProjectDetailPage({
     
     try {
       await projectAPI.delete(parseInt(id));
-      window.location.href = "/admin/projects";
+      window.location.href = "/admin/programs";
     } catch (error) {
       console.error("Error deleting project:", error);
       alert("Không thể xóa chương trình");
@@ -123,7 +123,7 @@ export default function ProjectDetailPage({
         <div className="container mx-auto px-4 py-8">
           {/* Navigation */}
           <Button variant="ghost" asChild className="mb-6">
-            <Link href="/admin/projects">
+            <Link href="/admin/programs">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Quay lại danh sách
             </Link>
@@ -170,7 +170,7 @@ export default function ProjectDetailPage({
                     {/* Actions */}
                     <div className="flex gap-2">
                       <Button variant="secondary" size="sm" asChild>
-                        <Link href={`/admin/projects/${id}/edit`}>
+                        <Link href={`/admin/programs/${id}/edit`}>
                           <Edit className="w-4 h-4 mr-1" />
                           Sửa
                         </Link>
@@ -375,14 +375,14 @@ export default function ProjectDetailPage({
             {/* Additional Actions */}
             <div className="flex gap-4">
               <Button asChild className="flex-1">
-                <Link href={`/admin/projects/${id}/applications`}>
+                <Link href={`/admin/programs/${id}/applications`}>
                   <Users className="w-4 h-4 mr-2" />
                   Quản lý đơn đăng ký
                 </Link>
               </Button>
               
               <Button variant="outline" asChild className="flex-1">
-                <Link href={`/projects/${id}`} target="_blank">
+                <Link href={`/programs/${id}`} target="_blank">
                   <Globe className="w-4 h-4 mr-2" />
                   Xem trang công khai
                 </Link>

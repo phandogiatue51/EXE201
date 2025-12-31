@@ -47,7 +47,7 @@ export default function ProfileSettingsPage() {
       return;
     }
 
-    const userId = user?.accountId || user?.id;
+    const userId = user?.accountId;
     if (!userId) {
       toast({
         title: "Lỗi",

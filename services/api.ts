@@ -559,6 +559,13 @@ export const organizationAPI = {
 
         return apiRequest(url);
     },
+
+    verify: (id: any, organData: any) => {
+        return apiRequest(`/Organization/verify/${id}`, {
+            method: 'PUT',
+            body: organData, 
+        });
+    },
 };
 
 export const projectAPI = {

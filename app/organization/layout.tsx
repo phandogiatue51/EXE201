@@ -23,7 +23,7 @@ import {
 
 const navItems = [
   { name: "Dashboard", href: "/organization", icon: LayoutDashboard },
-  { name: "Chương trình", href: "/organization/projects", icon: Calendar },
+  { name: "Chương trình", href: "/organization/programs", icon: Calendar },
   { name: "Đơn đăng ký", href: "/organization/applications", icon: FileText },
   { name: "Bài viết", href: "/organization/blogs", icon: Newspaper },
   { name: "Nhân viên", href: "/organization/employees", icon: Users },
@@ -97,7 +97,7 @@ export default function StaffLayout({
         <div className="h-full flex flex-col">
           {/* Logo */}
           <div className="p-6 border-b">
-            <Link href="/admin" className="flex items-center gap-2">
+            <Link href="/organization" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
                 <span className="text-white font-bold">A</span>
               </div>

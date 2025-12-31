@@ -264,7 +264,7 @@ export default function ApplicationDetailPage() {
                       </div>
                     </div>
                     <Button variant="outline" size="sm" asChild className="mt-4">
-                      <Link href={`/projects/${project?.id}`} target="_blank">
+                      <Link href={`/programs/${project?.id}`} target="_blank">
                         <ExternalLink className="w-3 h-3 mr-2" />
                         Xem chi tiết chương trình
                       </Link>

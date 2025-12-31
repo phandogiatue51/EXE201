@@ -78,7 +78,7 @@ export default function AdminDashboardPage() {
       icon: Calendar,
       color: "bg-purple-500",
       change: "+8%",
-      href: "/admin/projects",
+      href: "/admin/programs",
       subtext: `${stats.activePrograms} đang hoạt động`,
     },
     {
@@ -101,7 +101,7 @@ export default function AdminDashboardPage() {
             <p className="opacity-90">Hôm nay có {stats.pendingApprovals} yêu cầu cần duyệt</p>
           </div>
           <Button variant="secondary" asChild>
-            <Link href="/admin/projects/create">
+            <Link href="/admin/programs/create">
               Tạo chương trình mới
             </Link>
           </Button>
@@ -155,7 +155,7 @@ export default function AdminDashboardPage() {
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-900">Chương trình gần đây</h3>
-          <Link href="/admin/projects" className="text-sm text-[#6085F0] hover:underline">
+          <Link href="/admin/programs" className="text-sm text-[#6085F0] hover:underline">
             Xem tất cả
           </Link>
         </div>

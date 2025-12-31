@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react"; 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI } from "../../../services/api";
 import {
@@ -24,27 +23,46 @@ import {
 
 export default function ProjectsPage() {
   useAuth();
+
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<number | "all">("all");
   const [typeFilter, setTypeFilter] = useState<number | "all">("all");
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await projectAPI.getAll();
+      
+      const filter: any = {};
+      
+      if (search.trim()) {
+        filter.title = search;
+      }
+      
+      if (statusFilter !== "all") {
+        filter.status = statusFilter;
+      }
+      
+      if (typeFilter !== "all") {
+        filter.type = typeFilter;
+      }
+      
+      const data = await projectAPI.filter(filter);
       setProjects(data);
     } catch (error) {
       console.error("Error fetching projects:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, statusFilter, typeFilter]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchProjects();
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [search, statusFilter, typeFilter, fetchProjects]);
 
   const handleDelete = async (id: number) => {
     if (!confirm("Bạn có chắc chắn muốn xóa chương trình này?")) return;
@@ -58,25 +76,11 @@ export default function ProjectsPage() {
     }
   };
 
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.title.toLowerCase().includes(search.toLowerCase()) ||
-      project.description.toLowerCase().includes(search.toLowerCase()) ||
-      project.location.toLowerCase().includes(search.toLowerCase());
-    
-    const matchesStatus = statusFilter === "all" || project.status === statusFilter;
-    const matchesType = typeFilter === "all" || project.type === typeFilter;
-    
-    return matchesSearch && matchesStatus && matchesType;
-  });
-
-  // Get unique types and statuses for filters
   const uniqueTypes = [...new Set(projects.map(p => p.type))];
   const uniqueStatuses = [...new Set(projects.map(p => p.status))];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
@@ -89,7 +93,7 @@ export default function ProjectsPage() {
             </div>
             
             <Button asChild className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]">
-              <Link href="/admin/projects/new">
+              <Link href="/admin/programs/new">
                 <PlusCircle className="w-4 h-4 mr-2" />
                 Thêm chương trình
               </Link>
@@ -151,7 +155,7 @@ export default function ProjectsPage() {
               {/* Counter */}
               <div className="md:col-span-2 flex items-center justify-end">
                 <span className="text-muted-foreground">
-                  {filteredProjects.length} chương trình
+                  {projects.length} chương trình
                 </span>
               </div>
             </div>
@@ -165,7 +169,7 @@ export default function ProjectsPage() {
           ) : (
             /* Projects Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProjects.map((project) => (
+              {projects.map((project) => (
                 <Card key={project.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   {/* Project Image */}
                   <div className="h-48 bg-gradient-to-br from-blue-500 to-blue-600 relative overflow-hidden">
@@ -173,7 +177,7 @@ export default function ProjectsPage() {
                       <img
                         src={project.imageUrl}
                         alt={project.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover"  
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
@@ -274,14 +278,14 @@ export default function ProjectsPage() {
                     {/* Actions */}
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm" className="flex-1" asChild>
-                        <Link href={`/admin/projects/${project.id}`}>
+                        <Link href={`/admin/programs/${project.id}`}>
                           <Eye className="w-3 h-3 mr-1" />
                           Xem
                         </Link>
                       </Button>
                       
                       <Button variant="outline" size="sm" className="flex-1" asChild>
-                        <Link href={`/admin/projects/${project.id}/edit`}>
+                        <Link href={`/admin/programs/${project.id}/edit`}>
                           <Edit className="w-3 h-3 mr-1" />
                           Sửa
                         </Link>
@@ -303,8 +307,7 @@ export default function ProjectsPage() {
             </div>
           )}
 
-          {/* Empty State */}
-          {!loading && filteredProjects.length === 0 && (
+          {!loading && projects.length === 0 && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Building2 className="w-8 h-8 text-white" />
@@ -318,7 +321,7 @@ export default function ProjectsPage() {
                   : "Chưa có chương trình nào trong hệ thống"}
               </p>
               <Button asChild>
-                <Link href="/admin/projects/new">
+                <Link href="/admin/programs/new">
                   <PlusCircle className="w-4 h-4 mr-2" />
                   Thêm chương trình đầu tiên
                 </Link>

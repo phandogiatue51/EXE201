@@ -110,6 +110,7 @@ export default function EditOrganizationPage({
       }
 
       await organizationAPI.update(parseInt(id), formDataToSend);
+      alert("Cập nhật tổ chức thành công")
       router.push(`/admin/organizations/${id}`);
       router.refresh();
     } catch (error) {

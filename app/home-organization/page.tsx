@@ -1,23 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
-import { organizationAPI } from "../../../services/api";
-import { Organization } from "../../../lib/type";
-import { OrganizationStatusBadge } from "@/components/organization/OrganizationStatusBadge";
+import { organizationAPI } from "../../services/api";
+import { Organization } from "../../lib/type";
+import {  OrganizationStatusBadge } from "@/components/organization/OrganizationStatusBadge";
 import {
-  PlusCircle,
   Eye,
-  Edit,
-  Trash2,
   Search,
-  Filter,
   Building2,
   Phone,
   Mail,
@@ -27,118 +22,54 @@ import {
 
 export default function OrganizationsPage() {
   const { user } = useAuth();
-  const adminId = user?.accountId;
-  const router = useRouter();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<number | "all">("all");
+  const [statusFilter] = useState<number | "all">("all");
 
-  const fetchOrganizations = useCallback(async () => {
+  useEffect(() => {
+    fetchOrganizations();
+  }, []);
+
+  const fetchOrganizations = async () => {
     try {
       setLoading(true);
-      const filter: any = {};
-      
-      if (search.trim()) {
-        filter.name = search;
-      }
-      
-      if (statusFilter !== "all") {
-        filter.status = statusFilter;
-      }
-      
-      const data = await organizationAPI.filter(filter);
+      const data = await organizationAPI.getAll();
       setOrganizations(data);
     } catch (error) {
       console.error("Error fetching organizations:", error);
     } finally {
       setLoading(false);
     }
-  }, [search, statusFilter]);
-
-  useEffect(() => {
-    fetchOrganizations();
-  }, []);
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchOrganizations();
-    }, 500); 
-
-    return () => clearTimeout(timeoutId);
-  }, [search, statusFilter, fetchOrganizations]);
-
-  const handleDelete = async (id: number) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa tổ chức này?")) return;
-
-    try {
-      await organizationAPI.delete(id);
-      setOrganizations(organizations.filter((org) => org.id !== id));
-    } catch (error) {
-      console.error("Error deleting organization:", error);
-      alert("Không thể xóa tổ chức");
-    }
   };
 
-  const handleStatusChange = async (id: number, newStatus: number) => {
-    try {      
-      let rejectionReason: string | undefined;
-      
-      if (newStatus === 3) { 
-        const input = prompt("Nhập lý do từ chối:");
-        if (!input) return; 
-        rejectionReason = input;
-      }
-      
-      const verifyData = {
-        Status: newStatus,
-        AdminId: adminId || 1,
-        ...(rejectionReason && { RejectionReason: rejectionReason })
-      };
-      
-      await organizationAPI.verify(id, verifyData);
-      
-      setOrganizations(organizations.map(org =>
-        org.id === id ? { 
-          ...org, 
-          status: newStatus,
-          rejectionReason: rejectionReason || org.rejectionReason 
-        } : org
-      ));
-      alert("Xác thực tổ chức thành công");
-      router.push(`/admin/organizations`);
-      router.refresh();
-    } catch (error) {
-      console.error("Error updating status:", error);
-      alert("Không thể cập nhật trạng thái");
-    }
-  };
+  const filteredOrganizations = organizations.filter((org) => {
+    const matchesSearch =
+      org.name.toLowerCase().includes(search.toLowerCase()) ||
+      org.email?.toLowerCase().includes(search.toLowerCase()) ||
+      org.phoneNumber?.includes(search);
+
+    const isActive = org.status === 1;
+
+    return matchesSearch && isActive;
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Header />
+
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Quản lý tổ chức
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Quản lý tất cả các tổ chức tình nguyện trong hệ thống
-              </p>
+          <section className="py-10 bg-gradient-to-br from-[#77E5C8] via-[#6085F0] to-[#A7CBDC]">
+            <div className="container mx-auto px-4">
+              <div className="max-w-3xl mx-auto text-center">
+                <h1 className="text-5xl font-bold text-white mb-6">Tổ chức</h1>
+                <p className="text-xl text-white/90">
+                  Tìm kiếm các tổ chức đang hoạt động tại Together
+                </p>
+              </div>
             </div>
-
-            <Button
-              asChild
-              className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]"
-            >
-              <Link href="/admin/organizations/new">
-                <PlusCircle className="w-4 h-4 mr-2" />
-                Thêm tổ chức
-              </Link>
-            </Button>
-          </div>
+          </section>
 
           {/* Filters */}
           <Card className="p-6 mb-8">
@@ -153,34 +84,6 @@ export default function OrganizationsPage() {
                   className="pl-9"
                 />
               </div>
-
-              {/* Status Filter */}
-              <div className="md:col-span-4">
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-muted-foreground" />
-                  <select
-                    value={statusFilter}
-                    onChange={(e) =>
-                      setStatusFilter(e.target.value as number | "all")
-                    }
-                    className="w-full px-3 py-2 border rounded-lg bg-background"
-                  >
-                    <option value="all">Tất cả trạng thái</option>
-                    <option value={0}>Chờ duyệt</option>
-                    <option value={1}>Đang hoạt động</option>
-                    <option value={2}>Ngừng hoạt động</option>
-                    <option value={3}>Đã từ chối</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Counter */}
-              <div className="md:col-span-3 flex items-center justify-end">
-                <span className="text-muted-foreground">
-                  Hiển thị {organizations.length} /{" "}
-                  {organizations.length} tổ chức
-                </span>
-              </div>
             </div>
           </Card>
 
@@ -192,7 +95,7 @@ export default function OrganizationsPage() {
           ) : (
             /* Organizations Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {organizations.map((org) => (
+              {filteredOrganizations.map((org) => (
                 <Card
                   key={org.id}
                   className="overflow-hidden hover:shadow-lg transition-shadow"
@@ -301,63 +204,19 @@ export default function OrganizationsPage() {
                       className="flex-1"
                       asChild
                     >
-                      <Link href={`/admin/organizations/${org.id}`}>
+                      <Link href={`/home-organization/${org.id}`}>
                         <Eye className="w-3 h-3 mr-1" />
                         Xem
                       </Link>
                     </Button>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      asChild
-                    >
-                      <Link href={`/admin/organizations/${org.id}/edit`}>
-                        <Edit className="w-3 h-3 mr-1" />
-                        Sửa
-                      </Link>
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => handleDelete(org.id)}
-                    >
-                      <Trash2 className="w-3 h-3 mr-1" />
-                      Xóa
-                    </Button>
                   </div>
-
-                  {org.status === 0 && (
-                    <div className="px-6 pb-6 pt-0 border-t pt-4">
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                          onClick={() => handleStatusChange(org.id, 1)}
-                        >
-                          Duyệt
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => handleStatusChange(org.id, 3)}
-                        >
-                          Từ chối
-                        </Button>
-                      </div>
-                    </div>
-                  )}
                 </Card>
               ))}
             </div>
           )}
 
           {/* Empty State */}
-          {!loading && organizations.length === 0 && (
+          {!loading && filteredOrganizations.length === 0 && (
             <div className="text-center py-12">
               <Building2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">
