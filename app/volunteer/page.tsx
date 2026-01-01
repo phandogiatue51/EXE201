@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect,  } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 import { StatsCards } from "../../components/volunteer/stats-cards";
 import { ProgramsList } from "../../components/volunteer/programs-list";
 import { CertificatesList } from "../../components/volunteer/certificates-list";
@@ -10,6 +11,7 @@ import { accountAPI, certificateAPI, applicationAPI, projectAPI } from "@/servic
 import { VolunteerApplication, Certificate, Account, Project } from "../../lib/type"
 export default function VolunteerDashboardPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [registrations, setRegistrations] = useState<VolunteerApplication[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -63,6 +65,20 @@ export default function VolunteerDashboardPage() {
     };
   });
 
+  const handleView = (id: string | number) => { router.push(`/volunteer/certificates/${id}`); };
+
+  const handleDelete = async (id: string | number) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa chứng chỉ này?")) return;
+    
+    try {
+      await certificateAPI.delete(id);
+      setCertificates(prev => prev.filter(cert => cert.id !== id));
+      alert("Xóa chứng chỉ thành công!");
+    } catch (error) {
+      console.error("Error deleting certificate:", error);
+      alert("Có lỗi xảy ra khi xóa chứng chỉ");
+    }
+  };
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -96,7 +112,11 @@ export default function VolunteerDashboardPage() {
         <div className="lg:col-span-2 space-y-8">
           <ProgramsList registrations={enrichedRegistrations} />
           
-          <CertificatesList certificates={certificates} />
+          <CertificatesList
+            certificates={certificates}
+            onView={handleView}
+            onDelete={handleDelete}
+          />
         </div>
 
         <div className="lg:col-span-1">

@@ -1,18 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
-import { certificateAPI } from "../../../services/api";
+import { certificateAPI, categoryAPI } from "../../../services/api";
+import { Certificate, Category, Account } from "@/lib/type";
+import { CertificateFilterDto } from "@/lib/filter-type";
 import {
     Search,
     Filter,
     FileText,
-    Eye,
     CheckCircle,
     XCircle,
     Clock,
@@ -20,57 +28,95 @@ import {
     Calendar,
     Award,
     Building,
+    Eye,
+    User as UserIcon,
+    FolderOpen,
+    Hash,
 } from "lucide-react";
 
 export default function CertificatesPage() {
+    const router = useRouter();
     const { user } = useAuth();
-    const [certificates, setCertificates] = useState<any[]>([]);
-    const [filteredCertificates, setFilteredCertificates] = useState<any[]>([]);
+    const [certificates, setCertificates] = useState<Certificate[]>([]);
+    const [filteredCertificates, setFilteredCertificates] = useState<Certificate[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState<number | "all">("all");
-    const [selectedCertificate, setSelectedCertificate] = useState<any | null>(null);
+    const [loadingFilters, setLoadingFilters] = useState(false);
+    
+    const [filters, setFilters] = useState<CertificateFilterDto>({});
 
     useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                setLoadingFilters(true);
+                const categoriesData = await categoryAPI.getAll();
+                setCategories(categoriesData);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            } finally {
+                setLoadingFilters(false);
+            }
+        };
+
+        fetchCategories();
+    }, []); 
+
+    useEffect(() => {
+        const fetchCertificates = async () => {
+            try {
+                setLoading(true);
+
+                // Prepare filter object
+                const apiFilters: CertificateFilterDto = { 
+                    accountId: filters.accountId,
+                    categoryId: filters.categoryId,
+                    certificateName: filters.certificateName
+                };
+                
+                // Remove undefined/null/empty values
+                (Object.keys(apiFilters) as Array<keyof CertificateFilterDto>).forEach(key => {
+                    if (apiFilters[key] === undefined || 
+                        apiFilters[key] === null ||
+                        apiFilters[key] === "") {
+                        delete apiFilters[key];
+                    }
+                });
+
+                // Fetch certificates with filters
+                const data = await certificateAPI.filter(apiFilters);
+                setCertificates(data);
+                setFilteredCertificates(data);
+                    
+            } catch (error) {
+                console.error("Error fetching certificates:", error);
+                try {
+                    const allData = await certificateAPI.getAll();
+                    setCertificates(allData);
+                    setFilteredCertificates(allData);
+                } catch (fallbackError) {
+                    console.error("Fallback fetch error:", fallbackError);
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchCertificates();
-    }, []);
+    }, [filters]); 
 
-    useEffect(() => {
-        filterCertificates();
-    }, [certificates, search, statusFilter]);
-
-    const fetchCertificates = async () => {
-        try {
-            setLoading(true);
-            const data = await certificateAPI.getAll();
-            setCertificates(data);
-        } catch (error) {
-            console.error("Error fetching certificates:", error);
-        } finally {
-            setLoading(false);
-        }
+    const handleFilterChange = (key: keyof CertificateFilterDto, value: any) => {
+        setFilters(prev => ({
+            ...prev,
+            [key]: value === "all" || value === "" ? undefined : value
+        }));
     };
 
-    const filterCertificates = () => {
-        let result = certificates;
+    const handleViewDetail = (certificateId: string | number) => {
+        router.push(`/admin/certificates/${certificateId}`);
+    };
 
-        // Search filter
-        if (search) {
-            const searchLower = search.toLowerCase();
-            result = result.filter(cert =>
-                cert.certificateName.toLowerCase().includes(searchLower) ||
-                cert.issuingOrganization?.toLowerCase().includes(searchLower) ||
-                cert.certificateNumber?.toLowerCase().includes(searchLower) ||
-                cert.categoryName.toLowerCase().includes(searchLower)
-            );
-        }
-
-        // Status filter
-        if (statusFilter !== "all") {
-            result = result.filter(cert => cert.status === statusFilter);
-        }
-
-        setFilteredCertificates(result);
+    const clearAllFilters = () => {
+        setFilters({});
     };
 
     if (loading) {
@@ -88,6 +134,7 @@ export default function CertificatesPage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-background">
+            <Header />
             <main className="flex-1">
                 <div className="container mx-auto px-4 py-8">
                     {/* Header */}
@@ -100,99 +147,117 @@ export default function CertificatesPage() {
                         </div>
                     </div>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <Card className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Tổng chứng chỉ</p>
-                                    <p className="text-2xl font-bold">{certificates.length}</p>
-                                </div>
-                                <FileText className="w-8 h-8 text-blue-500" />
-                            </div>
-                        </Card>
-
-                        <Card className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Chờ duyệt</p>
-                                    <p className="text-2xl font-bold text-yellow-600">
-                                        {certificates.filter(c => c.status === 1 || c.status === undefined).length}
-                                    </p>
-                                </div>
-                                <Clock className="w-8 h-8 text-yellow-500" />
-                            </div>
-                        </Card>
-
-                        <Card className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Đã duyệt</p>
-                                    <p className="text-2xl font-bold text-green-600">
-                                        {certificates.filter(c => c.status === 2).length}
-                                    </p>
-                                </div>
-                                <CheckCircle className="w-8 h-8 text-green-500" />
-                            </div>
-                        </Card>
-
-                        <Card className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Đã từ chối</p>
-                                    <p className="text-2xl font-bold text-red-600">
-                                        {certificates.filter(c => c.status === 3).length}
-                                    </p>
-                                </div>
-                                <XCircle className="w-8 h-8 text-red-500" />
-                            </div>
-                        </Card>
-                    </div>
-
                     {/* Filters */}
                     <Card className="p-6 mb-8">
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                            {/* Search */}
-                            <div className="md:col-span-6 relative">
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
+                            {/* Search by Certificate Number */}
+                            <div className="md:col-span-3 relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                                 <Input
-                                    placeholder="Tìm kiếm chứng chỉ, tổ chức cấp, số chứng chỉ..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Số chứng chỉ..."
+                                    value={filters.certificateName  || ""}
+                                    onChange={(e) => handleFilterChange("certificateName", e.target.value)}
                                     className="pl-9"
                                 />
                             </div>
 
-                            {/* Status Filter */}
-                            <div className="md:col-span-4">
-                                <div className="flex items-center gap-2">
-                                    <Filter className="w-4 h-4 text-muted-foreground" />
-                                    <select
-                                        value={statusFilter}
-                                        onChange={(e) => setStatusFilter(e.target.value as number | "all")}
-                                        className="w-full px-3 py-2 border rounded-lg bg-background"
-                                    >
-                                        <option value="all">Tất cả trạng thái</option>
-                                        <option value="1">Chờ duyệt</option>
-                                        <option value="2">Đã duyệt</option>
-                                        <option value="3">Đã từ chối</option>
-                                    </select>
-                                </div>
+                            {/* Search by Account ID */}
+                            <div className="md:col-span-3 relative">
+                                <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                                <Input
+                                    placeholder="Account ID..."
+                                    value={filters.accountId?.toString() || ""}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === "" || /^\d+$/.test(value)) {
+                                            handleFilterChange("accountId", value ? parseInt(value) : undefined);
+                                        }
+                                    }}
+                                    className="pl-9"
+                                    type="number"
+                                    min="0"
+                                />
                             </div>
 
-                            {/* Counter */}
-                            <div className="md:col-span-2 flex items-center justify-end">
-                                <span className="text-muted-foreground">
-                                    {filteredCertificates.length} chứng chỉ
-                                </span>
+                            <div className="md:col-span-3">
+                                <Select
+                                    value={filters.categoryId?.toString() || "all"}
+                                    onValueChange={(value) => handleFilterChange("categoryId", value !== "all" ? parseInt(value) : undefined)}
+                                    disabled={loadingFilters || categories.length === 0}
+                                >
+                                    <SelectTrigger>
+                                        <div className="flex items-center gap-2">
+                                            <FolderOpen className="w-4 h-4" />
+                                            {loadingFilters ? (
+                                                <span className="text-muted-foreground">Đang tải...</span>
+                                            ) : (
+                                                <SelectValue placeholder={categories.length > 0 ? "Tất cả danh mục" : "Không có danh mục"} />
+                                            )}
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Tất cả danh mục</SelectItem>
+                                        {categories.map((category) => (
+                                            <SelectItem key={category.id} value={category.id.toString()}>
+                                                {category.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="md:col-span-3">
+                                <Button
+                                    variant="outline"
+                                    onClick={clearAllFilters}
+                                    disabled={!filters.accountId && !filters.categoryId && !filters.certificateName}
+                                    className="w-full"
+                                >
+                                    <Filter className="w-4 h-4 mr-2" />
+                                    Xóa bộ lọc
+                                </Button>
                             </div>
                         </div>
+
+                        {/* Active filters display */}
+                        {(filters.accountId || filters.categoryId || filters.certificateName) && (
+                            <div className="mt-4 pt-4 border-t">
+                                <p className="text-sm text-muted-foreground mb-2">Bộ lọc đang áp dụng:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {filters.accountId && (
+                                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full flex items-center gap-1">
+                                            <Hash className="w-3 h-3" />
+                                            Account ID: {filters.accountId}
+                                        </span>
+                                    )}
+                                    {filters.categoryId && (
+                                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full flex items-center gap-1">
+                                            <FolderOpen className="w-3 h-3" />
+                                            Danh mục: {categories.find(c => c.id === filters.categoryId)?.name || filters.categoryId}
+                                        </span>
+                                    )}
+                                    {filters.certificateName && (
+                                        <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full flex items-center gap-1">
+                                            <Search className="w-3 h-3" />
+                                            Tên chứng chỉ: {filters.certificateName}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </Card>
+
+                    {/* Results Count */}
+                    <div className="mb-6">
+                        <p className="text-muted-foreground">
+                            Hiển thị <span className="font-semibold text-foreground">{filteredCertificates.length}</span> chứng chỉ
+                        </p>
+                    </div>
 
                     {/* Certificates Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredCertificates.map((cert) => (
-                            <Card key={cert.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                            <Card key={cert.id} className="overflow-hidden hover:shadow-lg transition-shadow border">
                                 {/* Certificate Image */}
                                 <div className="h-48 bg-gradient-to-br from-blue-500 to-blue-600 relative overflow-hidden">
                                     {cert.imageUrl ? (
@@ -209,7 +274,7 @@ export default function CertificatesPage() {
 
                                     {/* Account ID Badge */}
                                     <div className="absolute top-4 right-4">
-                                        <span className="px-3 py-1 bg-black/50 text-white text-xs font-semibold rounded-full">
+                                        <span className="px-2 py-1 bg-black/70 text-white text-xs font-semibold rounded-full">
                                             ID: {cert.accountId}
                                         </span>
                                     </div>
@@ -281,7 +346,7 @@ export default function CertificatesPage() {
                                             variant="outline"
                                             size="sm"
                                             className="flex-1"
-                                            onClick={() => setSelectedCertificate(cert)}
+                                            onClick={() => handleViewDetail(cert.id)}
                                         >
                                             <Eye className="w-3 h-3 mr-1" />
                                             Xem chi tiết
@@ -293,157 +358,28 @@ export default function CertificatesPage() {
                     </div>
 
                     {/* Empty State */}
-                    {!loading && filteredCertificates.length === 0 && (
+                    {filteredCertificates.length === 0 && (
                         <div className="text-center py-12">
                             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Award className="w-8 h-8 text-white" />
                             </div>
                             <h3 className="text-lg font-semibold text-foreground mb-2">
-                                Không tìm thấy chứng chỉ
+                                {Object.keys(filters).length > 0 ? "Không tìm thấy chứng chỉ phù hợp" : "Chưa có chứng chỉ nào"}
                             </h3>
-                            <p className="text-muted-foreground">
-                                {search || statusFilter !== "all"
-                                    ? "Thử thay đổi bộ lọc tìm kiếm"
+                            <p className="text-muted-foreground mb-4">
+                                {Object.keys(filters).length > 0 
+                                    ? "Thử thay đổi bộ lọc tìm kiếm" 
                                     : "Chưa có chứng chỉ nào trong hệ thống"}
                             </p>
+                            {Object.keys(filters).length > 0 && (
+                                <Button variant="outline" onClick={clearAllFilters}>
+                                    Xóa bộ lọc
+                                </Button>
+                            )}
                         </div>
                     )}
                 </div>
             </main>
-
-            {/* Certificate Detail Modal */}
-            {selectedCertificate && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        {/* Header */}
-                        <div className="sticky top-0 bg-gradient-to-r from-[#77E5C8] to-[#6085F0] p-6 flex items-center justify-between">
-                            <div className="flex-1">
-                                <h2 className="text-2xl font-bold text-white mb-2">
-                                    {selectedCertificate.certificateName}
-                                </h2>
-                                <p className="text-white/90">Chi tiết chứng chỉ</p>
-                            </div>
-                            <button
-                                onClick={() => setSelectedCertificate(null)}
-                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                            >
-                                <XCircle className="w-6 h-6 text-white" />
-                            </button>
-                        </div>
-
-                        {/* Body */}
-                        <div className="p-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                {/* Left Column - Image */}
-                                <div>
-                                    <div className="rounded-lg overflow-hidden border">
-                                        {selectedCertificate.imageUrl ? (
-                                            <img
-                                                src={selectedCertificate.imageUrl}
-                                                alt={selectedCertificate.certificateName}
-                                                className="w-full h-64 object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-64 bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                                                <Award className="w-16 h-16 text-white/50" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Right Column - Details */}
-                                <div className="space-y-6">
-                                    {/* Basic Info */}
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-foreground mb-3">Thông tin chứng chỉ</h3>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <p className="text-sm text-muted-foreground mb-1">Tên chứng chỉ</p>
-                                                <p className="text-foreground font-medium">{selectedCertificate.certificateName}</p>
-                                            </div>
-
-                                            <div>
-                                                <p className="text-sm text-muted-foreground mb-1">Danh mục</p>
-                                                <p className="text-foreground font-medium">{selectedCertificate.categoryName}</p>
-                                            </div>
-
-                                            {selectedCertificate.issuingOrganization && (
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground mb-1">Tổ chức cấp</p>
-                                                    <p className="text-foreground font-medium">{selectedCertificate.issuingOrganization}</p>
-                                                </div>
-                                            )}
-
-                                            {selectedCertificate.certificateNumber && (
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground mb-1">Số chứng chỉ</p>
-                                                    <p className="text-foreground font-mono font-medium">{selectedCertificate.certificateNumber}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Dates */}
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-foreground mb-3">Thời hạn</h3>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {selectedCertificate.issueDate && (
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground mb-1">Ngày cấp</p>
-                                                    <p className="text-foreground font-medium">
-                                                        {new Date(selectedCertificate.issueDate).toLocaleDateString('vi-VN')}
-                                                    </p>
-                                                </div>
-                                            )}
-
-                                            {selectedCertificate.expiryDate && (
-                                                <div>
-                                                    <p className="text-sm text-muted-foreground mb-1">Hạn đến</p>
-                                                    <p className="text-foreground font-medium">
-                                                        {new Date(selectedCertificate.expiryDate).toLocaleDateString('vi-VN')}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Description */}
-                                    {selectedCertificate.description && (
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-foreground mb-3">Mô tả</h3>
-                                            <p className="text-muted-foreground whitespace-pre-line">
-                                                {selectedCertificate.description}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {/* Account Info */}
-                                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                        <h3 className="text-lg font-semibold text-foreground mb-3">Người sở hữu</h3>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold">
-                                                UID
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-foreground">Account ID: {selectedCertificate.accountId}</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Liên kết tài khoản để xem thông tin chi tiết
-                                                </p>
-                                            </div>
-                                            <Button variant="outline" size="sm" asChild className="ml-auto">
-                                                <Link href={`/admin/users/${selectedCertificate.accountId}`}>
-                                                    <User className="w-3 h-3 mr-1" />
-                                                    Xem tài khoản
-                                                </Link>
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

@@ -1,24 +1,17 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { use, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
-import { useAuth } from "@/hooks/use-auth";
 import { organizationAPI } from "../../../services/api";
-import { Organization } from "../../../lib/type";
-import { OrganizationStatusBadge, OrganizationStatus } from "@/components/organization/OrganizationStatusBadge";
-import {
-  ArrowLeft,
-  Building2,
-  Mail,
-  Phone,
-  Calendar,
-  MapPin,
-  Globe,
-  AlertCircle,
-} from "lucide-react";
+import { projectAPI, categoryAPI } from "../../../services/api";
+import { Organization, Project } from "../../../lib/type";
+import { OrganizationView } from "@/components/organization/OrganizationForm";
+import { ProjectFilters } from "@/components/organization/ProjectFilter";
+import { ProjectList } from "@/components/homepage/ProjectList";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { ProjectFilterDto } from "@/lib/filter-type";
 
 export default function OrganizationDetailPage({
   params,
@@ -26,13 +19,37 @@ export default function OrganizationDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { user } = useAuth();
   const [organization, setOrganization] = useState<Organization | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingProjects, setLoadingProjects] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<number[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
+  useEffect(() => {
+    fetchCategories();
+  }, [id]);
+
+  const fetchCategories = async () => {
+    try {
+      // You'll need to implement this API call
+      const categories = await categoryAPI.getAll();
+      setAvailableCategories(categories || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setAvailableCategories([]);
+    }
+  };
   useEffect(() => {
     fetchOrganization();
   }, [id]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [id, search, typeFilter, statusFilter]);
 
   const fetchOrganization = async () => {
     try {
@@ -46,12 +63,43 @@ export default function OrganizationDetailPage({
     }
   };
 
+  const fetchProjects = useCallback(async () => {
+    try {
+      if (!id) {
+        setLoadingProjects(false);
+        return;
+      }
+
+      setLoadingProjects(true);
+      const orgIdNumber = parseInt(id || "0");
+
+      const filter: ProjectFilterDto = {
+        organizationId: orgIdNumber,
+        title: search || undefined,
+        type: typeFilter !== "all" ? parseInt(typeFilter) : undefined,
+        status: statusFilter !== "all" ? parseInt(statusFilter) : undefined,
+        categoryIds: categoryFilter.length > 0 ? categoryFilter : undefined,
+      };
+
+      const data = await projectAPI.filter(filter);
+      setProjects(data || []);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      setProjects([]);
+    } finally {
+      setLoadingProjects(false);
+    }
+  }, [id, search, statusFilter, typeFilter, categoryFilter]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-1 container mx-auto px-4 py-12">
-          <p className="text-muted-foreground">Đang tải...</p>
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6085F0]"></div>
+            <span className="ml-3 text-muted-foreground">Đang tải...</span>
+          </div>
         </main>
       </div>
     );
@@ -62,7 +110,15 @@ export default function OrganizationDetailPage({
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-1 container mx-auto px-4 py-12">
-          <p className="text-muted-foreground">Không tìm thấy tổ chức</p>
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">Không tìm thấy tổ chức</p>
+            <Button variant="outline" asChild>
+              <Link href="/home-organization">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Quay lại danh sách
+              </Link>
+            </Button>
+          </div>
         </main>
       </div>
     );
@@ -78,161 +134,66 @@ export default function OrganizationDetailPage({
           <Button variant="ghost" asChild className="mb-6">
             <Link href="/home-organization">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Quay lại danh sách
+              Quay lại danh sách tổ chức
             </Link>
           </Button>
 
-          <div className="max-w-4xl mx-auto">
-            {/* Header Card */}
-            <Card className="p-8 mb-8">
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Logo */}
-                <div className="flex-shrink-0">
-                  {organization.logoUrl ? (
-                    <img
-                      src={organization.logoUrl}
-                      alt={organization.name}
-                      className="w-32 h-32 rounded-2xl object-cover border"
-                    />
-                  ) : (
-                    <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center">
-                      <Building2 className="w-16 h-16 text-white" />
-                    </div>
-                  )}
+          <div className="max-w-6xl mx-auto">
+            {/* Organization Info */}
+            <OrganizationView organization={organization} />
+
+            {/* Projects Section */}
+            <div className="mt-12">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground">
+                    Chương trình từ {organization.name}
+                  </h2>
+                  <p className="text-muted-foreground mt-1">
+                    Khám phá các chương trình tình nguyện của tổ chức
+                  </p>
                 </div>
 
-                {/* Info */}
-                <div className="flex-1">
-                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
-                    <div>
-                      <h1 className="text-3xl font-bold text-foreground mb-2">
-                        {organization.name}
-                      </h1>
-                      <div className="flex items-center gap-3">
-                        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                          {organization.type}
-                        </span>
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium border ${organization.status}`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <OrganizationStatusBadge status={organization.status}/>
-                          </div>
-                        </span>
-                      </div>  
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  {organization.description && (
-                    <div className="mb-6">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                        Mô tả
-                      </h3>
-                      <p className="text-foreground">
-                        {organization.description}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Contact Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {organization.email && (
-                      <div className="flex items-center gap-3">
-                        <Mail className="w-4 h-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Email</p>
-                          <a
-                            href={`mailto:${organization.email}`}
-                            className="text-blue-600 hover:underline"
-                          >
-                            {organization.email}
-                          </a>
-                        </div>
-                      </div>
-                    )}
-
-                    {organization.phoneNumber && (
-                      <div className="flex items-center gap-3">
-                        <Phone className="w-4 h-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">
-                            Điện thoại
-                          </p>
-                          <a
-                            href={`tel:${organization.phoneNumber}`}
-                            className="text-foreground hover:text-blue-600"
-                          >
-                            {organization.phoneNumber}
-                          </a>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-3">
-                      <Calendar className="w-4 h-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Ngày tham gia
-                        </p>
-                        <p className="text-foreground">
-                          {new Date(organization.createAt).toLocaleDateString(
-                            "vi-VN"
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    {organization.address && (
-                      <div className="flex items-center gap-3">
-                        <MapPin className="w-4 h-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">
-                            Địa chỉ
-                          </p>
-                          <p className="text-foreground">
-                            {organization.address}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {organization.website && (
-                      <div className="flex items-center gap-3">
-                        <Globe className="w-4 h-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">
-                            Website
-                          </p>
-                          <a
-                            href={organization.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            {organization.website}
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Rejection Reason */}
-                  {organization.rejectionReason &&
-                    organization.status === OrganizationStatus.Rejected && (
-                      <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <div className="flex items-center gap-2 text-red-800 mb-2">
-                          <AlertCircle className="w-4 h-4" />
-                          <p className="font-medium">Lý do từ chối</p>
-                        </div>
-                        <p className="text-red-600">
-                          {organization.rejectionReason}
-                        </p>
-                      </div>
-                    )}
+                <div className="text-sm text-muted-foreground">
+                  {projects.length} chương trình
                 </div>
               </div>
-            </Card>
+
+              <ProjectFilters
+                search={search}
+                setSearch={setSearch}
+                statusFilter={
+                  statusFilter === "all" ? "all" : parseInt(statusFilter)
+                }
+                setStatusFilter={(value) =>
+                  setStatusFilter(value === "all" ? "all" : value.toString())
+                }
+                typeFilter={typeFilter === "all" ? "all" : parseInt(typeFilter)}
+                setTypeFilter={(value) =>
+                  setTypeFilter(value === "all" ? "all" : value.toString())
+                }
+                categoryFilter={categoryFilter}
+                setCategoryFilter={setCategoryFilter}
+                availableCategories={availableCategories}
+                uniqueTypes={Array.from(new Set(projects.map((p) => p.type)))}
+                uniqueStatuses={Array.from(
+                  new Set(projects.map((p) => p.status))
+                )}
+                projects={projects}
+                filteredCount={projects.length}
+              />
+
+              <ProjectList
+                projects={projects}
+                loading={loadingProjects}
+                organizationName={organization.name}
+                emptyMessage={
+                  search || typeFilter !== "all" || statusFilter !== "all"
+                    ? "Không tìm thấy chương trình phù hợp với bộ lọc"
+                    : "Tổ chức này chưa tạo chương trình nào"
+                }
+              />
+            </div>
           </div>
         </div>
       </main>

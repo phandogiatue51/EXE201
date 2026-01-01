@@ -133,8 +133,7 @@ export default function OrganizationsPage() {
                           {org.typeName}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
-                          ID: {org.id} •{" "}
-                          {new Date(org.createAt).toLocaleDateString("vi-VN")}
+                          Ngày thành lập: {new Date(org.createAt).toLocaleDateString("vi-VN")}
                         </p>
                       </div>
                     </div>
