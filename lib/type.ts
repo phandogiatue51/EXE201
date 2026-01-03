@@ -167,10 +167,11 @@ export interface BlogPost {
   authorId?: number;
   authorName?: string;
   organizationId?: number;
+  organizationName?: string
   author?: Account;
   organization?: Organization;
-  publishedDate: Date;
-  updatedDate?: Date;
+  publishedDate: string;
+  updatedDate?: string;
   status: number;
   statusName?: string;
 }
@@ -183,7 +184,6 @@ export interface ProjectCategory {
 
 export const mapToCreateDtoField = (key: string): string => {
   const mapping: Record<string, string> = {
-    // Text fields - same
     title: 'Title',
     subtitle: 'Subtitle',
     excerpt: 'Excerpt',
@@ -196,8 +196,7 @@ export const mapToCreateDtoField = (key: string): string => {
     paragraph4: 'Paragraph4',
     paragraph5: 'Paragraph5',
     
-    // Image fields - different naming convention
-    featuredImage: 'FeaturedImageUrl', // For create
+    featuredImage: 'FeaturedImageUrl', 
     image1: 'ImageUrl1',
     image2: 'ImageUrl2',
     image3: 'ImageUrl3',
@@ -210,7 +209,6 @@ export const mapToCreateDtoField = (key: string): string => {
 
 export const mapToUpdateDtoField = (key: string): string => {
   const mapping: Record<string, string> = {
-    // Text fields - same
     title: 'Title',
     subtitle: 'Subtitle',
     excerpt: 'Excerpt',

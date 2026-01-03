@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { organizationAPI } from "../../../services/api";
 import { Organization } from "../../../lib/type";
+import { OrganizationStatusBadge } from "@/components/organization/OrganizationStatusBadge";
 import {
   PlusCircle,
   Eye,
@@ -17,10 +19,6 @@ import {
   Search,
   Filter,
   Building2,
-  CheckCircle,
-  Clock,
-  XCircle,
-  UserMinus,
   Phone,
   Mail,
   MapPin,
@@ -29,33 +27,53 @@ import {
 
 export default function OrganizationsPage() {
   const { user } = useAuth();
+  const adminId = user?.accountId;
+  const router = useRouter();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<number | "all">("all");
 
-  useEffect(() => {
-    fetchOrganizations();
-  }, []);
-
-  const fetchOrganizations = async () => {
+  const fetchOrganizations = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await organizationAPI.getAll();
+      const filter: any = {};
+      
+      if (search.trim()) {
+        filter.name = search;
+      }
+      
+      if (statusFilter !== "all") {
+        filter.status = statusFilter;
+      }
+      
+      const data = await organizationAPI.filter(filter);
       setOrganizations(data);
     } catch (error) {
       console.error("Error fetching organizations:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, statusFilter]);
+
+  useEffect(() => {
+    fetchOrganizations();
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchOrganizations();
+    }, 500); 
+
+    return () => clearTimeout(timeoutId);
+  }, [search, statusFilter, fetchOrganizations]);
 
   const handleDelete = async (id: number) => {
     if (!confirm("Bạn có chắc chắn muốn xóa tổ chức này?")) return;
-    
+
     try {
       await organizationAPI.delete(id);
-      setOrganizations(organizations.filter(org => org.id !== id));
+      setOrganizations(organizations.filter((org) => org.id !== id));
     } catch (error) {
       console.error("Error deleting organization:", error);
       alert("Không thể xóa tổ chức");
@@ -63,58 +81,58 @@ export default function OrganizationsPage() {
   };
 
   const handleStatusChange = async (id: number, newStatus: number) => {
-    try {
-      await organizationAPI.verify(id, newStatus);
+    try {      
+      let rejectionReason: string | undefined;
+      
+      if (newStatus === 3) { 
+        const input = prompt("Nhập lý do từ chối:");
+        if (!input) return; 
+        rejectionReason = input;
+      }
+      
+      const verifyData = {
+        Status: newStatus,
+        AdminId: adminId || 1,
+        ...(rejectionReason && { RejectionReason: rejectionReason })
+      };
+      
+      await organizationAPI.verify(id, verifyData);
+      
       setOrganizations(organizations.map(org =>
-        org.id === id ? { ...org, status: newStatus } : org
+        org.id === id ? { 
+          ...org, 
+          status: newStatus,
+          rejectionReason: rejectionReason || org.rejectionReason 
+        } : org
       ));
+      alert("Xác thực tổ chức thành công");
+      router.push(`/admin/organizations`);
+      router.refresh();
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Không thể cập nhật trạng thái");
     }
   };
 
-  const filteredOrganizations = organizations.filter(org => {
-    const matchesSearch = org.name.toLowerCase().includes(search.toLowerCase()) ||
-      org.email?.toLowerCase().includes(search.toLowerCase()) ||
-      org.phoneNumber?.includes(search);
-    
-    const matchesStatus = statusFilter === "all" || org.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
-
-  const getStatusIcon = (status: number) => {
-    switch (status) {
-      case 0:
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 1:
-        return <Clock className="w-4 h-4 text-yellow-600" />;
-      case 2:
-        return <UserMinus className="w-4 h-4 text-gray-600" />;
-      case 3:
-        return <XCircle className="w-4 h-4 text-red-600" />;
-      default:
-        return <Clock className="w-4 h-4 text-gray-600" />;
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Quản lý tổ chức</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                Quản lý tổ chức
+              </h1>
               <p className="text-muted-foreground mt-2">
                 Quản lý tất cả các tổ chức tình nguyện trong hệ thống
               </p>
             </div>
-            
-            <Button asChild className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]">
+
+            <Button
+              asChild
+              className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]"
+            >
               <Link href="/admin/organizations/new">
                 <PlusCircle className="w-4 h-4 mr-2" />
                 Thêm tổ chức
@@ -142,7 +160,9 @@ export default function OrganizationsPage() {
                   <Filter className="w-4 h-4 text-muted-foreground" />
                   <select
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as number | "all")}
+                    onChange={(e) =>
+                      setStatusFilter(e.target.value as number | "all")
+                    }
                     className="w-full px-3 py-2 border rounded-lg bg-background"
                   >
                     <option value="all">Tất cả trạng thái</option>
@@ -157,7 +177,8 @@ export default function OrganizationsPage() {
               {/* Counter */}
               <div className="md:col-span-3 flex items-center justify-end">
                 <span className="text-muted-foreground">
-                  Hiển thị {filteredOrganizations.length} / {organizations.length} tổ chức
+                  Hiển thị {organizations.length} /{" "}
+                  {organizations.length} tổ chức
                 </span>
               </div>
             </div>
@@ -171,8 +192,11 @@ export default function OrganizationsPage() {
           ) : (
             /* Organizations Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredOrganizations.map((org) => (
-                <Card key={org.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              {organizations.map((org) => (
+                <Card
+                  key={org.id}
+                  className="overflow-hidden hover:shadow-lg transition-shadow"
+                >
                   {/* Header */}
                   <div className="p-6 border-b">
                     <div className="flex items-start gap-4">
@@ -192,19 +216,22 @@ export default function OrganizationsPage() {
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
-                          <h3 className="font-semibold text-foreground truncate" title={org.name}>
+                          <h3
+                            className="font-semibold text-foreground truncate"
+                            title={org.name}
+                          >
                             {org.name}
                           </h3>
                           <div className="flex items-center gap-1">
-                            {getStatusIcon(org.status)}
-                            <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100">
-                              {org.statusName}
-                            </span>
+                            <OrganizationStatusBadge status={org.status} />
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">{org.typeName}</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {org.typeName}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-2">
-                          ID: {org.id} • {new Date(org.createAt).toLocaleDateString('vi-VN')}
+                          ID: {org.id} •{" "}
+                          {new Date(org.createAt).toLocaleDateString("vi-VN")}
                         </p>
                       </div>
                     </div>
@@ -241,7 +268,10 @@ export default function OrganizationsPage() {
                     {org.address && (
                       <div className="flex items-center gap-3 text-sm">
                         <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-muted-foreground truncate" title={org.address}>
+                        <span
+                          className="text-muted-foreground truncate"
+                          title={org.address}
+                        >
                           {org.address}
                         </span>
                       </div>
@@ -265,20 +295,30 @@ export default function OrganizationsPage() {
 
                   {/* Actions */}
                   <div className="p-6 pt-0 flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      asChild
+                    >
                       <Link href={`/admin/organizations/${org.id}`}>
                         <Eye className="w-3 h-3 mr-1" />
                         Xem
                       </Link>
                     </Button>
-                    
-                    <Button variant="outline" size="sm" className="flex-1" asChild>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      asChild
+                    >
                       <Link href={`/admin/organizations/${org.id}/edit`}>
                         <Edit className="w-3 h-3 mr-1" />
                         Sửa
                       </Link>
                     </Button>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -317,14 +357,14 @@ export default function OrganizationsPage() {
           )}
 
           {/* Empty State */}
-          {!loading && filteredOrganizations.length === 0 && (
+          {!loading && organizations.length === 0 && (
             <div className="text-center py-12">
               <Building2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">
                 Không tìm thấy tổ chức
               </h3>
               <p className="text-muted-foreground">
-                {search || statusFilter !== "all" 
+                {search || statusFilter !== "all"
                   ? "Thử thay đổi bộ lọc tìm kiếm"
                   : "Chưa có tổ chức nào trong hệ thống"}
               </p>

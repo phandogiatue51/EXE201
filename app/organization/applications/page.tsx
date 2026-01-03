@@ -9,16 +9,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { applicationAPI } from "../../../services/api";
 import { ApplicationFilter } from "../../../components/organization/ApplicationFilter";
 import { ApplicationFilterDto } from "../../../lib/filter-type";
-import { StatusBadge, ApplicationStatus } from "../../../components/organization/AppStatusBadge";
-import { formatDate, formatDateTime } from "@/lib/date";
 import {
-  Eye,
-  Calendar,
-  User,
-  FileText,
-  Building2,
-} from "lucide-react";
-import { VolunteerApplication } from "../../../lib/type"; 
+  StatusBadge,
+  ApplicationStatus,
+} from "../../../components/organization/ApplicationStatusBadge";
+import { formatDate, formatDateTime } from "@/lib/date";
+import { Eye, Calendar, User, FileText, Building2 } from "lucide-react";
+import { VolunteerApplication } from "../../../lib/type";
 
 export default function ApplicationsPage() {
   const { user } = useAuth();
@@ -28,7 +25,7 @@ export default function ApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<number | "all">("all");
   const [uniqueStatuses, setUniqueStatuses] = useState<number[]>([]);
-  const [projectInfo, setProjectInfo] = useState<Record<number, any>>({}); 
+  const [projectInfo, setProjectInfo] = useState<Record<number, any>>({});
 
   // Fetch applications with filters
   const fetchApplications = useCallback(async () => {
@@ -39,10 +36,10 @@ export default function ApplicationsPage() {
       }
 
       setLoading(true);
-      const orgIdNumber = parseInt(organizationId || '0');
+      const orgIdNumber = parseInt(organizationId || "0");
 
       const filter: ApplicationFilterDto = {
-        organizationId: orgIdNumber, 
+        organizationId: orgIdNumber,
         projectId: undefined,
         volunteerId: undefined,
         status: statusFilter !== "all" ? statusFilter : undefined,
@@ -54,7 +51,7 @@ export default function ApplicationsPage() {
       setApplications(data || []);
 
       if (data && data.length > 0) {
-        const statuses = [...new Set(data.map(app => app.status))];
+        const statuses = [...new Set(data.map((app) => app.status))];
         setUniqueStatuses(statuses);
       } else {
         setUniqueStatuses([]);
@@ -82,13 +79,13 @@ export default function ApplicationsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Quản lý đơn ứng tuyển</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                Quản lý đơn ứng tuyển
+              </h1>
               <p className="text-muted-foreground mt-2">
                 Quản lý tất cả đơn ứng tuyển vào chương trình của tổ chức
               </p>
@@ -110,15 +107,22 @@ export default function ApplicationsPage() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="text-muted-foreground ml-3">Đang tải đơn ứng tuyển...</p>
+              <p className="text-muted-foreground ml-3">
+                Đang tải đơn ứng tuyển...
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {applications.map((application) => (
-                <Card key={application.id} className="overflow-hidden hover:shadow-lg transition-shadow border">
+                <Card
+                  key={application.id}
+                  className="overflow-hidden hover:shadow-lg transition-shadow border"
+                >
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-4">
-                      <StatusBadge status={application.status as ApplicationStatus} />
+                      <StatusBadge
+                        status={application.status as ApplicationStatus}
+                      />
 
                       <span className="text-xs text-muted-foreground">
                         #{application.id.toString().padStart(4, "0")}
@@ -154,36 +158,43 @@ export default function ApplicationsPage() {
 
                       {application.relevantExperience && (
                         <div>
-                          <p className="text-sm font-medium text-foreground mb-1">Kinh nghiệm liên quan:</p>
+                          <p className="text-sm font-medium text-foreground mb-1">
+                            Kinh nghiệm liên quan:
+                          </p>
                           <p className="text-sm text-muted-foreground line-clamp-2">
                             {application.relevantExperience}
                           </p>
                         </div>
                       )}
 
-                      {application.selectedCertificates && application.selectedCertificates.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium text-foreground mb-1">
-                            Chứng chỉ ({application.selectedCertificates.length})
-                          </p>
-                          <div className="flex flex-wrap gap-1">
-                            {application.selectedCertificates.slice(0, 2).map((cert, index) => (
-                              <span 
-                                key={index} 
-                                className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-                                title={`${cert.certificateName} - ${cert.issuingOrganization}`}
-                              >
-                                {cert.certificateName}
-                              </span>
-                            ))}
-                            {application.selectedCertificates.length > 2 && (
-                              <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                                +{application.selectedCertificates.length - 2} khác
-                              </span>
-                            )}
+                      {application.selectedCertificates &&
+                        application.selectedCertificates.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium text-foreground mb-1">
+                              Chứng chỉ (
+                              {application.selectedCertificates.length})
+                            </p>
+                            <div className="flex flex-wrap gap-1">
+                              {application.selectedCertificates
+                                .slice(0, 2)
+                                .map((cert, index) => (
+                                  <span
+                                    key={index}
+                                    className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+                                    title={`${cert.certificateName} - ${cert.issuingOrganization}`}
+                                  >
+                                    {cert.certificateName}
+                                  </span>
+                                ))}
+                              {application.selectedCertificates.length > 2 && (
+                                <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                                  +{application.selectedCertificates.length - 2}{" "}
+                                  khác
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                     </div>
 
                     {/* Dates and Info */}
@@ -191,7 +202,9 @@ export default function ApplicationsPage() {
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         <div>
-                          <p className="text-xs text-muted-foreground">Ngày ứng tuyển</p>
+                          <p className="text-xs text-muted-foreground">
+                            Ngày ứng tuyển
+                          </p>
                           <p className="text-sm font-medium">
                             {formatDate(application.appliedAt)}
                           </p>
@@ -205,7 +218,9 @@ export default function ApplicationsPage() {
                         <div className="flex items-center gap-2">
                           <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                           <div>
-                            <p className="text-xs text-muted-foreground">Ngày xem xét</p>
+                            <p className="text-xs text-muted-foreground">
+                              Ngày xem xét
+                            </p>
                             <p className="text-sm font-medium">
                               {formatDate(application.reviewedAt)}
                             </p>
@@ -218,7 +233,9 @@ export default function ApplicationsPage() {
                     {(application.feedback || application.rejectionReason) && (
                       <div className="mb-6 p-3 bg-gray-50 rounded-lg">
                         <p className="text-sm font-medium text-foreground mb-1">
-                          {application.rejectionReason ? 'Lý do từ chối' : 'Phản hồi'}
+                          {application.rejectionReason
+                            ? "Lý do từ chối"
+                            : "Phản hồi"}
                         </p>
                         <p className="text-sm text-muted-foreground line-clamp-2">
                           {application.rejectionReason || application.feedback}
@@ -228,14 +245,21 @@ export default function ApplicationsPage() {
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" asChild>
-                        <Link href={`/organization/applications/${application.id}`}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        asChild
+                      >
+                        <Link
+                          href={`/organization/applications/${application.id}`}
+                        >
                           <Eye className="w-3 h-3 mr-1" />
                           Xem chi tiết
                         </Link>
                       </Button>
 
-                      {(application.status === 0) && (
+                      {application.status === 0 && (
                         <Button variant="default" size="sm" className="flex-1">
                           Xét duyệt
                         </Button>

@@ -7,7 +7,8 @@ import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { organizationAPI } from "../../../../services/api";
-import { Organization, OrganizationStatus } from "../../../../lib/type";
+import { Organization } from "../../../../lib/type";
+import { OrganizationStatusBadge, OrganizationStatus } from "@/components/organization/OrganizationStatusBadge";
 import {
   ArrowLeft,
   Building2,
@@ -64,19 +65,19 @@ export default function OrganizationDetailPage({
   };
 
   const handleStatusChange = async (newStatus: OrganizationStatus) => {
-    try {
-      let rejectionReason;
-      if (newStatus === OrganizationStatus.Rejected) {
-        rejectionReason = prompt("Nhập lý do từ chối:");
-        if (!rejectionReason) return;
-      }
+    // try {
+    //   let rejectionReason;
+    //   if (newStatus === OrganizationStatus.Rejected) {
+    //     rejectionReason = prompt("Nhập lý do từ chối:");
+    //     if (!rejectionReason) return;
+    //   }
       
-      await organizationAPI.verify(parseInt(id), newStatus, rejectionReason);
-      fetchOrganization();
-    } catch (error) {
-      console.error("Error updating status:", error);
-      alert("Không thể cập nhật trạng thái");
-    }
+    //   await organizationAPI.verify(parseInt(id), newStatus, rejectionReason);
+    //   fetchOrganization();
+    // } catch (error) {
+    //   console.error("Error updating status:", error);
+    //   alert("Không thể cập nhật trạng thái");
+    // }
   };
 
   if (loading) {
@@ -100,32 +101,6 @@ export default function OrganizationDetailPage({
       </div>
     );
   }
-
-  const getStatusIcon = (status: OrganizationStatus) => {
-    switch (status) {
-      case OrganizationStatus.Active:
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case OrganizationStatus.Pending:
-        return <Clock className="w-5 h-5 text-yellow-600" />;
-      case OrganizationStatus.Unactive:
-        return <UserMinus className="w-5 h-5 text-gray-600" />;
-      case OrganizationStatus.Rejected:
-        return <XCircle className="w-5 h-5 text-red-600" />;
-    }
-  };
-
-  const getStatusColor = (status: OrganizationStatus) => {
-    switch (status) {
-      case OrganizationStatus.Active:
-        return "bg-green-100 text-green-800 border-green-200";
-      case OrganizationStatus.Pending:
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case OrganizationStatus.Unactive:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      case OrganizationStatus.Rejected:
-        return "bg-red-100 text-red-800 border-red-200";
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -171,10 +146,9 @@ export default function OrganizationDetailPage({
                         <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                           {organization.type}
                         </span>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(organization.status)}`}>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${organization.status}`}>
                           <div className="flex items-center gap-2">
-                            {getStatusIcon(organization.status)}
-                            {organization.status}
+                            <OrganizationStatusBadge status={organization.status} />
                           </div>
                         </span>
                       </div>
@@ -245,7 +219,7 @@ export default function OrganizationDetailPage({
                       <div>
                         <p className="text-sm text-muted-foreground">Ngày tham gia</p>
                         <p className="text-foreground">
-                          {new Date(organization.createdAt).toLocaleDateString('vi-VN')}
+                          {new Date(organization.createAt).toLocaleDateString('vi-VN')}
                         </p>
                       </div>
                     </div>

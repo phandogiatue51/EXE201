@@ -7,33 +7,9 @@ import { Footer } from "@/components/footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { blogAPI } from "@/services/api";
-import { ArrowLeft, Calendar, User, Clock } from "lucide-react";
-
-interface Blog {
-  id: number;
-  title: string;
-  subtitle?: string;
-  excerpt?: string;
-  featuredImageUrl?: string;
-  imageUrl1?: string;
-  imageUrl2?: string;
-  imageUrl3?: string;
-  imageUrl4?: string;
-  imageUrl5?: string;
-  paragraph1?: string;
-  paragraph2?: string;
-  paragraph3?: string;
-  paragraph4?: string;
-  paragraph5?: string;
-  authorId?: number;
-  authorName?: string;
-  organizationId?: number;
-  organizationName?: string;
-  publishedDate?: string;
-  updatedDate?: string | null;
-  status?: number;
-  statusName?: string;
-}
+import { ArrowLeft, Calendar, User, Clock, Building } from "lucide-react";
+import { formatDate } from "@/lib/date";
+import { BlogPost } from "@/lib/type";
 
 export default function BlogDetailPage({
   params,
@@ -41,7 +17,7 @@ export default function BlogDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const [blog, setBlog] = useState<Blog | null>(null);
+  const [blog, setBlog] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,20 +38,6 @@ export default function BlogDetailPage({
 
     fetchBlog();
   }, [id]);
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "";
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return dateString;
-    }
-  };
 
   if (loading) {
     return (
@@ -113,7 +75,7 @@ export default function BlogDetailPage({
                 asChild
                 className="gradient-primary text-white"
               >
-                <Link href="/blog">Quay lại danh sách</Link>
+                <Link href="/blog">Quay lại</Link>
               </Button>
             </div>
           </Card>
@@ -136,7 +98,7 @@ export default function BlogDetailPage({
           >
             <Link href="/blog">
               <ArrowLeft className="mr-2 w-4 h-4" />
-              Quay lại danh sách blog
+              Quay lại
             </Link>
           </Button>
 
@@ -149,14 +111,6 @@ export default function BlogDetailPage({
                     alt={blog.title}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                  {blog.statusName && (
-                    <div className="absolute top-4 right-4">
-                      <span className="text-xs font-semibold text-white bg-[#6085F0] px-3 py-1 rounded-full shadow-lg">
-                        {blog.statusName}
-                      </span>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -174,7 +128,7 @@ export default function BlogDetailPage({
                   {blog.publishedDate && (
                     <span className="flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
-                      {formatDate(blog.publishedDate)}
+                      Ngày tạo: {formatDate(blog.publishedDate)}
                     </span>
                   )}
                   {blog.authorName && (
@@ -185,14 +139,14 @@ export default function BlogDetailPage({
                   )}
                   {blog.organizationName && (
                     <span className="flex items-center gap-2">
-                      <User className="w-4 h-4" />
+                      <Building className="w-4 h-4" />
                       {blog.organizationName}
                     </span>
                   )}
                   {blog.updatedDate && blog.updatedDate !== blog.publishedDate && (
                     <span className="flex items-center gap-2">
                       <Clock className="w-4 h-4" />
-                      Cập nhật: {formatDate(blog.updatedDate)}
+                      Ngày cập nhật: {formatDate(blog.updatedDate)}
                     </span>
                   )}
                 </div>

@@ -8,35 +8,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { blogAPI } from "@/services/api";
 import { Calendar, User, ArrowRight } from "lucide-react";
-
-interface Blog {
-  id: number;
-  title: string;
-  subtitle?: string;
-  excerpt?: string;
-  featuredImageUrl?: string;
-  imageUrl1?: string;
-  imageUrl2?: string;
-  imageUrl3?: string;
-  imageUrl4?: string;
-  imageUrl5?: string;
-  paragraph1?: string;
-  paragraph2?: string;
-  paragraph3?: string;
-  paragraph4?: string;
-  paragraph5?: string;
-  authorId?: number;
-  authorName?: string;
-  organizationId?: number;
-  organizationName?: string;
-  publishedDate?: string;
-  updatedDate?: string | null;
-  status?: number;
-  statusName?: string;
-}
+import { BlogPost } from "@/lib/type"
+import { formatDate } from "@/lib/date"
 
 export default function BlogPage() {
-  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,20 +34,6 @@ export default function BlogPage() {
     fetchBlogs();
   }, []);
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "";
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return dateString;
-    }
-  };
-
   const truncateContent = (content: string, maxLength: number = 150) => {
     if (content.length <= maxLength) return content;
     return content.substring(0, maxLength) + "...";
@@ -83,7 +45,7 @@ export default function BlogPage() {
 
       <main className="flex-1 bg-gradient-to-br from-[#77E5C8]/5 via-background to-[#A7CBDC]/5">
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-to-br from-[#77E5C8] via-[#6085F0] to-[#A7CBDC]">
+        <section className="py-10 bg-gradient-to-br from-[#77E5C8] via-[#6085F0] to-[#A7CBDC]">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-5xl font-bold text-white mb-6">Blog</h1>
@@ -136,14 +98,6 @@ export default function BlogPage() {
                           alt={blog.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                        {blog.statusName && (
-                          <div className="absolute top-4 right-4">
-                            <span className="text-xs font-semibold text-white bg-[#6085F0] px-3 py-1 rounded-full shadow-lg">
-                              {blog.statusName}
-                            </span>
-                          </div>
-                        )}
                       </div>
                     )}
                     <div className="p-6 flex-1 flex flex-col">

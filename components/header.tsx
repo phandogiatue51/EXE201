@@ -39,8 +39,8 @@ export function Header() {
     user?.role === "organization"
       ? "/organization/dashboard"
       : user?.role === "admin"
-        ? "/admin/dashboard"
-        : "/";
+      ? "/admin/dashboard"
+      : "/";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -54,72 +54,69 @@ export function Header() {
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-8">
-          {(!user || user.role === "volunteer") && (
-            <>
-              <Link
-                href="/"
-                className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
-                  isActive("/")
-                    ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
-                    : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
-                }`}
-              >
-                Trang chủ
-              </Link>
-              <Link
-                href="/programs"
-                className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
-                  isActive("/programs")
-                    ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
-                    : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
-                }`}
-              >
-                Chương trình
-              </Link>
-              <Link
-                href="/about"
-                className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
-                  isActive("/about")
-                    ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
-                    : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
-                }`}
-              >
-                Về chúng tôi
-              </Link>
-              <Link
-                href="/contact"
-                className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
-                  isActive("/contact")
-                    ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
-                    : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
-                }`}
-              >
-                Liên hệ
-              </Link>
-              {!user && (
-                <Link
-                  href="/auth/signup?role=organization"
-                  className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
-                    isActive("/auth/signup")
-                      ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
-                      : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
-                  }`}
-                >
-                  Dành cho tổ chức
-                </Link>
-              )}
-            </>
-          )}
-          <Link
-            href="/blog"
-            className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
-              isActive("/blog")
-                ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
-                : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
-            }`}
-          >
-            Blog
-          </Link>
+          <>
+            <Link
+              href="/"
+              className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
+                isActive("/")
+                  ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
+                  : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
+              }`}
+            >
+              Trang chủ
+            </Link>
+            <Link
+              href="/programs"
+              className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
+                isActive("/programs")
+                  ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
+                  : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
+              }`}
+            >
+              Chương trình
+            </Link>
+
+            <Link
+              href="/home-organization"
+              className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
+                isActive("/home-organization")
+                  ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
+                  : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
+              }`}
+            >
+              Tổ chức
+            </Link>
+            <Link
+              href="/blog"
+              className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
+                isActive("/blog")
+                  ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
+                  : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
+              }`}
+            >
+              Blog
+            </Link>
+            <Link
+              href="/about"
+              className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
+                isActive("/about")
+                  ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
+                  : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
+              }`}
+            >
+              Về chúng tôi
+            </Link>
+            <Link
+              href="/contact"
+              className={`relative px-3 py-2 rounded-lg transition-all duration-200 ${
+                isActive("/contact")
+                  ? "text-[#6085F0] font-semibold bg-[#77E5C8]/10"
+                  : "text-foreground hover:text-[#6085F0] hover:bg-[#77E5C8]/10"
+              }`}
+            >
+              Liên hệ
+            </Link>
+          </>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -136,11 +133,11 @@ export function Header() {
                 onMouseLeave={() => {
                   notificationTimeoutRef.current = setTimeout(
                     () => setIsNotificationOpen(false),
-                    200,
+                    200
                   );
                 }}
               >
-              <button
+                <button
                   onClick={() => setIsNotificationOpen(!isNotificationOpen)}
                   className="relative p-2 rounded-xl hover:bg-[#77E5C8]/10 transition-all duration-200 border border-transparent hover:border-[#77E5C8]"
                 >
@@ -175,7 +172,8 @@ export function Header() {
                               Tin nhắn mới từ tổ chức
                             </p>
                             <p className="text-xs text-muted-foreground mb-1">
-                              Bạn có tin nhắn mới trong chương trình "Khóa học AI cơ bản".
+                              Bạn có tin nhắn mới trong chương trình "Khóa học
+                              AI cơ bản".
                             </p>
                             <p className="text-xs text-[#6085F0]">
                               5 giờ trước
@@ -200,7 +198,8 @@ export function Header() {
                               Đơn đăng ký mới
                             </p>
                             <p className="text-xs text-muted-foreground mb-1">
-                              Có 3 tình nguyện viên đăng ký chương trình "Khóa học AI cơ bản".
+                              Có 3 tình nguyện viên đăng ký chương trình "Khóa
+                              học AI cơ bản".
                             </p>
                             <p className="text-xs text-[#6085F0]">
                               1 giờ trước
@@ -211,7 +210,8 @@ export function Header() {
                               Chương trình sắp bắt đầu
                             </p>
                             <p className="text-xs text-muted-foreground mb-1">
-                              Chương trình "Lập trình Python" sẽ bắt đầu trong 2 ngày.
+                              Chương trình "Lập trình Python" sẽ bắt đầu trong 2
+                              ngày.
                             </p>
                             <p className="text-xs text-[#6085F0]">
                               3 giờ trước
@@ -290,25 +290,25 @@ export function Header() {
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-[#77E5C8]/10 transition-all duration-200 border border-transparent hover:border-[#77E5C8] hover:shadow-sm"
                 >
-                <svg
+                  <svg
                     className={`w-4 h-4 text-foreground transition-transform duration-200 ${
                       isDropdownOpen ? "rotate-180" : ""
                     }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
                       d="M19 14l-7 7m0 0l-7-7m7 7V3"
                     />
-                </svg>
-              </button>
+                  </svg>
+                </button>
 
                 {/* Dropdown menu */}
-              {isDropdownOpen && (
+                {isDropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-64 bg-white/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl z-50 pointer-events-auto animate-in slide-in-from-top-2 duration-200">
                     <div className="px-4 py-4 border-b border-border/50">
                       <p className="text-xs text-muted-foreground">
@@ -317,18 +317,17 @@ export function Header() {
                       <span className="inline-block mt-2 px-2 py-1 text-xs text-[#6085F0] bg-[#77E5C8]/10 rounded-full font-medium capitalize">
                         {user.role}
                       </span>
-                  </div>
+                    </div>
 
-                  <div className="py-2">
-                    
-                    <Link
-                      href={
-                        user.role === "Volunteer"
-                          ? "/volunteer"
-                          : user.role === "Staff" 
+                    <div className="py-2">
+                      <Link
+                        href={
+                          user.role === "Volunteer"
+                            ? "/volunteer"
+                            : user.role === "Staff"
                             ? "/organization"
                             : "/admin"
-                      }
+                        }
                         className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-[#77E5C8]/10 transition-colors duration-150"
                         onClick={() => setIsDropdownOpen(false)}
                       >
@@ -356,8 +355,8 @@ export function Header() {
                       <Link
                         href="/profile/settings"
                         className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-[#77E5C8]/10 transition-colors duration-150"
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
                         <svg
                           className="w-4 h-4"
                           fill="none"
@@ -378,9 +377,9 @@ export function Header() {
                           />
                         </svg>
                         Cài đặt hồ sơ
-                    </Link>
-                    <button
-                      onClick={() => {
+                      </Link>
+                      <button
+                        onClick={() => {
                           logout();
                           setIsDropdownOpen(false);
                           router.push("/");
@@ -400,12 +399,12 @@ export function Header() {
                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                           />
                         </svg>
-                      Đăng xuất
-                    </button>
+                        Đăng xuất
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
             </>
           ) : (
             <div className="flex items-center gap-3">

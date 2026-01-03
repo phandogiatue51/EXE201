@@ -8,9 +8,16 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
-import { applicationAPI, projectAPI, accountAPI } from "../../../../services/api";
-import { StatusBadge } from "../../../../components/organization/AppStatusBadge";
-import {  APPLICATION_STATUS,  ApplicationStatus} from "../../../../components/organization/AppStatusBadge";
+import {
+  applicationAPI,
+  projectAPI,
+  accountAPI,
+} from "../../../../services/api";
+import { StatusBadge } from "../../../../components/organization/ApplicationStatusBadge";
+import {
+  APPLICATION_STATUS,
+  ApplicationStatus,
+} from "../../../../components/organization/ApplicationStatusBadge";
 import { VolunteerApplication, Account, Project } from "@/lib/type";
 import { ReviewAppDto } from "@/lib/type";
 import { formatDate, formatDateTime } from "@/lib/date";
@@ -22,7 +29,7 @@ import {
   Calendar,
   FileText,
   CheckCircle,
-  XCircle,  
+  XCircle,
   Award,
   Building2,
   MapPin,
@@ -37,9 +44,11 @@ import {
 export default function ApplicationDetailPage() {
   const params = useParams();
   const id = Number(params?.id);
-  
+
   const { user } = useAuth();
-  const [application, setApplication] = useState<VolunteerApplication | null>(null);
+  const [application, setApplication] = useState<VolunteerApplication | null>(
+    null
+  );
   const [projectDetail, setProjectDetails] = useState<Project | null>(null);
   const [volunteerDetail, setVolunteerDetails] = useState<Account | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,7 +63,7 @@ export default function ApplicationDetailPage() {
       setLoading(true);
       const data = await applicationAPI.getById(id);
       setApplication(data);
-      
+
       if (data?.projectId) {
         try {
           const projectData = await projectAPI.getById(data.projectId);
@@ -94,10 +103,13 @@ export default function ApplicationDetailPage() {
       await applicationAPI.review(id, reviewData);
 
       alert("Đã phê duyệt đơn ứng tuyển!");
-      fetchApplication(); 
+      fetchApplication();
     } catch (error: any) {
       console.error("Error approving application:", error);
-      const errorMessage = error?.message || error?.data?.message || "Không thể phê duyệt đơn ứng tuyển.";
+      const errorMessage =
+        error?.message ||
+        error?.data?.message ||
+        "Không thể phê duyệt đơn ứng tuyển.";
       alert(errorMessage);
     } finally {
       setReviewing(false);
@@ -121,10 +133,13 @@ export default function ApplicationDetailPage() {
       await applicationAPI.review(id, reviewData);
 
       alert("Đã từ chối đơn ứng tuyển!");
-      fetchApplication(); 
+      fetchApplication();
     } catch (error: any) {
       console.error("Error rejecting application:", error);
-      const errorMessage = error?.message || error?.data?.message || "Không thể từ chối đơn ứng tuyển.";
+      const errorMessage =
+        error?.message ||
+        error?.data?.message ||
+        "Không thể từ chối đơn ứng tuyển.";
       alert(errorMessage);
     } finally {
       setReviewing(false);
@@ -134,11 +149,12 @@ export default function ApplicationDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
         <main className="flex-1 container mx-auto px-4 py-12">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-muted-foreground ml-3">Đang tải thông tin đơn ứng tuyển...</p>
+            <p className="text-muted-foreground ml-3">
+              Đang tải thông tin đơn ứng tuyển...
+            </p>
           </div>
         </main>
       </div>
@@ -148,12 +164,15 @@ export default function ApplicationDetailPage() {
   if (!application) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
         <main className="flex-1 container mx-auto px-4 py-12">
           <div className="text-center">
             <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-foreground mb-2">Không tìm thấy đơn ứng tuyển</h2>
-            <p className="text-muted-foreground mb-6">Đơn ứng tuyển bạn đang tìm kiếm không tồn tại.</p>
+            <h2 className="text-xl font-semibold text-foreground mb-2">
+              Không tìm thấy đơn ứng tuyển
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              Đơn ứng tuyển bạn đang tìm kiếm không tồn tại.
+            </p>
             <Button asChild>
               <Link href="/organization/applications">
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -171,8 +190,6 @@ export default function ApplicationDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Navigation */}
@@ -189,17 +206,19 @@ export default function ApplicationDetailPage() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
                   <h1 className="text-2xl font-bold text-foreground mb-2">
-                    Đơn ứng tuyển #{application.id.toString().padStart(4, '0')}
+                    Đơn ứng tuyển #{application.id.toString().padStart(4, "0")}
                   </h1>
                   <div className="flex items-center gap-4">
-                    <StatusBadge status={application.status as ApplicationStatus} />
+                    <StatusBadge
+                      status={application.status as ApplicationStatus}
+                    />
                     <span className="text-sm text-muted-foreground">
                       Ứng tuyển vào: {formatDate(application.appliedAt)}
                     </span>
                   </div>
                 </div>
 
-                {(application.status === 0) && (
+                {application.status === 0 && (
                   <div className="flex gap-3">
                     <Button
                       variant="default"
@@ -232,26 +251,39 @@ export default function ApplicationDetailPage() {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Card className="p-4">
-                    <h3 className="font-semibold text-foreground mb-2">{project?.title}</h3>
+                    <h3 className="font-semibold text-foreground mb-2">
+                      {project?.title}
+                    </h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">Mã chương trình:</span>
+                        <span className="text-muted-foreground">
+                          Mã chương trình:
+                        </span>
                         <span className="font-medium">{project?.id}</span>
                       </div>
                       {project?.location && (
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Địa điểm:</span>
+                          <span className="text-muted-foreground">
+                            Địa điểm:
+                          </span>
                           <span>{project?.location}</span>
                         </div>
                       )}
                       {(project?.startDate || project?.endDate) && (
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Thời gian:</span>
+                          <span className="text-muted-foreground">
+                            Thời gian:
+                          </span>
                           <span>
-                            {project?.startDate ? formatDate(project?.startDate) : "Chưa có"} - 
-                            {project?.endDate ? formatDate(project?.endDate) : "Chưa có"}
+                            {project?.startDate
+                              ? formatDate(project?.startDate)
+                              : "Chưa có"}{" "}
+                            -
+                            {project?.endDate
+                              ? formatDate(project?.endDate)
+                              : "Chưa có"}
                           </span>
                         </div>
                       )}
@@ -259,12 +291,18 @@ export default function ApplicationDetailPage() {
                         <Users className="w-4 h-4 text-muted-foreground" />
                         <span className="text-muted-foreground">Số lượng:</span>
                         <span>
-                          {project?.currentVolunteers || 0}/{project?.requiredVolunteers || 0}
+                          {project?.currentVolunteers || 0}/
+                          {project?.requiredVolunteers || 0}
                         </span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" asChild className="mt-4">
-                      <Link href={`/projects/${project?.id}`} target="_blank">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="mt-4"
+                    >
+                      <Link href={`/programs/${project?.id}`} target="_blank">
                         <ExternalLink className="w-3 h-3 mr-2" />
                         Xem chi tiết chương trình
                       </Link>
@@ -283,19 +321,21 @@ export default function ApplicationDetailPage() {
                     <User className="w-5 h-5" />
                     Thông tin tình nguyện viên
                   </h2>
-                  
+
                   <div className="flex flex-col md:flex-row gap-6 mb-6">
                     <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center">
                       <User className="w-12 h-12 text-blue-600" />
                     </div>
-                    
+
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-foreground mb-2">
                         {account?.name}
                       </h3>
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Mã tình nguyện viên:</span>
+                          <span className="text-muted-foreground">
+                            Mã tình nguyện viên:
+                          </span>
                           <span className="font-medium">{account?.id}</span>
                         </div>
                         {account?.email && (
@@ -316,7 +356,9 @@ export default function ApplicationDetailPage() {
 
                   {account?.bio && (
                     <div className="mb-6">
-                      <h4 className="font-medium text-foreground mb-2">Giới thiệu bản thân</h4>
+                      <h4 className="font-medium text-foreground mb-2">
+                        Giới thiệu bản thân
+                      </h4>
                       <p className="text-muted-foreground whitespace-pre-line">
                         {account?.bio}
                       </p>
@@ -345,66 +387,82 @@ export default function ApplicationDetailPage() {
                 )}
 
                 {/* Certificates */}
-                {application.selectedCertificates && application.selectedCertificates.length > 0 && (
-                  <Card className="p-6">
-                    <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
-                      <Award className="w-5 h-5" />
-                      Chứng chỉ đã đính kèm ({application.selectedCertificates.length})
-                    </h2>
-                    <div className="space-y-4">
-                      {application.selectedCertificates.map((certificate: any, index: number) => (
-                        <Card key={index} className="p-4 border">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <h3 className="font-semibold text-foreground mb-1">
-                                {certificate.certificateName}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">
-                                {certificate.issuingOrganization}
-                              </p>
-                            </div>
-                            <Badge variant="outline">
-                              {certificate.categoryName}
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4 text-sm mb-3">
-                            <div>
-                              <p className="text-muted-foreground">Số chứng chỉ:</p>
-                              <p className="font-medium">{certificate.certificateNumber}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Ngày cấp:</p>
-                              <p className="font-medium">{formatDate(certificate.issueDate)}</p>
-                            </div>
-                            {certificate.expiryDate && (
-                              <div>
-                                <p className="text-muted-foreground">Ngày hết hạn:</p>
-                                <p className="font-medium">{formatDate(certificate.expiryDate)}</p>
+                {application.selectedCertificates &&
+                  application.selectedCertificates.length > 0 && (
+                    <Card className="p-6">
+                      <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+                        <Award className="w-5 h-5" />
+                        Chứng chỉ đã đính kèm (
+                        {application.selectedCertificates.length})
+                      </h2>
+                      <div className="space-y-4">
+                        {application.selectedCertificates.map(
+                          (certificate: any, index: number) => (
+                            <Card key={index} className="p-4 border">
+                              <div className="flex justify-between items-start mb-3">
+                                <div>
+                                  <h3 className="font-semibold text-foreground mb-1">
+                                    {certificate.certificateName}
+                                  </h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    {certificate.issuingOrganization}
+                                  </p>
+                                </div>
+                                <Badge variant="outline">
+                                  {certificate.categoryName}
+                                </Badge>
                               </div>
-                            )}
-                          </div>
 
-                          {certificate.description && (
-                            <p className="text-sm text-muted-foreground mb-3">
-                              {certificate.description}
-                            </p>
-                          )}
+                              <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                                <div>
+                                  <p className="text-muted-foreground">
+                                    Số chứng chỉ:
+                                  </p>
+                                  <p className="font-medium">
+                                    {certificate.certificateNumber}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">
+                                    Ngày cấp:
+                                  </p>
+                                  <p className="font-medium">
+                                    {formatDate(certificate.issueDate)}
+                                  </p>
+                                </div>
+                                {certificate.expiryDate && (
+                                  <div>
+                                    <p className="text-muted-foreground">
+                                      Ngày hết hạn:
+                                    </p>
+                                    <p className="font-medium">
+                                      {formatDate(certificate.expiryDate)}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
 
-                          {certificate.imageUrl && (
-                            <div className="space-y-2">
-                              <img
-                                src={certificate.imageUrl}
-                                alt="Certificate"
-                                className="max-w-full max-h-[400px] rounded border"
-                              />
-                            </div>
-                          )}
-                        </Card>
-                      ))}
-                    </div>
-                  </Card>
-                )}
+                              {certificate.description && (
+                                <p className="text-sm text-muted-foreground mb-3">
+                                  {certificate.description}
+                                </p>
+                              )}
+
+                              {certificate.imageUrl && (
+                                <div className="space-y-2">
+                                  <img
+                                    src={certificate.imageUrl}
+                                    alt="Certificate"
+                                    className="max-w-full max-h-[400px] rounded border"
+                                  />
+                                </div>
+                              )}
+                            </Card>
+                          )
+                        )}
+                      </div>
+                    </Card>
+                  )}
               </div>
 
               {/* Right Column: Review Section */}
@@ -421,16 +479,24 @@ export default function ApplicationDetailPage() {
                         <FileText className="w-4 h-4 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">Nộp đơn ứng tuyển</p>
-                        <p className="text-sm text-muted-foreground">{formatDateTime(application.appliedAt)}</p>
+                        <p className="font-medium text-foreground">
+                          Nộp đơn ứng tuyển
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatDateTime(application.appliedAt)}
+                        </p>
                       </div>
                     </div>
 
                     {application.reviewedAt && (
                       <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          application.status === 2 ? "bg-green-100" : "bg-red-100"
-                        }`}>
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                            application.status === 2
+                              ? "bg-green-100"
+                              : "bg-red-100"
+                          }`}
+                        >
                           {application.status === 2 ? (
                             <CheckCircle className="w-4 h-4 text-green-600" />
                           ) : (
@@ -439,9 +505,13 @@ export default function ApplicationDetailPage() {
                         </div>
                         <div>
                           <p className="font-medium text-foreground">
-                            {application.status === 2 ? "Đã phê duyệt" : "Đã từ chối"}
+                            {application.status === 2
+                              ? "Đã phê duyệt"
+                              : "Đã từ chối"}
                           </p>
-                          <p className="text-sm text-muted-foreground">{formatDateTime(application.reviewedAt)}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatDateTime(application.reviewedAt)}
+                          </p>
                           {application.reviewedByStaffId && (
                             <p className="text-xs text-muted-foreground">
                               Bởi nhân viên ID: {application.reviewedByStaffId}
@@ -459,21 +529,25 @@ export default function ApplicationDetailPage() {
                     <FileText className="w-5 h-5" />
                     Phản hồi
                   </h2>
-                  
-                  {(application.rejectionReason || application.feedback) ? (
+
+                  {application.rejectionReason || application.feedback ? (
                     <div className="space-y-4">
                       {application.rejectionReason && (
                         <div>
-                          <h3 className="font-medium text-red-600 mb-2">Lý do từ chối:</h3>
+                          <h3 className="font-medium text-red-600 mb-2">
+                            Lý do từ chối:
+                          </h3>
                           <p className="text-sm text-muted-foreground p-3 bg-red-50 rounded-lg">
                             {application.rejectionReason}
                           </p>
                         </div>
                       )}
-                      
+
                       {application.feedback && (
                         <div>
-                          <h3 className="font-medium text-foreground mb-2">Phản hồi:</h3>
+                          <h3 className="font-medium text-foreground mb-2">
+                            Phản hồi:
+                          </h3>
                           <p className="text-sm text-muted-foreground p-3 bg-blue-50 rounded-lg">
                             {application.feedback}
                           </p>
@@ -482,9 +556,11 @@ export default function ApplicationDetailPage() {
                     </div>
                   ) : (
                     <p className="text-muted-foreground text-center py-4">
-                      {application.status === 0 ? "Chưa có phản hồi" : 
-                       application.status === 1 ? "Đang chờ xét duyệt" : 
-                       "Không có phản hồi"}
+                      {application.status === 0
+                        ? "Chưa có phản hồi"
+                        : application.status === 1
+                        ? "Đang chờ xét duyệt"
+                        : "Không có phản hồi"}
                     </p>
                   )}
                 </Card>

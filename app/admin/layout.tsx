@@ -22,7 +22,7 @@ import {
 const navItems = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Tổ chức", href: "/admin/organizations", icon: Building },
-  { name: "Chương trình", href: "/admin/projects", icon: Calendar },
+  { name: "Chương trình", href: "/admin/programs", icon: Calendar },
   { name: "Chứng chỉ", href: "/admin/certificates", icon: Award },
   { name: "Bài viết", href: "/admin/blogs", icon: Newspaper },
   { name: "Người dùng", href: "/admin/users", icon: Users },

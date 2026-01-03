@@ -3,7 +3,49 @@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Upload, Calendar, MapPin, Users, Tag, Building2, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Upload,
+  Calendar,
+  MapPin,
+  Users,
+  Tag,
+  Building2,
+  Loader2,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  ProjectStatusBadge,
+  toProjectStatus,
+} from "@/components/organization/ProjectStatusBadge";
+
+interface ProjectFormProps {
+  formData: any;
+  imagePreview: string | null;
+  categories: any[];
+  loadingCategories: boolean;
+  projectTypes?: { value: string | number; label: string }[];
+  statusOptions?: { value: number; label: string }[];
+  isEdit?: boolean;
+  isViewMode?: boolean;
+  onInputChange?: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
+  onCategoryToggle?: (categoryId: number, checked: boolean) => void;
+  onImageChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onImageRemove?: () => void;
+  onSubmit?: (e: React.FormEvent) => void;
+  loading?: boolean;
+  submitText?: string;
+}
 
 export default function ProjectForm({
   formData,
@@ -11,18 +53,22 @@ export default function ProjectForm({
   categories,
   loadingCategories,
   projectTypes,
-  statusOptions,
+  statusOptions = [],
   isEdit = false,
+  isViewMode = false,
   onInputChange,
   onCategoryToggle,
   onImageChange,
   onImageRemove,
   onSubmit,
   loading,
-  submitText = "Tạo chương trình"
+  submitText = "Tạo chương trình",
 }: ProjectFormProps) {
+  const readOnly = isViewMode;
+
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      {/* Image Section */}
       <div>
         <label className="block text-sm font-medium text-foreground mb-2">
           Hình ảnh chương trình
@@ -39,38 +85,40 @@ export default function ProjectForm({
               <Building2 className="w-12 h-12 text-gray-400" />
             )}
           </div>
-          <div className="flex-1">
-            <input
-              id="imageInput"
-              type="file"
-              accept="image/*"
-              onChange={onImageChange}
-              className="hidden"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              className="cursor-pointer"
-              onClick={() => document.getElementById('imageInput')?.click()}
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Tải lên hình ảnh
-            </Button>
-            {imagePreview && (
+          {!readOnly && (
+            <div className="flex-1">
+              <input
+                id="imageInput"
+                type="file"
+                accept="image/*"
+                onChange={onImageChange}
+                className="hidden"
+              />
               <Button
                 type="button"
-                variant="ghost"
-                size="sm"
-                className="mt-2 text-red-600 hover:text-red-700"
-                onClick={onImageRemove}
+                variant="outline"
+                className="cursor-pointer"
+                onClick={() => document.getElementById("imageInput")?.click()}
               >
-                Xóa ảnh
+                <Upload className="w-4 h-4 mr-2" />
+                Tải lên hình ảnh
               </Button>
-            )}
-            <p className="text-sm text-muted-foreground mt-2">
-              PNG, JPG, GIF tối đa 5MB
-            </p>
-          </div>
+              {imagePreview && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 text-red-600 hover:text-red-700"
+                  onClick={onImageRemove}
+                >
+                  Xóa ảnh
+                </Button>
+              )}
+              <p className="text-sm text-muted-foreground mt-2">
+                PNG, JPG, GIF tối đa 5MB
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -80,113 +128,172 @@ export default function ProjectForm({
           <label className="block text-sm font-medium text-foreground mb-2">
             Tên chương trình *
           </label>
-          <Input
-            name="title"
-            value={formData.title}
-            onChange={onInputChange}
-            placeholder="Nhập tên chương trình"
-            required
-          />
+          {readOnly ? (
+            <div className="p-3 bg-gray-50 rounded-lg border">
+              <p className="text-foreground font-medium">
+                {formData.title || "—"}
+              </p>
+            </div>
+          ) : (
+            <Input
+              name="title"
+              value={formData.title}
+              onChange={onInputChange}
+              placeholder="Nhập tên chương trình"
+              required
+            />
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
             Mô tả *
           </label>
-          <Textarea
-            name="description"
-            value={formData.description}
-            onChange={onInputChange}
-            placeholder="Mô tả chi tiết về chương trình..."
-            rows={4}
-            required
-          />
+          {readOnly ? (
+            <div className="p-3 bg-gray-50 rounded-lg border min-h-[100px]">
+              <p className="text-foreground whitespace-pre-wrap">
+                {formData.description || "—"}
+              </p>
+            </div>
+          ) : (
+            <Textarea
+              name="description"
+              value={formData.description}
+              onChange={onInputChange}
+              placeholder="Mô tả chi tiết về chương trình..."
+              rows={4}
+              required
+            />
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Thử thách 
+            Thử thách
           </label>
-          <Textarea
-            name="challenges"
-            value={formData.challenges}
-            onChange={onInputChange}
-            placeholder="Thử thách của chương trình..."
-            rows={4}
-            required
-          />
+          {readOnly ? (
+            <div className="p-3 bg-gray-50 rounded-lg border min-h-[100px]">
+              <p className="text-foreground whitespace-pre-wrap">
+                {formData.challenges || "—"}
+              </p>
+            </div>
+          ) : (
+            <Textarea
+              name="challenges"
+              value={formData.challenges}
+              onChange={onInputChange}
+              placeholder="Thử thách của chương trình..."
+              rows={4}
+            />
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
             Mục tiêu *
           </label>
-          <Textarea
-            name="goals"
-            value={formData.goals}
-            onChange={onInputChange}
-            placeholder="Mục tiêu của chương trình..."
-            rows={4}
-            required
-          />
+          {readOnly ? (
+            <div className="p-3 bg-gray-50 rounded-lg border min-h-[100px]">
+              <p className="text-foreground whitespace-pre-wrap">
+                {formData.goals || "—"}
+              </p>
+            </div>
+          ) : (
+            <Textarea
+              name="goals"
+              value={formData.goals}
+              onChange={onInputChange}
+              placeholder="Mục tiêu của chương trình..."
+              rows={4}
+              required
+            />
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
             Hoạt động *
           </label>
-          <Textarea
-            name="activities"
-            value={formData.activities}
-            onChange={onInputChange}
-            placeholder="Hoạt động diễn ra trong chương trình..."
-            rows={4}
-            required
-          />
+          {readOnly ? (
+            <div className="p-3 bg-gray-50 rounded-lg border min-h-[100px]">
+              <p className="text-foreground whitespace-pre-wrap">
+                {formData.activities || "—"}
+              </p>
+            </div>
+          ) : (
+            <Textarea
+              name="activities"
+              value={formData.activities}
+              onChange={onInputChange}
+              placeholder="Hoạt động diễn ra trong chương trình..."
+              rows={4}
+              required
+            />
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Sự ảnh hưởng 
+            Sự ảnh hưởng
           </label>
-          <Textarea
-            name="impacts"
-            value={formData.impacts}
-            onChange={onInputChange}
-            placeholder=" Sự ảnh hưởng cua chương trình..."
-            rows={4}
-            required
-          />
+          {readOnly ? (
+            <div className="p-3 bg-gray-50 rounded-lg border min-h-[100px]">
+              <p className="text-foreground whitespace-pre-wrap">
+                {formData.impacts || "—"}
+              </p>
+            </div>
+          ) : (
+            <Textarea
+              name="impacts"
+              value={formData.impacts}
+              onChange={onInputChange}
+              placeholder=" Sự ảnh hưởng cua chương trình..."
+              rows={4}
+            />
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Quyền lợi 
+            Quyền lợi
           </label>
-          <Textarea
-            name="benefits"
-            value={formData.benefits}
-            onChange={onInputChange}
-            placeholder="Quyền lợi của tình nguyện viên..."
-            rows={4}
-            required
-          />
+          {readOnly ? (
+            <div className="p-3 bg-gray-50 rounded-lg border min-h-[100px]">
+              <p className="text-foreground whitespace-pre-wrap">
+                {formData.benefits || "—"}
+              </p>
+            </div>
+          ) : (
+            <Textarea
+              name="benefits"
+              value={formData.benefits}
+              onChange={onInputChange}
+              placeholder="Quyền lợi của tình nguyện viên..."
+              rows={4}
+            />
+          )}
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Yêu cầu 
+            Yêu cầu
           </label>
-          <Textarea
-            name="requirements"
-            value={formData.requirements}
-            onChange={onInputChange}
-            placeholder="Yêu cầu về tình nguyện viên..."
-            rows={4}
-            required
-          />
+          {readOnly ? (
+            <div className="p-3 bg-gray-50 rounded-lg border min-h-[100px]">
+              <p className="text-foreground whitespace-pre-wrap">
+                {formData.requirements || "—"}
+              </p>
+            </div>
+          ) : (
+            <Textarea
+              name="requirements"
+              value={formData.requirements}
+              onChange={onInputChange}
+              placeholder="Yêu cầu về tình nguyện viên..."
+              rows={4}
+            />
+          )}
         </div>
-    
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -194,61 +301,97 @@ export default function ProjectForm({
               <Tag className="w-4 h-4 inline mr-2" />
               Loại chương trình *
             </label>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={onInputChange}
-              className="w-full px-3 py-2 border rounded-lg bg-background"
-              required
-            >
-              <option value="">Chọn loại chương trình</option>
-              {projectTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
+            {readOnly ? (
+              <div className="p-3 bg-gray-50 rounded-lg border">
+                <p className="text-foreground">
+                  {projectTypes?.find((t) => t.value === formData.type)
+                    ?.label ||
+                    formData.type ||
+                    "—"}
+                </p>
+              </div>
+            ) : (
+              <Select
+                value={String(formData.type || "")}
+                onValueChange={(value) => {
+                  if (onInputChange) {
+                    const event = {
+                      target: { name: "type", value },
+                    } as React.ChangeEvent<HTMLSelectElement>;
+                    onInputChange(event);
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn loại chương trình" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projectTypes?.map((type) => (
+                    <SelectItem key={type.value} value={String(type.value)}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
-          {/* Status Field - Only for Edit */}
-          {isEdit && statusOptions && (
+          {(isEdit || readOnly) && statusOptions && (
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
                 Trạng thái *
               </label>
-              <select
-                name="status"
-                value={formData.status || 0}
-                onChange={onInputChange}
-                className="w-full px-3 py-2 border rounded-lg bg-background"
-                required
-              >
-                {statusOptions.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
+              {readOnly ? (
+                <div className="p-3 bg-gray-50 rounded-lg border">
+                  <ProjectStatusBadge
+                    status={toProjectStatus(formData.status || 0)}
+                    showIcon={true}
+                    showText={true}
+                    size="sm"
+                  />
+                </div>
+              ) : (
+                <select
+                  name="status"
+                  value={formData.status || 0}
+                  onChange={onInputChange}
+                  className="w-full px-3 py-2 border rounded-lg bg-background"
+                  required
+                >
+                  {statusOptions.map((status) => (
+                    <option key={status.value} value={status.value}>
+                      {status.label}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Location & Dates */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground">Địa điểm & Thời gian</h3>
+        <h3 className="text-lg font-semibold text-foreground">
+          Địa điểm & Thời gian
+        </h3>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
             <MapPin className="w-4 h-4 inline mr-2" />
             Địa điểm
           </label>
-          <Input
-            name="location"
-            value={formData.location}
-            onChange={onInputChange}
-            placeholder="Nhập địa điểm thực hiện chương trình"
-          />
+          {readOnly ? (
+            <div className="p-3 bg-gray-50 rounded-lg border">
+              <p className="text-foreground">{formData.location || "—"}</p>
+            </div>
+          ) : (
+            <Input
+              name="location"
+              value={formData.location}
+              onChange={onInputChange}
+              placeholder="Nhập địa điểm thực hiện chương trình"
+            />
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -257,12 +400,22 @@ export default function ProjectForm({
               <Calendar className="w-4 h-4 inline mr-2" />
               Ngày bắt đầu
             </label>
-            <Input
-              type="date"
-              name="startDate"
-              value={formData.startDate}
-              onChange={onInputChange}
-            />
+            {readOnly ? (
+              <div className="p-3 bg-gray-50 rounded-lg border">
+                <p className="text-foreground">
+                  {formData.startDate
+                    ? new Date(formData.startDate).toLocaleDateString("vi-VN")
+                    : "—"}
+                </p>
+              </div>
+            ) : (
+              <Input
+                type="date"
+                name="startDate"
+                value={formData.startDate}
+                onChange={onInputChange}
+              />
+            )}
           </div>
 
           <div>
@@ -270,33 +423,53 @@ export default function ProjectForm({
               <Calendar className="w-4 h-4 inline mr-2" />
               Ngày kết thúc
             </label>
-            <Input
-              type="date"
-              name="endDate"
-              value={formData.endDate}
-              onChange={onInputChange}
-            />
+            {readOnly ? (
+              <div className="p-3 bg-gray-50 rounded-lg border">
+                <p className="text-foreground">
+                  {formData.endDate
+                    ? new Date(formData.endDate).toLocaleDateString("vi-VN")
+                    : "—"}
+                </p>
+              </div>
+            ) : (
+              <Input
+                type="date"
+                name="endDate"
+                value={formData.endDate}
+                onChange={onInputChange}
+              />
+            )}
           </div>
         </div>
       </div>
 
       {/* Volunteers */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground">Tình nguyện viên</h3>
+        <h3 className="text-lg font-semibold text-foreground">
+          Tình nguyện viên
+        </h3>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
             <Users className="w-4 h-4 inline mr-2" />
             Số lượng tình nguyện viên cần *
           </label>
-          <Input
-            type="number"
-            name="requiredVolunteers"
-            value={formData.requiredVolunteers}
-            onChange={onInputChange}
-            min="1"
-            required
-          />
+          {readOnly ? (
+            <div className="p-3 bg-gray-50 rounded-lg border">
+              <p className="text-foreground">
+                {formData.requiredVolunteers || "0"}
+              </p>
+            </div>
+          ) : (
+            <Input
+              type="number"
+              name="requiredVolunteers"
+              value={formData.requiredVolunteers}
+              onChange={onInputChange}
+              min="1"
+              required
+            />
+          )}
         </div>
       </div>
 
@@ -304,18 +477,20 @@ export default function ProjectForm({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-foreground">Danh mục *</h3>
-          {loadingCategories && (
+          {loadingCategories && !readOnly && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />
               Đang tải danh mục...
             </div>
           )}
         </div>
-        <p className="text-sm text-muted-foreground mb-2">
-          Chọn ít nhất một danh mục phù hợp với chương trình
-        </p>
-        
-        {loadingCategories ? (
+        {!readOnly && (
+          <p className="text-sm text-muted-foreground mb-2">
+            Chọn ít nhất một danh mục phù hợp với chương trình
+          </p>
+        )}
+
+        {loadingCategories && !readOnly ? (
           <div className="text-center py-4">
             <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
           </div>
@@ -323,7 +498,32 @@ export default function ProjectForm({
           <div className="text-center py-4 border rounded-lg bg-yellow-50">
             <p className="text-yellow-700">Không có danh mục nào khả dụng</p>
           </div>
+        ) : readOnly ? (
+          // View mode: show selected categories as badges
+          <div className="flex flex-wrap gap-2">
+            {formData.categories && formData.categories.length > 0 ? (
+              formData.categories.map((categoryId: number) => {
+                const category = categories.find((c) => c.id === categoryId);
+                if (!category) return null;
+                return (
+                  <Badge
+                    key={category.id}
+                    variant="secondary"
+                    style={{
+                      backgroundColor: category.color || "#4CAF50",
+                      color: "white",
+                    }}
+                  >
+                    {category.name}
+                  </Badge>
+                );
+              })
+            ) : (
+              <p className="text-muted-foreground">Không có danh mục nào</p>
+            )}
+          </div>
         ) : (
+          // Form mode: show checkboxes
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {categories.map((category) => (
               <label
@@ -332,24 +532,29 @@ export default function ProjectForm({
               >
                 <input
                   type="checkbox"
-                  checked={formData.categories.includes(category.id)}
-                  onChange={(e) => onCategoryToggle(category.id, e.target.checked)}
+                  checked={formData.categories?.includes(category.id) || false}
+                  onChange={(e) =>
+                    onCategoryToggle?.(category.id, e.target.checked)
+                  }
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <div className="flex items-center gap-2">
-                  {category.icon && category.icon.includes('fa-') ? (
+                  {category.icon && category.icon.includes("fa-") ? (
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: category.color || '#4CAF50' }}
+                      style={{ backgroundColor: category.color || "#4CAF50" }}
                     >
                       <span className="text-xs text-white">
-                        {category.icon.replace('fa-', '').charAt(0).toUpperCase()}
+                        {category.icon
+                          .replace("fa-", "")
+                          .charAt(0)
+                          .toUpperCase()}
                       </span>
                     </div>
                   ) : (
                     <div
                       className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: category.color || '#4CAF50' }}
+                      style={{ backgroundColor: category.color || "#4CAF50" }}
                     />
                   )}
                   <span className="text-sm text-foreground">
@@ -360,29 +565,34 @@ export default function ProjectForm({
             ))}
           </div>
         )}
-        
-        {formData.categories.length === 0 && !loadingCategories && categories.length > 0 && (
-          <p className="text-sm text-red-600 mt-2">
-            * Vui lòng chọn ít nhất một danh mục
-          </p>
-        )}
+
+        {!readOnly &&
+          formData.categories?.length === 0 &&
+          !loadingCategories &&
+          categories.length > 0 && (
+            <p className="text-sm text-red-600 mt-2">
+              * Vui lòng chọn ít nhất một danh mục
+            </p>
+          )}
       </div>
 
-      {/* Submit Button */}
-      <Button
-        type="submit"
-        className="w-full bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]"
-        disabled={loading || loadingCategories}
-      >
-        {loading ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Đang xử lý...
-          </>
-        ) : (
-          submitText
-        )}
-      </Button>
+      {/* Submit Button - Only show in form mode */}
+      {!readOnly && (
+        <Button
+          type="submit"
+          className="w-full bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]"
+          disabled={loading || loadingCategories}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Đang xử lý...
+            </>
+          ) : (
+            submitText
+          )}
+        </Button>
+      )}
     </form>
   );
 }

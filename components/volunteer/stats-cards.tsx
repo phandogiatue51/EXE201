@@ -20,13 +20,13 @@ export function StatsCards({ registrations, certificates }: StatsCardsProps) {
       color: "from-[#77E5C8] to-[#6085F0]",
     },
     {
-      title: "Giờ tình nguyện",
-      value: totalHours,
+      title: "Đơn đăng ký chờ duyệt",
+      value: registrations.length,
       icon: Clock,
       color: "from-[#77E5C8] to-[#6085F0]",
     },
     {
-      title: "Chứng chỉ nhận được",
+      title: "Chứng chỉ của tôi",
       value: certificates.length,
       icon: Award,
       color: "from-[#77E5C8] to-[#6085F0]",

@@ -5,10 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { blogAPI } from "../../../services/api";
 import { BlogPost } from "../../../lib/type";
+import { BlogStatusBadge } from "@/components/BlogStatusBadge";
+
 import {
   Search,
   Filter,
@@ -18,12 +19,9 @@ import {
   PlusCircle,
   FileText,
   Calendar,
-  User,
-  Building2,
   CheckCircle,
   Clock,
   XCircle,
-  ExternalLink,
 } from "lucide-react";
 import { BlogFilterDto } from "@/lib/filter-type";
 
@@ -45,11 +43,14 @@ export default function BlogsPage() {
       }
 
       setLoading(true);
-      const orgIdNumber = parseInt(organizationId || '0');
+      const orgIdNumber = parseInt(organizationId || "0");
 
       const filter: BlogFilterDto = {
         organizationId: orgIdNumber,
-        authorId: staffRole && staffRole !== "Manager" ? Number(user?.accountId) : undefined,
+        authorId:
+          staffRole && staffRole !== "Manager"
+            ? Number(user?.accountId)
+            : undefined,
         title: undefined,
         publishDate: undefined,
         status: statusFilter !== "all" ? statusFilter : undefined,
@@ -78,16 +79,17 @@ export default function BlogsPage() {
 
     if (search) {
       const searchLower = search.toLowerCase();
-      result = result.filter(blog =>
-        blog.title?.toLowerCase().includes(searchLower) ||
-        blog.author?.name?.toLowerCase().includes(searchLower) ||
-        blog.author?.email?.toLowerCase().includes(searchLower) ||
-        blog.organization?.name?.toLowerCase().includes(searchLower)
+      result = result.filter(
+        (blog) =>
+          blog.title?.toLowerCase().includes(searchLower) ||
+          blog.author?.name?.toLowerCase().includes(searchLower) ||
+          blog.author?.email?.toLowerCase().includes(searchLower) ||
+          blog.organization?.name?.toLowerCase().includes(searchLower)
       );
     }
 
     if (statusFilter !== "all") {
-      result = result.filter(blog => blog.status === statusFilter);
+      result = result.filter((blog) => blog.status === statusFilter);
     }
 
     setFilteredBlogs(result);
@@ -108,7 +110,7 @@ export default function BlogsPage() {
 
     try {
       await blogAPI.delete(id);
-      setBlogs(blogs.filter(blog => blog.id !== id));
+      setBlogs(blogs.filter((blog) => blog.id !== id));
       alert("Đã xóa bài viết!");
     } catch (error) {
       console.error("Error deleting blog:", error);
@@ -119,50 +121,20 @@ export default function BlogsPage() {
   const handleStatusChange = async (id: number, newStatus: number) => {
     try {
       await blogAPI.updateStatus(id, newStatus);
-      setBlogs(blogs.map(blog =>
-        blog.id === id ? { ...blog, status: newStatus } : blog
-      ));
+      setBlogs(
+        blogs.map((blog) =>
+          blog.id === id ? { ...blog, status: newStatus } : blog
+        )
+      );
       alert("Đã cập nhật trạng thái!");
     } catch (error) {
       console.error("Error updating status:", error);
     }
   };
 
-  const getStatusIcon = (status: number) => {
-    switch (status) {
-      case 1: // Draft
-        return <Clock className="w-4 h-4 text-gray-600" />;
-      case 2: // Published
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 3: // Archived
-        return <XCircle className="w-4 h-4 text-yellow-600" />;
-      default:
-        return <Clock className="w-4 h-4 text-gray-600" />;
-    }
-  };
-
-  const getStatusText = (status: number) => {
-    switch (status) {
-      case 1: return "Bản nháp";
-      case 2: return "Đã đăng";
-      case 3: return "Lưu trữ";
-      default: return "Không xác định";
-    }
-  };
-
-  const getStatusColor = (status: number) => {
-    switch (status) {
-      case 1: return "bg-gray-100 text-gray-800 border-gray-200";
-      case 2: return "bg-green-100 text-green-800 border-green-200";
-      case 3: return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
         <main className="flex-1 container mx-auto px-4 py-12">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6085F0]"></div>
@@ -174,20 +146,23 @@ export default function BlogsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Quản lý bài viết</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                Quản lý bài viết
+              </h1>
               <p className="text-muted-foreground mt-2">
                 Quản lý tất cả bài viết blog trên hệ thống
               </p>
             </div>
 
-            <Button asChild className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]">
+            <Button
+              asChild
+              className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]"
+            >
               <Link href="/organization/blogs/new">
                 <PlusCircle className="w-4 h-4 mr-2" />
                 Thêm bài viết
@@ -212,7 +187,7 @@ export default function BlogsPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Đã đăng</p>
                   <p className="text-2xl font-bold text-green-600">
-                    {blogs.filter(b => b.status === 2).length}
+                    {blogs.filter((b) => b.status === 2).length}
                   </p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-green-500" />
@@ -224,7 +199,7 @@ export default function BlogsPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Bản nháp</p>
                   <p className="text-2xl font-bold text-gray-600">
-                    {blogs.filter(b => b.status === 1).length}
+                    {blogs.filter((b) => b.status === 1).length}
                   </p>
                 </div>
                 <Clock className="w-8 h-8 text-gray-500" />
@@ -236,7 +211,7 @@ export default function BlogsPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Lưu trữ</p>
                   <p className="text-2xl font-bold text-yellow-600">
-                    {blogs.filter(b => b.status === 3).length}
+                    {blogs.filter((b) => b.status === 3).length}
                   </p>
                 </div>
                 <XCircle className="w-8 h-8 text-yellow-500" />
@@ -264,7 +239,9 @@ export default function BlogsPage() {
                   <Filter className="w-4 h-4 text-muted-foreground" />
                   <select
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as number | "all")}
+                    onChange={(e) =>
+                      setStatusFilter(e.target.value as number | "all")
+                    }
                     className="w-full px-3 py-2 border rounded-lg bg-background"
                   >
                     <option value="all">Tất cả trạng thái</option>
@@ -296,13 +273,27 @@ export default function BlogsPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b bg-gray-50">
-                      <th className="text-center p-4 font-medium text-gray-700">ID</th>
-                      <th className="text-center p-4 font-medium text-gray-700">Tiêu đề</th>
-                      <th className="text-center p-4 font-medium text-gray-700">Tác giả</th>
-                      <th className="text-center p-4 font-medium text-gray-700">Ngày đăng</th>
-                      <th className="text-center p-4 font-medium text-gray-700">Cập nhật</th>
-                      <th className="text-center p-4 font-medium text-gray-700">Trạng thái</th>
-                      <th className="text-center p-4 font-medium text-gray-700">Hành động</th>
+                      <th className="text-center p-4 font-medium text-gray-700">
+                        ID
+                      </th>
+                      <th className="text-center p-4 font-medium text-gray-700">
+                        Tiêu đề
+                      </th>
+                      <th className="text-center p-4 font-medium text-gray-700">
+                        Tác giả
+                      </th>
+                      <th className="text-center p-4 font-medium text-gray-700">
+                        Ngày đăng
+                      </th>
+                      <th className="text-center p-4 font-medium text-gray-700">
+                        Cập nhật
+                      </th>
+                      <th className="text-center p-4 font-medium text-gray-700">
+                        Trạng thái
+                      </th>
+                      <th className="text-center p-4 font-medium text-gray-700">
+                        Hành động
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -310,13 +301,17 @@ export default function BlogsPage() {
                       <tr key={blog.id} className="border-b hover:bg-gray-50">
                         {/* ID */}
                         <td className="p-4">
-                          <p className="text-sm font-mono text-gray-600">#{blog.id}</p>
+                          <p className="text-sm font-mono text-gray-600">
+                            #{blog.id}
+                          </p>
                         </td>
 
                         {/* Title */}
                         <td className="p-4">
                           <div>
-                            <p className="font-medium text-foreground">{blog.title || "Không có tiêu đề"}</p>
+                            <p className="font-medium text-foreground">
+                              {blog.title || "Không có tiêu đề"}
+                            </p>
                           </div>
                         </td>
 
@@ -336,7 +331,9 @@ export default function BlogsPage() {
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-gray-400" />
                             <span className="text-sm">
-                              {new Date(blog.publishedDate).toLocaleDateString('vi-VN')}
+                              {new Date(blog.publishedDate).toLocaleDateString(
+                                "vi-VN"
+                              )}
                             </span>
                           </div>
                         </td>
@@ -347,41 +344,44 @@ export default function BlogsPage() {
                             <div className="flex items-center gap-2">
                               <Calendar className="w-4 h-4 text-gray-400" />
                               <span className="text-sm">
-                                {new Date(blog.updatedDate).toLocaleDateString('vi-VN')}
+                                {new Date(blog.updatedDate).toLocaleDateString(
+                                  "vi-VN"
+                                )}
                               </span>
                             </div>
                           ) : (
-                            <span className="text-sm text-gray-400">Chưa cập nhật</span>
+                            <span className="text-sm text-gray-400">
+                              Chưa cập nhật
+                            </span>
                           )}
                         </td>
 
                         {/* Status */}
                         <td className="p-4">
-                          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border ${getStatusColor(blog.status)}`}>
-                            {getStatusIcon(blog.status)}
-                            <span className="text-sm font-medium">{getStatusText(blog.status)}</span>
+                          <div
+                            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border`}
+                          >
+                            <BlogStatusBadge
+                              status={blog.status}
+                              showIcon={true}
+                              size="sm"
+                            />
                           </div>
                         </td>
 
                         {/* Actions */}
                         <td className="p-4">
                           <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              asChild
-                            >
+                            <Button size="sm" variant="outline" asChild>
                               <Link href={`/organization/blogs/${blog.id}`}>
                                 <Eye className="h-3 w-3 mr-1" />
                                 Xem
                               </Link>
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              asChild
-                            >
-                              <Link href={`/organization/blogs/${blog.id}/edit`}>
+                            <Button size="sm" variant="outline" asChild>
+                              <Link
+                                href={`/organization/blogs/${blog.id}/edit`}
+                              >
                                 <Edit className="h-3 w-3 mr-1" />
                                 Sửa
                               </Link>

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI, categoryAPI } from "../../../../services/api";
 import { ArrowLeft } from "lucide-react";
@@ -180,7 +179,7 @@ export default function CreateProjectPage() {
       await projectAPI.create(projectData);
 
       alert("Tạo chương trình thành công!");
-      router.push("/organization/projects");
+      router.push("/organization/programs");
       router.refresh();
     } catch (error: any) {
       console.error("Error creating project:", error);
@@ -217,12 +216,11 @@ export default function CreateProjectPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
 
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <Button variant="ghost" asChild className="mb-6">
-            <Link href="/organization/projects">
+            <Link href="/organization/programs">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Quay lại danh sách
             </Link>
