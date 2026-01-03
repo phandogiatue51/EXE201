@@ -9,6 +9,10 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI } from "../../services/api";
 import {
+  ProjectStatusBadge,
+  toProjectStatus,
+} from "@/components/organization/ProjectStatusBadge";
+import {
   Eye,
   Search,
   Users,
@@ -16,10 +20,11 @@ import {
   MapPin,
   Tag,
   Building2,
+  Pen,
 } from "lucide-react";
 
 export default function ProjectsPage() {
-  useAuth();
+  const { user } = useAuth();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -142,20 +147,16 @@ export default function ProjectsPage() {
                         <Building2 className="w-16 h-16 text-white/50" />
                       </div>
                     )}
-                    {/* Status Badge */}
                     <div className="absolute top-4 right-4">
                       <span
-                        className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                          project.status === 3
-                            ? "bg-green-100 text-green-800"
-                            : project.status === 2
-                            ? "bg-blue-100 text-blue-800"
-                            : project.status === 4
-                            ? "bg-purple-100 text-purple-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
+                        className={`px-3 py-1 text-xs font-semibold rounded-full`}
                       >
-                        {project.statusName}
+                        <ProjectStatusBadge
+                          status={toProjectStatus(project.status)}
+                          showIcon={false}
+                          showText={true}
+                          size="sm"
+                        />
                       </span>
                     </div>
                   </div>
@@ -258,6 +259,31 @@ export default function ProjectsPage() {
                           <Eye className="w-3 h-3 mr-1" />
                           Xem
                         </Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        asChild
+                      >
+                        {user?.accountId ? (
+                          <Link
+                            href={`/programs/${project.id}/certificate-selection`}
+                          >
+                            <Pen className="w-3 h-3 mr-1" />
+                            Đăng ký
+                          </Link>
+                        ) : (
+                          <div
+                            onClick={() => {
+                              alert("Bạn cần đăng nhập để tiếp tục");
+                            }}
+                            className="flex items-center cursor-pointer"
+                          >
+                            <Pen className="w-3 h-3 mr-1" />
+                            Đăng ký
+                          </div>
+                        )}
                       </Button>
                     </div>
                   </div>

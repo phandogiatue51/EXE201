@@ -22,18 +22,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   ProjectStatusBadge,
-  ProjectStatus,
   toProjectStatus,
 } from "@/components/organization/ProjectStatusBadge";
+
 interface ProjectFormProps {
   formData: any;
-  imagePreview: string;
+  imagePreview: string | null;
   categories: any[];
   loadingCategories: boolean;
-  projectTypes: { value: string; label: string }[];
+  projectTypes?: { value: string | number; label: string }[];
   statusOptions?: { value: number; label: string }[];
   isEdit?: boolean;
-  isViewMode?: boolean; // Add view mode prop
+  isViewMode?: boolean;
   onInputChange?: (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -304,14 +304,15 @@ export default function ProjectForm({
             {readOnly ? (
               <div className="p-3 bg-gray-50 rounded-lg border">
                 <p className="text-foreground">
-                  {projectTypes.find((t) => t.value === formData.type)?.label ||
+                  {projectTypes?.find((t) => t.value === formData.type)
+                    ?.label ||
                     formData.type ||
                     "—"}
                 </p>
               </div>
             ) : (
               <Select
-                value={formData.type}
+                value={String(formData.type || "")}
                 onValueChange={(value) => {
                   if (onInputChange) {
                     const event = {
@@ -325,9 +326,8 @@ export default function ProjectForm({
                   <SelectValue placeholder="Chọn loại chương trình" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Chọn loại chương trình</SelectItem>
-                  {projectTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
+                  {projectTypes?.map((type) => (
+                    <SelectItem key={type.value} value={String(type.value)}>
                       {type.label}
                     </SelectItem>
                   ))}

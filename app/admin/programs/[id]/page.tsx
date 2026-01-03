@@ -8,21 +8,19 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI } from "../../../../services/api";
 import {
+  ProjectStatusBadge,
+  toProjectStatus,
+} from "@/components/organization/ProjectStatusBadge";
+import {
   ArrowLeft,
   Building2,
   Calendar,
   MapPin,
   Users,
-  Tag,
   Edit,
   Trash2,
   Globe,
   ExternalLink,
-  Clock,
-  CheckCircle,
-  XCircle,
-  UserMinus,
-  AlertCircle,
 } from "lucide-react";
 
 export default function ProjectDetailPage({
@@ -53,7 +51,7 @@ export default function ProjectDetailPage({
 
   const handleDelete = async () => {
     if (!confirm("Bạn có chắc chắn muốn xóa chương trình này?")) return;
-    
+
     try {
       await projectAPI.delete(parseInt(id));
       window.location.href = "/admin/programs";
@@ -85,40 +83,8 @@ export default function ProjectDetailPage({
     );
   }
 
-  const getStatusIcon = (status: number) => {
-    switch (status) {
-      case 3: // Active
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 2: // Recruiting
-        return <Clock className="w-5 h-5 text-blue-600" />;
-      case 4: // Completed
-        return <CheckCircle className="w-5 h-5 text-purple-600" />;
-      case 5: // Cancelled
-        return <XCircle className="w-5 h-5 text-red-600" />;
-      default:
-        return <Clock className="w-5 h-5 text-gray-600" />;
-    }
-  };
-
-  const getStatusColor = (status: number) => {
-    switch (status) {
-      case 3: // Active
-        return "bg-green-100 text-green-800 border-green-200";
-      case 2: // Recruiting
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case 4: // Completed
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      case 5: // Cancelled
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Navigation */}
@@ -145,28 +111,35 @@ export default function ProjectDetailPage({
                     <Building2 className="w-24 h-24 text-white/30" />
                   </div>
                 )}
-                
+
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                
+
                 {/* Content Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
                   <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div className="flex-1">
-                      <h1 className="text-3xl font-bold mb-2">{project.title}</h1>
+                      <h1 className="text-3xl font-bold mb-2">
+                        {project.title}
+                      </h1>
                       <div className="flex items-center gap-3">
                         <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm">
                           {project.typeName}
                         </span>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(project.status)}`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-medium border`}
+                        >
                           <div className="flex items-center gap-2">
-                            {getStatusIcon(project.status)}
-                            {project.statusName}
+                            <ProjectStatusBadge
+                              status={toProjectStatus(project.status)}
+                              showIcon={false}
+                              showText={true}
+                            />
                           </div>
                         </span>
                       </div>
                     </div>
-                    
+
                     {/* Actions */}
                     <div className="flex gap-2">
                       <Button variant="secondary" size="sm" asChild>
@@ -196,11 +169,22 @@ export default function ProjectDetailPage({
                   <div className="flex items-center gap-3">
                     <Building2 className="w-5 h-5 text-blue-600" />
                     <div>
-                      <p className="text-sm text-blue-600 font-medium">Tổ chức</p>
-                      <p className="text-foreground">{project.organizationName}</p>
+                      <p className="text-sm text-blue-600 font-medium">
+                        Tổ chức
+                      </p>
+                      <p className="text-foreground">
+                        {project.organizationName}
+                      </p>
                     </div>
-                    <Button variant="ghost" size="sm" asChild className="ml-auto">
-                      <Link href={`/admin/organizations/${project.organizationId}`}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="ml-auto"
+                    >
+                      <Link
+                        href={`/admin/organizations/${project.organizationId}`}
+                      >
                         <ExternalLink className="w-3 h-3 mr-1" />
                         Xem tổ chức
                       </Link>
@@ -210,61 +194,77 @@ export default function ProjectDetailPage({
 
                 {/* Description */}
                 <div className="mb-8">
-                  <h2 className="text-lg font-semibold text-foreground mb-3">Mô tả chương trình</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-3">
+                    Mô tả chương trình
+                  </h2>
                   <p className="text-muted-foreground whitespace-pre-line">
                     {project.description}
                   </p>
                 </div>
 
                 <div className="mb-8">
-                  <h2 className="text-lg font-semibold text-foreground mb-3">Thử thách</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-3">
+                    Thử thách
+                  </h2>
                   <p className="text-muted-foreground whitespace-pre-line">
                     {project.challenges}
                   </p>
                 </div>
 
                 <div className="mb-8">
-                  <h2 className="text-lg font-semibold text-foreground mb-3">Mục tiêu của chương trình</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-3">
+                    Mục tiêu của chương trình
+                  </h2>
                   <p className="text-muted-foreground whitespace-pre-line">
                     {project.goals}
                   </p>
                 </div>
 
                 <div className="mb-8">
-                  <h2 className="text-lg font-semibold text-foreground mb-3">Hoạt động diễn ra trong chương trình</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-3">
+                    Hoạt động diễn ra trong chương trình
+                  </h2>
                   <p className="text-muted-foreground whitespace-pre-line">
                     {project.activities}
                   </p>
                 </div>
 
                 <div className="mb-8">
-                  <h2 className="text-lg font-semibold text-foreground mb-3">Sự ảnh hưởng của chương trình</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-3">
+                    Sự ảnh hưởng của chương trình
+                  </h2>
                   <p className="text-muted-foreground whitespace-pre-line">
                     {project.impacts}
                   </p>
                 </div>
 
                 <div className="mb-8">
-                  <h2 className="text-lg font-semibold text-foreground mb-3">Quyền lợi của tình nguyện viên</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-3">
+                    Quyền lợi của tình nguyện viên
+                  </h2>
                   <p className="text-muted-foreground whitespace-pre-line">
                     {project.benefits}
                   </p>
                 </div>
 
                 <div className="mb-8">
-                  <h2 className="text-lg font-semibold text-foreground mb-3">Yêu cầu từ tình nguyện viên</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-3">
+                    Yêu cầu từ tình nguyện viên
+                  </h2>
                   <p className="text-muted-foreground whitespace-pre-line">
                     {project.requirements}
                   </p>
                 </div>
-                
+
                 {/* Info Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                   <Card className="p-4">
                     <div className="flex items-center gap-3">
                       <MapPin className="w-5 h-5 text-blue-600" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Địa điểm</p>
+                        <p className="text-sm text-muted-foreground">
+                          Địa điểm
+                        </p>
                         <p className="font-medium text-foreground">
                           {project.location || "Chưa cập nhật"}
                         </p>
@@ -276,9 +276,15 @@ export default function ProjectDetailPage({
                     <div className="flex items-center gap-3">
                       <Calendar className="w-5 h-5 text-blue-600" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Ngày bắt đầu</p>
+                        <p className="text-sm text-muted-foreground">
+                          Ngày bắt đầu
+                        </p>
                         <p className="font-medium text-foreground">
-                          {project.startDate ? new Date(project.startDate).toLocaleDateString('vi-VN') : "Chưa có"}
+                          {project.startDate
+                            ? new Date(project.startDate).toLocaleDateString(
+                                "vi-VN"
+                              )
+                            : "Chưa có"}
                         </p>
                       </div>
                     </div>
@@ -288,9 +294,15 @@ export default function ProjectDetailPage({
                     <div className="flex items-center gap-3">
                       <Calendar className="w-5 h-5 text-blue-600" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Ngày kết thúc</p>
+                        <p className="text-sm text-muted-foreground">
+                          Ngày kết thúc
+                        </p>
                         <p className="font-medium text-foreground">
-                          {project.endDate ? new Date(project.endDate).toLocaleDateString('vi-VN') : "Chưa có"}
+                          {project.endDate
+                            ? new Date(project.endDate).toLocaleDateString(
+                                "vi-VN"
+                              )
+                            : "Chưa có"}
                         </p>
                       </div>
                     </div>
@@ -300,9 +312,12 @@ export default function ProjectDetailPage({
                     <div className="flex items-center gap-3">
                       <Users className="w-5 h-5 text-blue-600" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Tình nguyện viên</p>
+                        <p className="text-sm text-muted-foreground">
+                          Tình nguyện viên
+                        </p>
                         <p className="font-medium text-foreground">
-                          {project.currentVolunteers}/{project.requiredVolunteers}
+                          {project.currentVolunteers}/
+                          {project.requiredVolunteers}
                         </p>
                       </div>
                     </div>
@@ -313,13 +328,25 @@ export default function ProjectDetailPage({
                 <div className="mb-8">
                   <div className="flex justify-between text-sm text-muted-foreground mb-2">
                     <span>Tiến độ tuyển tình nguyện viên</span>
-                    <span>{Math.round((project.currentVolunteers / project.requiredVolunteers) * 100)}%</span>
+                    <span>
+                      {Math.round(
+                        (project.currentVolunteers /
+                          project.requiredVolunteers) *
+                          100
+                      )}
+                      %
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <div
                       className="bg-blue-600 h-3 rounded-full transition-all duration-300"
                       style={{
-                        width: `${Math.min(100, (project.currentVolunteers / project.requiredVolunteers) * 100)}%`
+                        width: `${Math.min(
+                          100,
+                          (project.currentVolunteers /
+                            project.requiredVolunteers) *
+                            100
+                        )}%`,
                       }}
                     />
                   </div>
@@ -328,7 +355,9 @@ export default function ProjectDetailPage({
                 {/* Categories */}
                 {project.categories && project.categories.length > 0 && (
                   <div className="mb-8">
-                    <h2 className="text-lg font-semibold text-foreground mb-3">Danh mục</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-3">
+                      Danh mục
+                    </h2>
                     <div className="flex flex-wrap gap-3">
                       {project.categories.map((cat: any) => (
                         <div
@@ -336,7 +365,7 @@ export default function ProjectDetailPage({
                           className="px-4 py-3 rounded-lg border flex items-center gap-3"
                           style={{
                             backgroundColor: `${cat.categoryColor}10`,
-                            borderColor: `${cat.categoryColor}30`
+                            borderColor: `${cat.categoryColor}30`,
                           }}
                         >
                           <div
@@ -344,11 +373,19 @@ export default function ProjectDetailPage({
                             style={{ backgroundColor: cat.categoryColor }}
                           >
                             <span className="text-xs text-white">
-                              {cat.categoryIcon ? cat.categoryIcon.replace('fa-', '').charAt(0).toUpperCase() : 'C'}
+                              {cat.categoryIcon
+                                ? cat.categoryIcon
+                                    .replace("fa-", "")
+                                    .charAt(0)
+                                    .toUpperCase()
+                                : "C"}
                             </span>
                           </div>
                           <div>
-                            <p className="font-medium" style={{ color: cat.categoryColor }}>
+                            <p
+                              className="font-medium"
+                              style={{ color: cat.categoryColor }}
+                            >
                               {cat.categoryName}
                             </p>
                           </div>
@@ -361,11 +398,17 @@ export default function ProjectDetailPage({
                 {/* Timestamps */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                   <div>
-                    <p>Ngày tạo: {new Date(project.createdAt).toLocaleString('vi-VN')}</p>
+                    <p>
+                      Ngày tạo:{" "}
+                      {new Date(project.createdAt).toLocaleString("vi-VN")}
+                    </p>
                   </div>
                   {project.updatedAt && (
                     <div>
-                      <p>Cập nhật lần cuối: {new Date(project.updatedAt).toLocaleString('vi-VN')}</p>
+                      <p>
+                        Cập nhật lần cuối:{" "}
+                        {new Date(project.updatedAt).toLocaleString("vi-VN")}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -380,7 +423,7 @@ export default function ProjectDetailPage({
                   Quản lý đơn đăng ký
                 </Link>
               </Button>
-              
+
               <Button variant="outline" asChild className="flex-1">
                 <Link href={`/programs/${id}`} target="_blank">
                   <Globe className="w-4 h-4 mr-2" />

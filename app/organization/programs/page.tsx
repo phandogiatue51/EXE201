@@ -61,7 +61,6 @@ export default function ProjectsPage() {
         status: statusFilter !== "all" ? statusFilter : undefined,
       };
 
-      // Add category filter if any selected
       if (categoryFilter.length > 0) {
         filter.categoryIds = categoryFilter;
       }
@@ -78,7 +77,6 @@ export default function ProjectsPage() {
     }
   }, [organizationId, debouncedSearch, statusFilter, typeFilter, categoryFilter]);
 
-  // Fetch categories
   const fetchCategories = useCallback(async () => {
     try {
       const categories = await categoryAPI.getAll();
@@ -89,14 +87,12 @@ export default function ProjectsPage() {
     }
   }, []);
 
-  // Initial load
   useEffect(() => {
     if (organizationId) {
       fetchCategories();
     }
   }, [organizationId, fetchCategories]);
 
-  // Fetch projects when filters change
   useEffect(() => {
     if (organizationId) {
       fetchProjects();
@@ -108,7 +104,6 @@ export default function ProjectsPage() {
 
     try {
       await projectAPI.delete(id);
-      // Refresh the list
       fetchProjects();
     } catch (error) {
       console.error("Error deleting project:", error);
@@ -116,14 +111,11 @@ export default function ProjectsPage() {
     }
   };
 
-  // Get unique types and statuses for filters
   const uniqueTypes = [...new Set(projects.map(p => p.type))];
   const uniqueStatuses = [...new Set(projects.map(p => p.status))];
 
-  // Filtered projects count
   const filteredCount = projects.length;
 
-  // Helper function to format date
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('vi-VN');
@@ -134,11 +126,9 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
 
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
-          {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
               <h1 className="text-3xl font-bold text-foreground">Quản lý chương trình</h1>

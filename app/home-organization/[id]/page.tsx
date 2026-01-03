@@ -10,7 +10,7 @@ import { Organization, Project } from "../../../lib/type";
 import { OrganizationView } from "@/components/organization/OrganizationForm";
 import { ProjectFilters } from "@/components/organization/ProjectFilter";
 import { ProjectList } from "@/components/homepage/ProjectList";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { ProjectFilterDto } from "@/lib/filter-type";
 
 export default function OrganizationDetailPage({
@@ -35,7 +35,6 @@ export default function OrganizationDetailPage({
 
   const fetchCategories = async () => {
     try {
-      // You'll need to implement this API call
       const categories = await categoryAPI.getAll();
       setAvailableCategories(categories || []);
     } catch (error) {
@@ -130,7 +129,6 @@ export default function OrganizationDetailPage({
 
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
-          {/* Navigation */}
           <Button variant="ghost" asChild className="mb-6">
             <Link href="/home-organization">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -139,10 +137,8 @@ export default function OrganizationDetailPage({
           </Button>
 
           <div className="max-w-6xl mx-auto">
-            {/* Organization Info */}
             <OrganizationView organization={organization} />
 
-            {/* Projects Section */}
             <div className="mt-12">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>

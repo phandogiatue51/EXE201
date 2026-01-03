@@ -192,7 +192,6 @@ export default function EditEmployeePage({
   if (loadingEmployee) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
         <main className="flex-1 container mx-auto px-4 py-12">
           <p className="text-muted-foreground">Đang tải thông tin nhân sự...</p>
         </main>
@@ -203,7 +202,6 @@ export default function EditEmployeePage({
   if (!initialData) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
         <main className="flex-1 container mx-auto px-4 py-12">
           <p className="text-muted-foreground">Không tìm thấy nhân sự</p>
         </main>

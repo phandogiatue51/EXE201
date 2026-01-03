@@ -91,13 +91,6 @@ export default function ProjectsPage() {
                 Quản lý tất cả các chương trình tình nguyện
               </p>
             </div>
-            
-            <Button asChild className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]">
-              <Link href="/admin/programs/new">
-                <PlusCircle className="w-4 h-4 mr-2" />
-                Thêm chương trình
-              </Link>
-            </Button>
           </div>
 
           {/* Filters */}

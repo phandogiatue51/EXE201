@@ -11,32 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Upload, Loader2, FolderOpen } from "lucide-react";
-import { Category } from "@/lib/type";
-
-interface CertificateFormProps {
-  formData: {
-    certificateName: string;
-    certificateNumber: string;
-    categoryId: string;
-    issuingOrganization: string;
-    issueDate: string;
-    expiryDate: string;
-    description: string;
-  };
-  categories: Category[];
-  loadingCategories: boolean;
-  imagePreview: string | null;
-  loading: boolean;
-  isViewMode?: boolean;
-  onInputChange?: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => void;
-  onCategoryChange?: (value: string) => void;
-  onImageChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onImageRemove?: () => void;
-  onSubmit?: (e: React.FormEvent) => void;
-  submitText?: string;
-}
+import { CertificateFormProps} from "@/lib/interface/CertificateFormProps"
 
 export default function CertificateForm({
   formData,

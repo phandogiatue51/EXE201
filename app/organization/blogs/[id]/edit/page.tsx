@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { BlogForm } from "../../../../../components/organization/blogs/BlogForm";
-import { Header } from "@/components/header";
 import { BlogPost } from "@/lib/type";
 import { blogAPI } from "@/services/api";
 import { useAuth } from "@/hooks/use-auth";
@@ -46,7 +45,6 @@ export default function EditBlogPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
         <main className="flex-1 container mx-auto px-4 py-12">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6085F0]"></div>
@@ -59,7 +57,6 @@ export default function EditBlogPage() {
   if (error) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
         <main className="flex-1">
           <div className="container mx-auto px-4 py-8">
             <div className="text-center py-12">
@@ -74,7 +71,6 @@ export default function EditBlogPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
       
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
