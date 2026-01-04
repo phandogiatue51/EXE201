@@ -29,7 +29,7 @@ export default function OrganizationDashboardPage() {
             </p>
           </div>
           <Button variant="secondary" asChild>
-            <Link href="/organization/create-program">
+            <Link href="/organization/programs/new">
               Tạo chương trình mới
             </Link>
           </Button>
@@ -121,7 +121,7 @@ export default function OrganizationDashboardPage() {
               className="w-full mt-6 bg-[#6085F0] hover:opacity-90"
               asChild
             >
-              <Link href="/organization/create-program">
+              <Link href="/organization/programs/new">
                 Tạo chương trình mới
               </Link>
             </Button>

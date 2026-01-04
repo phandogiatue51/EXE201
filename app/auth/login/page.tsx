@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   const { login: apiLogin, loading: authLoading, error: authError } = useAuth();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -23,13 +23,15 @@ export default function LoginPage() {
 
     try {
       const result = await apiLogin(email, password);
-      
+
       console.log("Login successful:", result);
-      
     } catch (err) {
       console.error("Login error:", err);
-      
-      const errorMessage = (err as any)?.message || (err as any)?.toString() || "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.";
+
+      const errorMessage =
+        (err as any)?.message ||
+        (err as any)?.toString() ||
+        "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -66,7 +68,9 @@ export default function LoginPage() {
               </label>
               <input
                 value={email}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setEmail(e.target.value)
+                }
                 placeholder="your@email.com"
                 className="w-full px-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6085F0] bg-background text-foreground"
                 required
@@ -81,7 +85,9 @@ export default function LoginPage() {
               <input
                 type="password"
                 value={password}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setPassword(e.target.value)
+                }
                 placeholder="••••••••"
                 className="w-full px-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6085F0] bg-background text-foreground"
                 required
@@ -106,6 +112,15 @@ export default function LoginPage() {
                 className="text-[#6085F0] hover:underline font-semibold"
               >
                 Đăng ký ngay
+              </Link>
+            </p>
+            <p className="text-muted-foreground mt-2">
+              Bạn đại diện cho tổ chức?{" "}
+              <Link
+                href="/auth/organization-signup"
+                className="text-[#6085F0] hover:underline font-semibold"
+              >
+                Đăng ký tổ chức
               </Link>
             </p>
           </div>

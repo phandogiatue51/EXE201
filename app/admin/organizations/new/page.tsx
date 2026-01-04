@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { organizationAPI } from "../../../../services/api";
-import { ArrowLeft, Upload, Building2, Mail, Phone, MapPin, Globe } from "lucide-react";
+import { ArrowLeft, Upload, Building2, Mail, Phone, MapPin, Globe, User } from "lucide-react";
 
 export default function CreateOrganizationPage() {
   const router = useRouter();
@@ -20,7 +20,17 @@ export default function CreateOrganizationPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [managerData, setManagerData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phoneNumber: "",
+    dateOfBirth: "",
+    isFemale: false,
+    role: 0,
+  });
+
+  const [organizationData, setOrganizationData] = useState({
     name: "",
     description: "",
     type: 0,
@@ -30,15 +40,25 @@ export default function CreateOrganizationPage() {
     address: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'type' ? parseInt(value as string) : value
-    }));
+  const handleManagerChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setManagerData({
+      ...managerData,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleOrganizationChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setOrganizationData({
+      ...organizationData,
+      [name]: name === "type" ? parseInt(value as string) : value,
+    });
+  };
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
@@ -56,31 +76,36 @@ export default function CreateOrganizationPage() {
 
     try {
       const formDataToSend = new FormData();
-      
-      // Append form data (use backend field names expected by the API)
-      const keyMap: Record<string, string> = {
-        name: 'Name',
-        description: 'Description',
-        type: 'Type',
-        website: 'Website',
-        email: 'Email',
-        phoneNumber: 'PhoneNumber',
-        address: 'Address',
-      };
 
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== undefined && value !== '') {
-          const mapped = keyMap[key] || key;
-          formDataToSend.append(mapped, value.toString());
-        }
-      });
+      // Append Manager data
+      formDataToSend.append("Manager.Name", managerData.name);
+      formDataToSend.append("Manager.Email", managerData.email);
+      formDataToSend.append("Manager.Password", managerData.password);
 
-      // Append image file if exists (match backend DTO property name)
+      if (managerData.phoneNumber) {
+        formDataToSend.append("Manager.PhoneNumber", managerData.phoneNumber);
+      }
+      if (managerData.dateOfBirth) {
+        formDataToSend.append("Manager.DateOfBirth", managerData.dateOfBirth);
+      }
+      formDataToSend.append("Manager.IsFemale", managerData.isFemale.toString());
+      formDataToSend.append("Manager.Role", managerData.role.toString());
+
+      // Append Organization data
+      formDataToSend.append("Name", organizationData.name);
+      formDataToSend.append("Description", organizationData.description);
+      formDataToSend.append("Type", organizationData.type.toString());
+      formDataToSend.append("Website", organizationData.website);
+      formDataToSend.append("Email", organizationData.email);
+      formDataToSend.append("PhoneNumber", organizationData.phoneNumber);
+      formDataToSend.append("Address", organizationData.address);
+
+      // Append image file if exists
       if (imageFile) {
-        formDataToSend.append('ImageFile', imageFile);
+        formDataToSend.append("ImageFile", imageFile);
       }
 
-      await organizationAPI.create(formDataToSend);
+      await organizationAPI.createWithManager(formDataToSend);
       router.push("/admin/organizations");
       router.refresh();
     } catch (error) {
@@ -112,161 +137,302 @@ export default function CreateOrganizationPage() {
             </Link>
           </Button>
 
-          <div className="max-w-2xl mx-auto">
-            <Card className="p-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Thêm tổ chức mới</h1>
+          <div className="max-w-4xl mx-auto">
+            <Card className="p-8 border-[#77E5C8]">
+              <h1 className="text-3xl font-bold text-foreground mb-2">Thêm tổ chức mới</h1>
+              <p className="text-muted-foreground mb-8">
+                Tạo tổ chức mới với thông tin người quản lý
+              </p>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Logo Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Logo tổ chức
-                  </label>
-                  <div className="flex items-center gap-6">
-                    <div className="w-32 h-32 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
-                      {imagePreview ? (
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Building2 className="w-12 h-12 text-gray-400" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <input
-                        ref={fileInputRef}
-                        id="logoInput"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Manager Information Section */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    Thông tin người quản lý
+                  </h2>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Họ và tên
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        name="name"
+                        value={managerData.name}
+                        onChange={handleManagerChange}
+                        placeholder="Nguyễn Văn A"
+                        required
+                        disabled={loading}
                       />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="cursor-pointer"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <Upload className="w-4 h-4 mr-2" />
-                        Tải lên logo
-                      </Button>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        PNG, JPG, GIF tối đa 5MB
-                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Email
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <Input
+                        type="email"
+                        name="email"
+                        value={managerData.email}
+                        onChange={handleManagerChange}
+                        placeholder="manager@email.com"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Mật khẩu
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <Input
+                        type="password"
+                        name="password"
+                        value={managerData.password}
+                        onChange={handleManagerChange}
+                        placeholder="••••••••"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Số điện thoại
+                      </label>
+                      <Input
+                        type="tel"
+                        name="phoneNumber"
+                        value={managerData.phoneNumber}
+                        onChange={handleManagerChange}
+                        placeholder="0123456789"
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Ngày sinh
+                      </label>
+                      <Input
+                        type="date"
+                        name="dateOfBirth"
+                        value={managerData.dateOfBirth}
+                        onChange={handleManagerChange}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Giới tính
+                      </label>
+                      <div className="flex items-center space-x-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="isFemale"
+                            checked={managerData.isFemale === true}
+                            onChange={() =>
+                              setManagerData({ ...managerData, isFemale: true })
+                            }
+                            className="mr-2"
+                            disabled={loading}
+                          />
+                          Nữ
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="isFemale"
+                            checked={managerData.isFemale === false}
+                            onChange={() =>
+                              setManagerData({ ...managerData, isFemale: false })
+                            }
+                            className="mr-2"
+                            disabled={loading}
+                          />
+                          Nam
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Basic Info */}
-                <div className="space-y-4">
+                {/* Organization Information Section */}
+                <div className="space-y-4 pt-6 border-t">
+                  <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                    <Building2 className="w-5 h-5" />
+                    Thông tin tổ chức
+                  </h2>
+
+                  {/* Logo Upload */}
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      Tên tổ chức *
+                      Logo tổ chức
                     </label>
-                    <Input
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Nhập tên tổ chức"
-                      required
-                    />
+                    <div className="flex items-center gap-6">
+                      <div className="w-32 h-32 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                        {imagePreview ? (
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Building2 className="w-12 h-12 text-gray-400" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          ref={fileInputRef}
+                          id="logoInput"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="hidden"
+                          disabled={loading}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="cursor-pointer"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={loading}
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          Tải lên logo
+                        </Button>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          PNG, JPG, GIF tối đa 5MB
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Loại tổ chức *
-                    </label>
-                    <select
-                      name="type"
-                      value={formData.type}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border rounded-lg bg-background"
-                      required
-                    >
-                      <option value="">Chọn loại tổ chức</option>
-                      {organizationTypes.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Tên tổ chức
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <Input
+                        name="name"
+                        value={organizationData.name}
+                        onChange={handleOrganizationChange}
+                        placeholder="Nhập tên tổ chức"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Mô tả
-                    </label>
-                    <Textarea
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      placeholder="Mô tả về tổ chức..."
-                      rows={4}
-                    />
-                  </div>
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Loại tổ chức
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <select
+                        name="type"
+                        value={organizationData.type}
+                        onChange={handleOrganizationChange}
+                        className="w-full px-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6085F0] bg-background text-foreground"
+                        required
+                        disabled={loading}
+                      >
+                        <option value="">Chọn loại tổ chức</option>
+                        {organizationTypes.map((type) => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                {/* Contact Info */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-foreground">Thông tin liên hệ</h3>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      <Mail className="w-4 h-4 inline mr-2" />
-                      Email *
-                    </label>
-                    <Input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="contact@organization.com"
-                      required
-                    />
-                  </div>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Mô tả
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <Textarea
+                        name="description"
+                        value={organizationData.description}
+                        onChange={handleOrganizationChange}
+                        placeholder="Mô tả về tổ chức..."
+                        rows={4}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      <Phone className="w-4 h-4 inline mr-2" />
-                      Số điện thoại *
-                    </label>
-                    <Input
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleInputChange}
-                      placeholder="0123 456 789"
-                      required
-                    />
-                  </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        <Mail className="w-4 h-4 inline mr-2" />
+                        Email
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <Input
+                        type="email"
+                        name="email"
+                        value={organizationData.email}
+                        onChange={handleOrganizationChange}
+                        placeholder="contact@organization.com"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      <MapPin className="w-4 h-4 inline mr-2" />
-                      Địa chỉ *
-                    </label>
-                    <Input
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      placeholder="Số nhà, đường, quận/huyện, thành phố"
-                      required
-                    />
-                  </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        <Phone className="w-4 h-4 inline mr-2" />
+                        Số điện thoại
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <Input
+                        name="phoneNumber"
+                        value={organizationData.phoneNumber}
+                        onChange={handleOrganizationChange}
+                        placeholder="0123 456 789"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      <Globe className="w-4 h-4 inline mr-2" />
-                      Website *
-                    </label>
-                    <Input
-                      name="website"
-                      value={formData.website}
-                      onChange={handleInputChange}
-                      placeholder="https://example.com"
-                      required
-                    />
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        <MapPin className="w-4 h-4 inline mr-2" />
+                        Địa chỉ
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <Input
+                        name="address"
+                        value={organizationData.address}
+                        onChange={handleOrganizationChange}
+                        placeholder="Số nhà, đường, quận/huyện, thành phố"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        <Globe className="w-4 h-4 inline mr-2" />
+                        Website
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <Input
+                        name="website"
+                        value={organizationData.website}
+                        onChange={handleOrganizationChange}
+                        placeholder="https://example.com"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -282,7 +448,7 @@ export default function CreateOrganizationPage() {
                   </Button>
                   <Button
                     type="submit"
-                    className="flex-1 bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]"
+                    className="flex-1 gradient-primary hover:opacity-90 text-white"
                     disabled={loading}
                   >
                     {loading ? "Đang tạo..." : "Tạo tổ chức"}

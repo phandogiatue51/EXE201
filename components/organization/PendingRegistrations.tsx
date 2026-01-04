@@ -24,11 +24,11 @@ export default function PendingRegistrations({
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-900">Đơn đăng ký chờ duyệt</h3>
-        <Link href="#" className="text-sm text-[#6085F0] hover:underline">
+        <Link href="/organization/applications" className="text-sm text-[#6085F0] hover:underline">
           Xem tất cả
         </Link>
       </div>
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {registrations.length > 0 ? (
           registrations.map((reg) => (
             <div
@@ -70,9 +70,11 @@ export default function PendingRegistrations({
             </div>
           ))
         ) : (
-          <p className="text-gray-500 text-center py-4">
-            Không có đơn đăng ký chờ duyệt
-          </p>
+          <div className="col-span-2">
+            <p className="text-gray-500 text-center py-4">
+              Không có đơn đăng ký chờ duyệt
+            </p>
+          </div>
         )}
       </div>
     </Card>
