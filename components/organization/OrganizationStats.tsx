@@ -26,7 +26,7 @@ export default function OrganizationStats({ stats }: OrganizationStatsProps) {
       value: stats.programs,
       icon: Briefcase,
       color: "text-blue-600",
-      subtext: `${stats.activePrograms} đang hoạt động`,
+      subtext: null,
     },
     {
       title: "Đơn đăng ký",

@@ -231,6 +231,15 @@ export default function SignupPage() {
                 Đăng nhập ngay
               </Link>
             </p>
+            <p className="text-muted-foreground mt-2">
+              Bạn đại diện cho tổ chức?{" "}
+              <Link
+                href="/auth/organization-signup"
+                className="text-[#6085F0] hover:underline font-semibold"
+              >
+                Đăng ký tổ chức
+              </Link>
+            </p>
           </div>
         </Card>
       </main>
