@@ -8,8 +8,8 @@ import { organizationAPI } from "../../../services/api";
 import { projectAPI, categoryAPI } from "../../../services/api";
 import { Organization, Project } from "../../../lib/type";
 import { OrganizationView } from "@/components/organization/OrganizationForm";
-import { ProjectFilters } from "@/components/organization/ProjectFilter";
-import { ProjectList } from "@/components/homepage/ProjectList";
+import { ProjectFilters } from "@/components/filter/ProjectFilter";
+import { ProjectList } from "@/components/list/ProjectList";
 import { ArrowLeft } from "lucide-react";
 import { ProjectFilterDto } from "@/lib/filter-type";
 

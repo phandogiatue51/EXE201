@@ -10,7 +10,7 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { organizationAPI } from "../../../services/api";
 import { Organization } from "../../../lib/type";
-import { OrganizationStatusBadge } from "@/components/organization/OrganizationStatusBadge";
+import { OrganizationStatusBadge } from "@/components/status-badge/OrganizationStatusBadge";
 import {
   PlusCircle,
   Eye,
@@ -38,15 +38,15 @@ export default function OrganizationsPage() {
     try {
       setLoading(true);
       const filter: any = {};
-      
+
       if (search.trim()) {
         filter.name = search;
       }
-      
+
       if (statusFilter !== "all") {
         filter.status = statusFilter;
       }
-      
+
       const data = await organizationAPI.filter(filter);
       setOrganizations(data);
     } catch (error) {
@@ -63,7 +63,7 @@ export default function OrganizationsPage() {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       fetchOrganizations();
-    }, 500); 
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [search, statusFilter, fetchOrganizations]);
@@ -81,30 +81,34 @@ export default function OrganizationsPage() {
   };
 
   const handleStatusChange = async (id: number, newStatus: number) => {
-    try {      
+    try {
       let rejectionReason: string | undefined;
-      
-      if (newStatus === 3) { 
+
+      if (newStatus === 3) {
         const input = prompt("Nhập lý do từ chối:");
-        if (!input) return; 
+        if (!input) return;
         rejectionReason = input;
       }
-      
+
       const verifyData = {
         Status: newStatus,
         AdminId: adminId || 1,
-        ...(rejectionReason && { RejectionReason: rejectionReason })
+        ...(rejectionReason && { RejectionReason: rejectionReason }),
       };
-      
+
       await organizationAPI.verify(id, verifyData);
-      
-      setOrganizations(organizations.map(org =>
-        org.id === id ? { 
-          ...org, 
-          status: newStatus,
-          rejectionReason: rejectionReason || org.rejectionReason 
-        } : org
-      ));
+
+      setOrganizations(
+        organizations.map((org) =>
+          org.id === id
+            ? {
+                ...org,
+                status: newStatus,
+                rejectionReason: rejectionReason || org.rejectionReason,
+              }
+            : org
+        )
+      );
       alert("Xác thực tổ chức thành công");
       router.push(`/admin/organizations`);
       router.refresh();
@@ -177,8 +181,8 @@ export default function OrganizationsPage() {
               {/* Counter */}
               <div className="md:col-span-3 flex items-center justify-end">
                 <span className="text-muted-foreground">
-                  Hiển thị {organizations.length} /{" "}
-                  {organizations.length} tổ chức
+                  Hiển thị {organizations.length} / {organizations.length} tổ
+                  chức
                 </span>
               </div>
             </div>

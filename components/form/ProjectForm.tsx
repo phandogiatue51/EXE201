@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ProjectStatusBadge,
   toProjectStatus,
-} from "@/components/organization/ProjectStatusBadge";
+} from "@/components/status-badge/ProjectStatusBadge";
 
 interface ProjectFormProps {
   formData: any;

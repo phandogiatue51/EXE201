@@ -9,7 +9,7 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI, categoryAPI } from "../../../../../services/api";
 import { ArrowLeft } from "lucide-react";
-import ProjectForm from "../../../../../components/organization/ProjectForm";
+import ProjectForm from "../../../../../components/form/ProjectForm";
 
 export default function EditProjectPage({
   params,
@@ -62,7 +62,7 @@ export default function EditProjectPage({
         setLoadingProject(true);
         const data = await projectAPI.getById(parseInt(id));
         setInitialData(data);
-        
+
         setFormData({
           title: data.title,
           description: data.description,
@@ -74,17 +74,18 @@ export default function EditProjectPage({
           requirements: data.requirements,
           type: data.type,
           location: data.location || "",
-          startDate: data.startDate 
-            ? new Date(data.startDate).toISOString().split('T')[0]
+          startDate: data.startDate
+            ? new Date(data.startDate).toISOString().split("T")[0]
             : "",
-          endDate: data.endDate 
-            ? new Date(data.endDate).toISOString().split('T')[0]
+          endDate: data.endDate
+            ? new Date(data.endDate).toISOString().split("T")[0]
             : "",
           requiredVolunteers: data.requiredVolunteers,
-          categories: data.categories?.map((c: any) => c.categoryId || c.id) || [],
+          categories:
+            data.categories?.map((c: any) => c.categoryId || c.id) || [],
           status: data.status,
         });
-        
+
         if (data.imageUrl) {
           setImagePreview(data.imageUrl);
         }
@@ -116,24 +117,28 @@ export default function EditProjectPage({
     fetchCategories();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' ? parseInt(value) : value
+      [name]: type === "number" ? parseInt(value) : value,
     }));
   };
 
   const handleCategoryToggle = (categoryId: number, checked: boolean) => {
     if (checked) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        categories: [...prev.categories, categoryId]
+        categories: [...prev.categories, categoryId],
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        categories: prev.categories.filter(id => id !== categoryId)
+        categories: prev.categories.filter((id) => id !== categoryId),
       }));
     }
   };
@@ -145,13 +150,13 @@ export default function EditProjectPage({
         alert("Kích thước file không được vượt quá 5MB");
         return;
       }
-      
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
       if (!validTypes.includes(file.type)) {
         alert("Chỉ chấp nhận file ảnh (JPEG, PNG, GIF)");
         return;
       }
-      
+
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -199,17 +204,17 @@ export default function EditProjectPage({
         benefits: formData.benefits,
         requirements: formData.requirements,
         type: formData.type,
-        location: formData.location || '',
+        location: formData.location || "",
         status: formData.status,
         organizationId: organizationId,
         requiredVolunteers: formData.requiredVolunteers,
-        categoryIds: formData.categories, 
+        categoryIds: formData.categories,
       };
 
       if (formData.startDate) {
         projectData.startDate = new Date(formData.startDate).toISOString();
       }
-      
+
       if (formData.endDate) {
         projectData.endDate = new Date(formData.endDate).toISOString();
       }
@@ -219,9 +224,9 @@ export default function EditProjectPage({
         projectData.imageUrl = imageFile;
       }
 
-      console.log('Updating project with data:', projectData);
-      console.log('Categories array:', projectData.categoryIds);
-      
+      console.log("Updating project with data:", projectData);
+      console.log("Categories array:", projectData.categoryIds);
+
       await projectAPI.update(parseInt(id), projectData);
 
       alert("Cập nhật chương trình thành công!");
@@ -229,21 +234,23 @@ export default function EditProjectPage({
       router.refresh();
     } catch (error: any) {
       console.error("Error updating project:", error);
-      
+
       let errorMessage = "Không thể cập nhật chương trình. Vui lòng thử lại.";
-      
+
       if (error?.data?.errors) {
         const validationErrors = error.data.errors;
         const errorList = Object.entries(validationErrors)
-          .map(([field, errors]) => `${field}: ${(errors as string[]).join(', ')}`)
-          .join('\n');
+          .map(
+            ([field, errors]) => `${field}: ${(errors as string[]).join(", ")}`
+          )
+          .join("\n");
         errorMessage = `Lỗi xác thực:\n${errorList}`;
       } else if (error?.message) {
         errorMessage = error.message;
       } else if (error?.data?.message) {
         errorMessage = error.data.message;
       }
-      
+
       alert(errorMessage);
     } finally {
       setLoading(false);
@@ -262,9 +269,21 @@ export default function EditProjectPage({
 
   const statusOptions = [
     { value: 0, label: "Bản nháp", color: "bg-gray-100 text-gray-800" },
-    { value: 1, label: "Đang lên kế hoạch", color: "bg-blue-100 text-blue-800" },
-    { value: 2, label: "Đang tuyển dụng", color: "bg-yellow-100 text-yellow-800" },
-    { value: 3, label: "Đang triển khai", color: "bg-green-100 text-green-800" },
+    {
+      value: 1,
+      label: "Đang lên kế hoạch",
+      color: "bg-blue-100 text-blue-800",
+    },
+    {
+      value: 2,
+      label: "Đang tuyển dụng",
+      color: "bg-yellow-100 text-yellow-800",
+    },
+    {
+      value: 3,
+      label: "Đang triển khai",
+      color: "bg-green-100 text-green-800",
+    },
     { value: 4, label: "Hoàn thành", color: "bg-purple-100 text-purple-800" },
     { value: 5, label: "Đã hủy", color: "bg-red-100 text-red-800" },
   ];
@@ -291,7 +310,6 @@ export default function EditProjectPage({
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <Button variant="ghost" asChild className="mb-6">
@@ -303,8 +321,10 @@ export default function EditProjectPage({
 
           <div className="max-w-2xl mx-auto">
             <Card className="p-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Chỉnh sửa chương trình</h1>
-              
+              <h1 className="text-2xl font-bold text-foreground mb-2">
+                Chỉnh sửa chương trình
+              </h1>
+
               <ProjectForm
                 formData={formData}
                 imagePreview={imagePreview}

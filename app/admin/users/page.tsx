@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AccountBadge } from "@/components/AccountBadge";
+import { AccountBadge } from "@/components/status-badge/AccountBadge";
 import {
   Users,
   Search,
@@ -35,7 +35,7 @@ export default function UsersPage() {
       const filter: any = {};
 
       if (search.trim()) {
-        filter.name = search; 
+        filter.name = search;
       }
 
       if (roleFilter !== "all") {

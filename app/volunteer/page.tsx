@@ -4,8 +4,8 @@ import { useState, useEffect,  } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { StatsCards } from "../../components/volunteer/stats-cards";
-import { ProgramsList } from "../../components/volunteer/programs-list";
-import { CertificatesList } from "../../components/volunteer/certificates-list";
+import { ProgramsList } from "../../components/list/programs-list";
+import { CertificatesList } from "../../components/list/certificates-list";
 import { ProfileSidebar } from "../../components/volunteer/profile-sidebar";
 import { accountAPI, certificateAPI, applicationAPI, projectAPI } from "@/services/api";
 import { VolunteerApplication, Certificate, Account, Project } from "../../lib/type"

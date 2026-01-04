@@ -136,7 +136,6 @@ export default function CertificateForm({
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              <FolderOpen className="w-4 h-4 inline mr-2" />
               Phân loại *
             </label>
             {readOnly ? (

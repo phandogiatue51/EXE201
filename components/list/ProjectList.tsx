@@ -5,7 +5,7 @@ import {
   ProjectStatusBadge,
   ProjectStatus,
   toProjectStatus,
-} from "@/components/organization/ProjectStatusBadge";
+} from "@/components/status-badge/ProjectStatusBadge";
 import { Project } from "@/lib/type";
 import { Calendar, MapPin, Users, Tag, Building2 } from "lucide-react";
 import Link from "next/link";

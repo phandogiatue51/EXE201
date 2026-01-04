@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { staffAPI } from "../../../../services/api";
 import { ArrowLeft, UserPlus } from "lucide-react";
-import StaffForm from "../../../../components/organization/StaffForm";
+import StaffForm from "../../../../components/form/StaffForm";
 
 export default function CreateEmployeePage() {
   const router = useRouter();
@@ -37,9 +37,9 @@ export default function CreateEmployeePage() {
     if (OrganizationId) {
       const orgIdNumber = parseInt(OrganizationId);
       if (!isNaN(orgIdNumber)) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          organizationId: orgIdNumber
+          organizationId: orgIdNumber,
         }));
       }
     }
@@ -49,7 +49,7 @@ export default function CreateEmployeePage() {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
-      
+
       // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -64,39 +64,43 @@ export default function CreateEmployeePage() {
     setImagePreview(null);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value, type } = e.target;
 
     if (type === "checkbox" || name === "isActive") {
       const target = e.target as HTMLInputElement;
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: name === "isActive" ? value === "true" : target.checked
+        [name]: name === "isActive" ? value === "true" : target.checked,
       }));
     } else if (name === "role") {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: parseInt(value)
+        [name]: parseInt(value),
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
 
   const handleGenderChange = (isFemale: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      isFemale
+      isFemale,
     }));
   };
 
   const handleRoleChange = (role: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      role
+      role,
     }));
   };
 
@@ -118,28 +122,34 @@ export default function CreateEmployeePage() {
 
     try {
       const formDataToSend = new FormData();
-      
-      formDataToSend.append('NewAccount.Name', formData.name);
-      formDataToSend.append('NewAccount.Email', formData.email);
-      formDataToSend.append('NewAccount.Password', formData.password);
-      formDataToSend.append('NewAccount.IsFemale', formData.isFemale.toString());
-      
+
+      formDataToSend.append("NewAccount.Name", formData.name);
+      formDataToSend.append("NewAccount.Email", formData.email);
+      formDataToSend.append("NewAccount.Password", formData.password);
+      formDataToSend.append(
+        "NewAccount.IsFemale",
+        formData.isFemale.toString()
+      );
+
       if (formData.phoneNumber) {
-        formDataToSend.append('NewAccount.PhoneNumber', formData.phoneNumber);
+        formDataToSend.append("NewAccount.PhoneNumber", formData.phoneNumber);
       }
-      
+
       if (formData.dateOfBirth) {
-        formDataToSend.append('NewAccount.DateOfBirth', formData.dateOfBirth);
+        formDataToSend.append("NewAccount.DateOfBirth", formData.dateOfBirth);
       }
-      
+
       if (imageFile) {
-        formDataToSend.append('NewAccount.ProfileImageUrl', imageFile);
+        formDataToSend.append("NewAccount.ProfileImageUrl", imageFile);
       } else {
-        formDataToSend.append('NewAccount.ProfileImageUrl', '');
+        formDataToSend.append("NewAccount.ProfileImageUrl", "");
       }
-      
-      formDataToSend.append('OrganizationId', formData.organizationId.toString());
-      formDataToSend.append('Role', formData.role.toString());
+
+      formDataToSend.append(
+        "OrganizationId",
+        formData.organizationId.toString()
+      );
+      formDataToSend.append("Role", formData.role.toString());
 
       await staffAPI.create(formDataToSend);
 
@@ -148,21 +158,27 @@ export default function CreateEmployeePage() {
       router.refresh();
     } catch (error: any) {
       console.error("Error creating employee:", error);
-  
     } finally {
       setLoading(false);
     }
   };
 
   const staffRoles = [
-    { value: 0, label: "Quản lý", description: "Quản lý toàn bộ tổ chức và nhân sự" },
-    { value: 1, label: "Người duyệt", description: "Duyệt đơn đăng ký chương trình" },
+    {
+      value: 0,
+      label: "Quản lý",
+      description: "Quản lý toàn bộ tổ chức và nhân sự",
+    },
+    {
+      value: 1,
+      label: "Người duyệt",
+      description: "Duyệt đơn đăng ký chương trình",
+    },
     { value: 2, label: "Nhân viên", description: "Thành viên thông thường" },
   ];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <Button variant="ghost" asChild className="mb-6">
@@ -179,7 +195,9 @@ export default function CreateEmployeePage() {
                   <UserPlus className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">Thêm nhân sự mới</h1>
+                  <h1 className="text-2xl font-bold text-foreground">
+                    Thêm nhân sự mới
+                  </h1>
                   <p className="text-muted-foreground">
                     Tạo tài khoản nhân sự cho tổ chức của bạn
                   </p>

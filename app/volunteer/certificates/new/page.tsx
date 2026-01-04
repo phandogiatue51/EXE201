@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { certificateAPI, categoryAPI } from "../../../../services/api";
 import { ArrowLeft, UserPlus } from "lucide-react";
-import CertificateForm from "@/components/volunteer/CertificateForm";
+import CertificateForm from "@/components/form/CertificateForm";
 import { Category } from "@/lib/type";
 
 export default function CreateCertificatePage() {
@@ -95,7 +95,10 @@ export default function CreateCertificatePage() {
       formDataToSend.append("CertificateName", formData.certificateName);
       formDataToSend.append("CertificateNumber", formData.certificateNumber);
       formDataToSend.append("CategoryId", formData.categoryId);
-      formDataToSend.append("IssuingOrganization", formData.issuingOrganization);
+      formDataToSend.append(
+        "IssuingOrganization",
+        formData.issuingOrganization
+      );
       formDataToSend.append("IssueDate", formData.issueDate);
 
       if (formData.expiryDate) {
