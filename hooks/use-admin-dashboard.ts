@@ -7,6 +7,34 @@ import {
 } from "@/services/api";
 import { Project, Account, Certificate, Organization } from "@/lib/type";
 
+// Helper function to calculate percentage change based on items created in last 30 days
+function calculateChange(total: number, items: any[], dateField: string = 'createdAt'): number {
+  if (total === 0 || items.length === 0) return 0;
+  
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  
+  const recentCount = items.filter((item: any) => {
+    const itemDate = new Date(item[dateField] || 0);
+    return itemDate >= thirtyDaysAgo;
+  }).length;
+  
+  // Calculate growth rate: compare recent (30 days) vs older (before 30 days)
+  const olderCount = total - recentCount;
+  
+  // If all items are recent (created in last 30 days), show 100%
+  if (olderCount === 0) {
+    return recentCount > 0 ? 100 : 0;
+  }
+  
+  // Growth rate: percentage of new items relative to old items
+  // Formula: (recent / older) * 100
+  const growthRate = (recentCount / olderCount) * 100;
+  
+  // Cap at 1000% to avoid extremely large numbers
+  return Math.min(Math.round(growthRate * 10) / 10, 1000);
+}
+
 interface AdminDashboardStats {
   volunteers: number;
   organizations: number;
@@ -14,6 +42,12 @@ interface AdminDashboardStats {
   certificates: number;
   pendingApprovals: number;
   activePrograms: number;
+  changes: {
+    volunteers: number;
+    organizations: number;
+    programs: number;
+    certificates: number;
+  };
 }
 
 export function useAdminDashboard() {
@@ -25,6 +59,12 @@ export function useAdminDashboard() {
     certificates: 0,
     pendingApprovals: 0,
     activePrograms: 0,
+    changes: {
+      volunteers: 0,
+      organizations: 0,
+      programs: 0,
+      certificates: 0,
+    },
   });
   
   const [recentPrograms, setRecentPrograms] = useState<Project[]>([]);
@@ -64,16 +104,28 @@ export function useAdminDashboard() {
           ? organizations.filter((org: Organization) => org.status === 0)
           : [];
 
-        // Get recent programs (last 5, sorted by createdAt)
+        // Get recent programs (last 3, sorted by createdAt)
         const sortedPrograms = [...allPrograms].sort((a: Project, b: Project) => {
           const dateA = new Date(a.createdAt || 0).getTime();
           const dateB = new Date(b.createdAt || 0).getTime();
           return dateB - dateA;
         });
-        setRecentPrograms(sortedPrograms.slice(0, 5));
+        setRecentPrograms(sortedPrograms.slice(0, 3));
 
         // Set pending organizations
         setPendingOrganizations(pendingOrgs.slice(0, 3));
+
+        // Calculate percentage changes based on items created in last 30 days
+        const volunteerAccounts = Array.isArray(accounts) 
+          ? accounts.filter((a: Account) => a.role === 0 || a.roleName?.toLowerCase().includes('volunteer'))
+          : [];
+        
+        const changes = {
+          volunteers: calculateChange(volunteers, volunteerAccounts, 'createdAt'),
+          organizations: calculateChange(orgCount, organizations, 'createAt'),
+          programs: calculateChange(allPrograms.length, allPrograms, 'createdAt'),
+          certificates: calculateChange(allCertificates.length, allCertificates, 'issueDate'),
+        };
 
         // Update stats
         setStats({
@@ -83,12 +135,13 @@ export function useAdminDashboard() {
           certificates: allCertificates.length,
           pendingApprovals: pendingOrgs.length,
           activePrograms: activeProgramsCount,
+          changes,
         });
 
         // Debug logging
         console.log('📊 Admin Dashboard Stats:', {
           volunteers,
-          organizations: orgAccounts,
+          organizations: orgCount,
           programs: allPrograms.length,
           certificates: allCertificates.length,
           pendingApprovals: pendingOrgs.length,
@@ -135,8 +188,20 @@ export function useAdminDashboard() {
         const dateB = new Date(b.createdAt || 0).getTime();
         return dateB - dateA;
       });
-      setRecentPrograms(sortedPrograms.slice(0, 5));
+      setRecentPrograms(sortedPrograms.slice(0, 3));
       setPendingOrganizations(pendingOrgs.slice(0, 3));
+
+      // Calculate percentage changes
+      const volunteerAccounts = Array.isArray(accounts) 
+        ? accounts.filter((a: Account) => a.role === 0 || a.roleName?.toLowerCase().includes('volunteer'))
+        : [];
+      
+      const changes = {
+        volunteers: calculateChange(volunteers, volunteerAccounts, 'createdAt'),
+        organizations: calculateChange(orgCount, organizations, 'createAt'),
+        programs: calculateChange(allPrograms.length, allPrograms, 'createdAt'),
+        certificates: calculateChange(allCertificates.length, allCertificates, 'issueDate'),
+      };
 
       setStats({
         volunteers,
@@ -145,6 +210,7 @@ export function useAdminDashboard() {
         certificates: allCertificates.length,
         pendingApprovals: pendingOrgs.length,
         activePrograms: activeProgramsCount,
+        changes,
       });
     } catch (error) {
       console.error("Error refreshing admin dashboard data:", error);
