@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
-import { ProjectDetailCard } from "@/components/ProjectDetailCard";
-import CertificateForm from "@/components/volunteer/CertificateForm";
+import { ProjectDetailCard } from "@/components/card/ProjectDetailCard";
+import CertificateForm from "@/components/form/CertificateForm";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import {

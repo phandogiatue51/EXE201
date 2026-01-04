@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { BlogPost } from "@/lib/type";
 import { blogAPI } from "@/services/api";
 import { useAuth } from "@/hooks/use-auth";
-import { BlogStatusBadge } from "@/components/BlogStatusBadge";
+import { BlogStatusBadge } from "@/components/status-badge/BlogStatusBadge";
 
 import { ArrowLeft, Edit, Calendar, User, Eye } from "lucide-react";
 

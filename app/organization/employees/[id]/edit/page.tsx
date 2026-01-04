@@ -9,7 +9,7 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { staffAPI } from "../../../../../services/api";
 import { ArrowLeft, UserCog } from "lucide-react";
-import StaffForm from "../../../../../components/organization/StaffForm";
+import StaffForm from "../../../../../components/form/StaffForm";
 
 export default function EditEmployeePage({
   params,
@@ -44,19 +44,19 @@ export default function EditEmployeePage({
         setLoadingEmployee(true);
         const data = await staffAPI.getById(parseInt(id));
         setInitialData(data);
-        
+
         setFormData({
           name: data.name || "",
           email: data.email || "",
           phoneNumber: data.phoneNumber || "",
-          dateOfBirth: data.dateOfBirth 
-            ? new Date(data.dateOfBirth).toISOString().split('T')[0]
+          dateOfBirth: data.dateOfBirth
+            ? new Date(data.dateOfBirth).toISOString().split("T")[0]
             : "",
           isFemale: data.isFemale || false,
           role: data.role || 2,
           isActive: data.isActive ?? true,
         });
-        
+
         if (data.profileImageUrl) {
           setImagePreview(data.profileImageUrl);
         }
@@ -70,39 +70,43 @@ export default function EditEmployeePage({
     fetchEmployee();
   }, [id]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value, type } = e.target;
 
     if (type === "checkbox" || name === "isActive") {
       const target = e.target as HTMLInputElement;
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: name === "isActive" ? value === "true" : target.checked
+        [name]: name === "isActive" ? value === "true" : target.checked,
       }));
     } else if (name === "role") {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: parseInt(value)
+        [name]: parseInt(value),
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
 
   const handleGenderChange = (isFemale: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      isFemale
+      isFemale,
     }));
   };
 
   const handleRoleChange = (role: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      role
+      role,
     }));
   };
 
@@ -129,29 +133,29 @@ export default function EditEmployeePage({
 
     try {
       const formDataToSend = new FormData();
-      
-      formDataToSend.append('Name', formData.name);
-      formDataToSend.append('Email', formData.email);
-      
+
+      formDataToSend.append("Name", formData.name);
+      formDataToSend.append("Email", formData.email);
+
       if (formData.phoneNumber) {
-        formDataToSend.append('PhoneNumber', formData.phoneNumber);
+        formDataToSend.append("PhoneNumber", formData.phoneNumber);
       }
-      
+
       if (formData.dateOfBirth) {
-        formDataToSend.append('DateOfBirth', formData.dateOfBirth);
+        formDataToSend.append("DateOfBirth", formData.dateOfBirth);
       }
-      
-      formDataToSend.append('IsFemale', formData.isFemale.toString());
-      
-      formDataToSend.append('Role', formData.role.toString());
-      formDataToSend.append('IsActive', formData.isActive.toString());
-      
+
+      formDataToSend.append("IsFemale", formData.isFemale.toString());
+
+      formDataToSend.append("Role", formData.role.toString());
+      formDataToSend.append("IsActive", formData.isActive.toString());
+
       if (imageFile) {
-        formDataToSend.append('ProfileImageUrl', imageFile);
+        formDataToSend.append("ProfileImageUrl", imageFile);
       } else if (imagePreview && !imageFile) {
       }
 
-      console.log('Updating employee with FormData:');
+      console.log("Updating employee with FormData:");
       for (let [key, value] of formDataToSend.entries()) {
         console.log(key, value instanceof File ? `File: ${value.name}` : value);
       }
@@ -163,12 +167,12 @@ export default function EditEmployeePage({
       router.refresh();
     } catch (error: any) {
       console.error("Error updating employee:", error);
-      
+
       let errorMessage = "Unable to update employee. Please try again.";
-      
+
       if (error?.response?.data) {
         const errorData = error.response.data;
-        if (typeof errorData === 'string') {
+        if (typeof errorData === "string") {
           errorMessage = errorData;
         } else if (errorData.message) {
           errorMessage = errorData.message;
@@ -176,7 +180,7 @@ export default function EditEmployeePage({
       } else if (error?.message) {
         errorMessage = error.message;
       }
-      
+
       alert(errorMessage);
     } finally {
       setLoading(false);
@@ -184,8 +188,16 @@ export default function EditEmployeePage({
   };
 
   const staffRoles = [
-    { value: 0, label: "Quản lý", description: "Quản lý toàn bộ tổ chức và nhân sự" },
-    { value: 1, label: "Người duyệt", description: "Duyệt đơn đăng ký chương trình" },
+    {
+      value: 0,
+      label: "Quản lý",
+      description: "Quản lý toàn bộ tổ chức và nhân sự",
+    },
+    {
+      value: 1,
+      label: "Người duyệt",
+      description: "Duyệt đơn đăng ký chương trình",
+    },
     { value: 2, label: "Nhân viên", description: "Thành viên thông thường" },
   ];
 
@@ -229,7 +241,9 @@ export default function EditEmployeePage({
                   <UserCog className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">Chỉnh sửa nhân sự</h1>
+                  <h1 className="text-2xl font-bold text-foreground">
+                    Chỉnh sửa nhân sự
+                  </h1>
                   <p className="text-muted-foreground">
                     Cập nhật thông tin nhân sự
                   </p>

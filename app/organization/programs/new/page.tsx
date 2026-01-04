@@ -1,4 +1,4 @@
-    "use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI, categoryAPI } from "../../../../services/api";
 import { ArrowLeft } from "lucide-react";
-import ProjectForm from "../../../../components/organization/ProjectForm";
+import ProjectForm from "../../../../components/form/ProjectForm";
 
 export default function CreateProjectPage() {
   const router = useRouter();
@@ -19,7 +19,7 @@ export default function CreateProjectPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [organizationId, setOrganizationId] = useState<number>(0);
-  
+
   const [categories, setCategories] = useState<any[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
@@ -67,24 +67,28 @@ export default function CreateProjectPage() {
     fetchCategories();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' ? parseInt(value) : value
+      [name]: type === "number" ? parseInt(value) : value,
     }));
   };
 
   const handleCategoryToggle = (categoryId: number, checked: boolean) => {
     if (checked) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        categories: [...prev.categories, categoryId]
+        categories: [...prev.categories, categoryId],
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        categories: prev.categories.filter(id => id !== categoryId)
+        categories: prev.categories.filter((id) => id !== categoryId),
       }));
     }
   };
@@ -96,13 +100,13 @@ export default function CreateProjectPage() {
         alert("Kích thước file không được vượt quá 5MB");
         return;
       }
-      
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
       if (!validTypes.includes(file.type)) {
         alert("Chỉ chấp nhận file ảnh (JPEG, PNG, GIF)");
         return;
       }
-      
+
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -175,7 +179,7 @@ export default function CreateProjectPage() {
         projectData.imageUrl = imageFile;
       }
 
-      console.log('Sending project data:', projectData);
+      console.log("Sending project data:", projectData);
       await projectAPI.create(projectData);
 
       alert("Tạo chương trình thành công!");
@@ -183,21 +187,23 @@ export default function CreateProjectPage() {
       router.refresh();
     } catch (error: any) {
       console.error("Error creating project:", error);
-      
+
       let errorMessage = "Không thể tạo chương trình. Vui lòng thử lại.";
-      
+
       if (error?.data?.errors) {
         const validationErrors = error.data.errors;
         const errorList = Object.entries(validationErrors)
-          .map(([field, errors]) => `${field}: ${(errors as string[]).join(', ')}`)
-          .join('\n');
+          .map(
+            ([field, errors]) => `${field}: ${(errors as string[]).join(", ")}`
+          )
+          .join("\n");
         errorMessage = `Lỗi xác thực:\n${errorList}`;
       } else if (error?.message) {
         errorMessage = error.message;
       } else if (error?.data?.message) {
         errorMessage = error.data.message;
       }
-      
+
       alert(errorMessage);
     } finally {
       setLoading(false);
@@ -216,7 +222,6 @@ export default function CreateProjectPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <Button variant="ghost" asChild className="mb-6">
@@ -228,8 +233,10 @@ export default function CreateProjectPage() {
 
           <div className="max-w-2xl mx-auto">
             <Card className="p-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Thêm chương trình mới</h1>
-              
+              <h1 className="text-2xl font-bold text-foreground mb-2">
+                Thêm chương trình mới
+              </h1>
+
               <ProjectForm
                 formData={formData}
                 imagePreview={imagePreview}

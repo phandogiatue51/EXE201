@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI } from "../../../../services/api";
-import { ProjectDetailCard } from "@/components/ProjectDetailCard";
+import ProjectDetailCard from "@/components/card/ProjectDetailCard";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { Edit, Trash2, Globe, Users } from "lucide-react";
@@ -66,8 +66,8 @@ export default function ProjectDetailPage({
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <main className="flex-1">
-          <ErrorState 
-            message={error || "Không tìm thấy chương trình"} 
+          <ErrorState
+            message={error || "Không tìm thấy chương trình"}
             onRetry={fetchProject}
           />
         </main>
@@ -127,10 +127,9 @@ export default function ProjectDetailPage({
               className="mb-8"
             />
 
-            {/* Additional Actions */}
             <div className="flex gap-4">
               <Button asChild className="flex-1">
-                <Link href={`/organization/programs/${id}/applications`}>
+                <Link href={`/preview-application/${id}`}>
                   <Users className="w-4 h-4 mr-2" />
                   Quản lý đơn đăng ký
                 </Link>

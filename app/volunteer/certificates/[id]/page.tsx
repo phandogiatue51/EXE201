@@ -9,7 +9,7 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { certificateAPI, categoryAPI } from "@/services/api";
 import { ArrowLeft, Trash2, UserPlus } from "lucide-react";
-import CertificateForm from "@/components/volunteer/CertificateForm";
+import CertificateForm from "@/components/form/CertificateForm";
 
 export default function CertificateDetailPage() {
   const router = useRouter();

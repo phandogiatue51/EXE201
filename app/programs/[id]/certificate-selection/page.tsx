@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
-import CertificateForm from "@/components/volunteer/CertificateForm";
+import CertificateForm from "@/components/form/CertificateForm";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { certificateAPI, categoryAPI } from "@/services/api";
@@ -20,7 +20,7 @@ export default function CertificateSelectionPage({
   const { id } = use(params);
   const { user } = useAuth();
   const router = useRouter();
-  
+
   const [certificates, setCertificates] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
@@ -37,13 +37,12 @@ export default function CertificateSelectionPage({
     try {
       setLoading(true);
       setError(null);
-      
+
       const certsData = await certificateAPI.getByAccountId(user!.accountId);
       setCertificates(certsData || []);
-      
+
       const catsData = await categoryAPI.getAll();
       setCategories(catsData || []);
-      
     } catch (error) {
       console.error("Error fetching data:", error);
       setError("Không thể tải danh sách chứng chỉ");
@@ -58,7 +57,9 @@ export default function CertificateSelectionPage({
 
   const handleContinue = () => {
     if (selectedCertificate) {
-      router.push(`/programs/${id}/register-preview?certificateId=${selectedCertificate.id}`);
+      router.push(
+        `/programs/${id}/register-preview?certificateId=${selectedCertificate.id}`
+      );
     }
   };
 
@@ -87,9 +88,9 @@ export default function CertificateSelectionPage({
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <ErrorState 
-          message={error || "Vui lòng đăng nhập để xem chứng chỉ"} 
-          onRetry={() => user ? fetchData() : router.push("/login")}
+        <ErrorState
+          message={error || "Vui lòng đăng nhập để xem chứng chỉ"}
+          onRetry={() => (user ? fetchData() : router.push("/login"))}
         />
       </div>
     );
@@ -98,7 +99,7 @@ export default function CertificateSelectionPage({
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8">
         <Button variant="ghost" asChild className="mb-6">
           <a href={`/programs/${id}`}>
@@ -131,9 +132,7 @@ export default function CertificateSelectionPage({
                     className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#A7CBDC]"
                     asChild
                   >
-                    <a href="/volunteer/certificates/new">
-                      Thêm chứng chỉ mới
-                    </a>
+                    <a href="/volunteer/certificates/new">Thêm chứng chỉ mới</a>
                   </Button>
                 </Card>
               ) : (
@@ -195,9 +194,7 @@ export default function CertificateSelectionPage({
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Check className="w-8 h-8 text-gray-400" />
                   </div>
-                  <p className="text-muted-foreground">
-                    Chưa chọn chứng chỉ
-                  </p>
+                  <p className="text-muted-foreground">Chưa chọn chứng chỉ</p>
                   <p className="text-sm text-muted-foreground mt-2">
                     Vui lòng chọn một chứng chỉ từ danh sách bên trái
                   </p>

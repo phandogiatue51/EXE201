@@ -11,7 +11,7 @@ import { projectAPI } from "../../services/api";
 import {
   ProjectStatusBadge,
   toProjectStatus,
-} from "@/components/organization/ProjectStatusBadge";
+} from "@/components/status-badge/ProjectStatusBadge";
 import {
   Eye,
   Search,

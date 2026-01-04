@@ -57,6 +57,7 @@ export interface VolunteerApplication {
   projectTitle: string; 
   organizationId: number; 
   organizationName: string; 
+  selectedCertificateId: number;
   volunteerId: number;
   volunteerName: string;
   status: number;
@@ -68,7 +69,7 @@ export interface VolunteerApplication {
   rejectionReason?: string; 
   feedback?: string; 
   notes?: string;
-  selectedCertificates?: { 
+  selectedCertificate?: { 
     id: number;
     accountId: number;
     certificateName: string;
@@ -80,7 +81,7 @@ export interface VolunteerApplication {
     expiryDate?: string;
     description?: string;
     imageUrl?: string;
-  }[];
+  };
 }
 
 export interface Staff {
