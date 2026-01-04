@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,52 +7,16 @@ import {
   Briefcase,
   Calendar,
   Award,
-  TrendingUp,
-  AlertCircle,
-  Clock,
-  CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  mockAccounts,
-  mockPrograms,
-  mockCertificates,
-  mockOrganizationRegistrations,
-} from "@/lib/mock-data";
 import RecentActivity from "../../components/admin/RecentActivity";
 import QuickStats from "../../components/admin/QuickStats";
 import PendingApprovals from "../../components/admin/PendingApprovals";
+import { useAdminDashboard } from "../../hooks/use-admin-dashboard";
+import { ProjectStatus } from "@/components/organization/ProjectStatusBadge";
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({
-    volunteers: 0,
-    organizations: 0,
-    programs: 0,
-    certificates: 0,
-    pendingApprovals: 0,
-    activePrograms: 0,
-  });
-
-  useEffect(() => {
-    // Load data from localStorage
-    const customPrograms = JSON.parse(localStorage.getItem("customPrograms") || "[]");
-    const customCertificates = JSON.parse(localStorage.getItem("customCertificates") || "[]");
-    const orgRegistrations = JSON.parse(localStorage.getItem("orgRegistrations") || "[]");
-    
-    const volunteers = mockAccounts.filter(a => a.role === "volunteer").length;
-    const organizations = mockAccounts.filter(a => a.role === "organization").length;
-    const allPrograms = [...mockPrograms, ...customPrograms];
-    const allCertificates = [...mockCertificates, ...customCertificates];
-    
-    setStats({
-      volunteers,
-      organizations,
-      programs: allPrograms.length,
-      certificates: allCertificates.length,
-      pendingApprovals: orgRegistrations.filter((r: any) => r.status === "pending").length,
-      activePrograms: allPrograms.filter((p: any) => p.status === "active").length,
-    });
-  }, []);
+  const { stats, isLoading, recentPrograms } = useAdminDashboard();
 
   const statCards = [
     {
@@ -160,29 +123,38 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
         <div className="space-y-4">
-          {mockPrograms.slice(0, 5).map((program) => (
-            <div
-              key={program.id}
-              className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
-            >
-              <div>
-                <h4 className="font-medium text-gray-900"></h4>
-                <p className="text-sm text-gray-500">{program.organizationName}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  program.status === 'active' 
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {program.status === 'active' ? 'Đang diễn ra' : 'Đã kết thúc'}
-                </span>
-                <span className="text-sm text-gray-500">
-                  {program.volunteersJoined} tình nguyện viên
-                </span>
-              </div>
-            </div>
-          ))}
+          {isLoading ? (
+            <p className="text-gray-500 text-center py-4">Đang tải...</p>
+          ) : recentPrograms.length > 0 ? (
+            recentPrograms.map((program) => {
+              const isActive = program.status === ProjectStatus.Active;
+              return (
+                <div
+                  key={program.id}
+                  className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+                >
+                  <div>
+                    <h4 className="font-medium text-gray-900">{program.title}</h4>
+                    <p className="text-sm text-gray-500">{program.organizationName}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      isActive
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {isActive ? 'Đang diễn ra' : program.statusName || 'Đã kết thúc'}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {program.currentVolunteers || 0} tình nguyện viên
+                    </span>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p className="text-gray-500 text-center py-4">Chưa có chương trình nào</p>
+          )}
         </div>
       </Card>
     </div>
