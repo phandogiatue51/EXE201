@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Account } from "@/lib/type";
-import { AccountBadge } from "@/components/AccountBadge";
+import { AccountBadge } from "@/components/status-badge/AccountBadge";
 import { formatDate } from "@/lib/date";
 import { ArrowLeft, Mail, Phone, Trash2, Award } from "lucide-react";
 import { accountAPI, certificateAPI } from "@/services/api";

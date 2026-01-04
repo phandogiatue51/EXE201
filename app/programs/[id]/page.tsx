@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from "react";
 import { Header } from "@/components/header";
 import { projectAPI } from "../../../services/api";
-import { ProjectDetailCard } from "@/components/ProjectDetailCard";
+import { ProjectDetailCard } from "@/components/card/ProjectDetailCard";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 
@@ -48,8 +48,8 @@ export default function ProjectDetailPage({
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <ErrorState 
-          message={error || "Không tìm thấy chương trình"} 
+        <ErrorState
+          message={error || "Không tìm thấy chương trình"}
           onRetry={fetchProject}
         />
       </div>

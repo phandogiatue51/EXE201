@@ -8,7 +8,10 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { organizationAPI } from "../../../../services/api";
 import { Organization } from "../../../../lib/type";
-import { OrganizationStatusBadge, OrganizationStatus } from "@/components/organization/OrganizationStatusBadge";
+import {
+  OrganizationStatusBadge,
+  OrganizationStatus,
+} from "@/components/status-badge/OrganizationStatusBadge";
 import {
   ArrowLeft,
   Building2,
@@ -54,7 +57,7 @@ export default function OrganizationDetailPage({
 
   const handleDelete = async () => {
     if (!confirm("Bạn có chắc chắn muốn xóa tổ chức này?")) return;
-    
+
     try {
       await organizationAPI.delete(parseInt(id));
       window.location.href = "/admin/organizations";
@@ -71,7 +74,6 @@ export default function OrganizationDetailPage({
     //     rejectionReason = prompt("Nhập lý do từ chối:");
     //     if (!rejectionReason) return;
     //   }
-      
     //   await organizationAPI.verify(parseInt(id), newStatus, rejectionReason);
     //   fetchOrganization();
     // } catch (error) {
@@ -146,9 +148,13 @@ export default function OrganizationDetailPage({
                         <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                           {organization.type}
                         </span>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${organization.status}`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-medium border ${organization.status}`}
+                        >
                           <div className="flex items-center gap-2">
-                            <OrganizationStatusBadge status={organization.status} />
+                            <OrganizationStatusBadge
+                              status={organization.status}
+                            />
                           </div>
                         </span>
                       </div>
@@ -177,8 +183,12 @@ export default function OrganizationDetailPage({
                   {/* Description */}
                   {organization.description && (
                     <div className="mb-6">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Mô tả</h3>
-                      <p className="text-foreground">{organization.description}</p>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                        Mô tả
+                      </h3>
+                      <p className="text-foreground">
+                        {organization.description}
+                      </p>
                     </div>
                   )}
 
@@ -203,7 +213,9 @@ export default function OrganizationDetailPage({
                       <div className="flex items-center gap-3">
                         <Phone className="w-4 h-4 text-muted-foreground" />
                         <div>
-                          <p className="text-sm text-muted-foreground">Điện thoại</p>
+                          <p className="text-sm text-muted-foreground">
+                            Điện thoại
+                          </p>
                           <a
                             href={`tel:${organization.phoneNumber}`}
                             className="text-foreground hover:text-blue-600"
@@ -217,9 +229,13 @@ export default function OrganizationDetailPage({
                     <div className="flex items-center gap-3">
                       <Calendar className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Ngày tham gia</p>
+                        <p className="text-sm text-muted-foreground">
+                          Ngày tham gia
+                        </p>
                         <p className="text-foreground">
-                          {new Date(organization.createAt).toLocaleDateString('vi-VN')}
+                          {new Date(organization.createAt).toLocaleDateString(
+                            "vi-VN"
+                          )}
                         </p>
                       </div>
                     </div>
@@ -228,8 +244,12 @@ export default function OrganizationDetailPage({
                       <div className="flex items-center gap-3">
                         <MapPin className="w-4 h-4 text-muted-foreground" />
                         <div>
-                          <p className="text-sm text-muted-foreground">Địa chỉ</p>
-                          <p className="text-foreground">{organization.address}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Địa chỉ
+                          </p>
+                          <p className="text-foreground">
+                            {organization.address}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -238,7 +258,9 @@ export default function OrganizationDetailPage({
                       <div className="flex items-center gap-3">
                         <Globe className="w-4 h-4 text-muted-foreground" />
                         <div>
-                          <p className="text-sm text-muted-foreground">Website</p>
+                          <p className="text-sm text-muted-foreground">
+                            Website
+                          </p>
                           <a
                             href={organization.website}
                             target="_blank"
@@ -253,15 +275,18 @@ export default function OrganizationDetailPage({
                   </div>
 
                   {/* Rejection Reason */}
-                  {organization.rejectionReason && organization.status === OrganizationStatus.Rejected && (
-                    <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                      <div className="flex items-center gap-2 text-red-800 mb-2">
-                        <AlertCircle className="w-4 h-4" />
-                        <p className="font-medium">Lý do từ chối</p>
+                  {organization.rejectionReason &&
+                    organization.status === OrganizationStatus.Rejected && (
+                      <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-center gap-2 text-red-800 mb-2">
+                          <AlertCircle className="w-4 h-4" />
+                          <p className="font-medium">Lý do từ chối</p>
+                        </div>
+                        <p className="text-red-600">
+                          {organization.rejectionReason}
+                        </p>
                       </div>
-                      <p className="text-red-600">{organization.rejectionReason}</p>
-                    </div>
-                  )}
+                    )}
                 </div>
               </div>
             </Card>
@@ -269,11 +294,15 @@ export default function OrganizationDetailPage({
             {/* Status Actions */}
             {organization.status === OrganizationStatus.Pending && (
               <Card className="p-6 mb-8">
-                <h2 className="text-lg font-semibold text-foreground mb-4">Phê duyệt tổ chức</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-4">
+                  Phê duyệt tổ chức
+                </h2>
                 <div className="flex gap-4">
                   <Button
                     className="bg-green-600 hover:bg-green-700"
-                    onClick={() => handleStatusChange(OrganizationStatus.Active)}
+                    onClick={() =>
+                      handleStatusChange(OrganizationStatus.Active)
+                    }
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Duyệt tổ chức
@@ -281,7 +310,9 @@ export default function OrganizationDetailPage({
                   <Button
                     variant="outline"
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => handleStatusChange(OrganizationStatus.Rejected)}
+                    onClick={() =>
+                      handleStatusChange(OrganizationStatus.Rejected)
+                    }
                   >
                     <XCircle className="w-4 h-4 mr-2" />
                     Từ chối
@@ -293,12 +324,16 @@ export default function OrganizationDetailPage({
             {/* Other Status Actions */}
             {organization.status !== OrganizationStatus.Pending && (
               <Card className="p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-4">Thay đổi trạng thái</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-4">
+                  Thay đổi trạng thái
+                </h2>
                 <div className="flex flex-wrap gap-2">
                   {organization.status !== OrganizationStatus.Active && (
                     <Button
                       variant="outline"
-                      onClick={() => handleStatusChange(OrganizationStatus.Active)}
+                      onClick={() =>
+                        handleStatusChange(OrganizationStatus.Active)
+                      }
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
                       Kích hoạt
@@ -307,7 +342,9 @@ export default function OrganizationDetailPage({
                   {organization.status !== OrganizationStatus.Unactive && (
                     <Button
                       variant="outline"
-                      onClick={() => handleStatusChange(OrganizationStatus.Unactive)}
+                      onClick={() =>
+                        handleStatusChange(OrganizationStatus.Unactive)
+                      }
                     >
                       <UserMinus className="w-4 h-4 mr-2" />
                       Ngừng hoạt động
@@ -317,7 +354,9 @@ export default function OrganizationDetailPage({
                     <Button
                       variant="outline"
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => handleStatusChange(OrganizationStatus.Rejected)}
+                      onClick={() =>
+                        handleStatusChange(OrganizationStatus.Rejected)
+                      }
                     >
                       <XCircle className="w-4 h-4 mr-2" />
                       Từ chối

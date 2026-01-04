@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI, categoryAPI } from "../../../services/api";
-import { ProjectFilters } from "../../../components/organization/ProjectFilter";
+import { ProjectFilters } from "../../../components/filter/ProjectFilter";
 import { ProjectFilterDto } from "../../../lib/filter-type";
 import {
   PlusCircle,
@@ -52,7 +52,7 @@ export default function ProjectsPage() {
       }
 
       setLoading(true);
-      const orgIdNumber = parseInt(organizationId || '0');
+      const orgIdNumber = parseInt(organizationId || "0");
 
       const filter: ProjectFilterDto = {
         organizationId: orgIdNumber,
@@ -75,7 +75,13 @@ export default function ProjectsPage() {
     } finally {
       setLoading(false);
     }
-  }, [organizationId, debouncedSearch, statusFilter, typeFilter, categoryFilter]);
+  }, [
+    organizationId,
+    debouncedSearch,
+    statusFilter,
+    typeFilter,
+    categoryFilter,
+  ]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -111,14 +117,14 @@ export default function ProjectsPage() {
     }
   };
 
-  const uniqueTypes = [...new Set(projects.map(p => p.type))];
-  const uniqueStatuses = [...new Set(projects.map(p => p.status))];
+  const uniqueTypes = [...new Set(projects.map((p) => p.type))];
+  const uniqueStatuses = [...new Set(projects.map((p) => p.status))];
 
   const filteredCount = projects.length;
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('vi-VN');
+      return new Date(dateString).toLocaleDateString("vi-VN");
     } catch {
       return "Chưa có";
     }
@@ -126,18 +132,22 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Quản lý chương trình</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                Quản lý chương trình
+              </h1>
               <p className="text-muted-foreground mt-2">
                 Quản lý tất cả các chương trình tình nguyện
               </p>
             </div>
 
-            <Button asChild className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]">
+            <Button
+              asChild
+              className="bg-gradient-to-r from-[#77E5C8] to-[#6085F0] hover:from-[#6085F0] hover:to-[#77E5C8]"
+            >
               <Link href="/organization/programs/new">
                 <PlusCircle className="w-4 h-4 mr-2" />
                 Thêm chương trình
@@ -170,7 +180,10 @@ export default function ProjectsPage() {
             /* Projects Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => (
-                <Card key={project.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <Card
+                  key={project.id}
+                  className="overflow-hidden hover:shadow-lg transition-shadow"
+                >
                   {/* Project Image */}
                   <div className="h-48 bg-gradient-to-br from-blue-500 to-blue-600 relative overflow-hidden">
                     {project.imageUrl ? (
@@ -186,11 +199,17 @@ export default function ProjectsPage() {
                     )}
                     {/* Status Badge */}
                     <div className="absolute top-4 right-4">
-                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${project.status === 3 ? 'bg-green-100 text-green-800' : // Active
-                        project.status === 2 ? 'bg-blue-100 text-blue-800' : // Recruiting
-                          project.status === 4 ? 'bg-purple-100 text-purple-800' : // Completed
-                            'bg-gray-100 text-gray-800'
-                        }`}>
+                      <span
+                        className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                          project.status === 3
+                            ? "bg-green-100 text-green-800" // Active
+                            : project.status === 2
+                            ? "bg-blue-100 text-blue-800" // Recruiting
+                            : project.status === 4
+                            ? "bg-purple-100 text-purple-800" // Completed
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
                         {project.statusName}
                       </span>
                     </div>
@@ -228,7 +247,10 @@ export default function ProjectsPage() {
                     <div className="grid grid-cols-2 gap-3 mb-6">
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-xs text-muted-foreground truncate" title={project.location}>
+                        <span
+                          className="text-xs text-muted-foreground truncate"
+                          title={project.location}
+                        >
                           {project.location || "Chưa có địa điểm"}
                         </span>
                       </div>
@@ -236,14 +258,17 @@ export default function ProjectsPage() {
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         <span className="text-xs text-muted-foreground">
-                          {project.startDate ? formatDate(project.startDate) : "Chưa có"}
+                          {project.startDate
+                            ? formatDate(project.startDate)
+                            : "Chưa có"}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         <span className="text-xs text-muted-foreground">
-                          {project.currentVolunteers || 0}/{project.requiredVolunteers || 0}
+                          {project.currentVolunteers || 0}/
+                          {project.requiredVolunteers || 0}
                         </span>
                       </div>
 
@@ -256,9 +281,13 @@ export default function ProjectsPage() {
                                 key={cat.categoryId || cat.id}
                                 className="px-2 py-1 text-xs rounded-full"
                                 style={{
-                                  backgroundColor: `${cat.categoryColor || cat.color}20`,
+                                  backgroundColor: `${
+                                    cat.categoryColor || cat.color
+                                  }20`,
                                   color: cat.categoryColor || cat.color,
-                                  border: `1px solid ${cat.categoryColor || cat.color}40`
+                                  border: `1px solid ${
+                                    cat.categoryColor || cat.color
+                                  }40`,
                                 }}
                               >
                                 {cat.categoryName || cat.name}
@@ -276,15 +305,27 @@ export default function ProjectsPage() {
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        asChild
+                      >
                         <Link href={`/organization/programs/${project.id}`}>
                           <Eye className="w-3 h-3 mr-1" />
                           Xem
                         </Link>
                       </Button>
 
-                      <Button variant="outline" size="sm" className="flex-1" asChild>
-                        <Link href={`/organization/programs/${project.id}/edit`}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        asChild
+                      >
+                        <Link
+                          href={`/organization/programs/${project.id}/edit`}
+                        >
                           <Edit className="w-3 h-3 mr-1" />
                           Sửa
                         </Link>
@@ -316,7 +357,10 @@ export default function ProjectsPage() {
                 Không tìm thấy chương trình
               </h3>
               <p className="text-muted-foreground mb-4">
-                {search || statusFilter !== "all" || typeFilter !== "all" || categoryFilter.length > 0
+                {search ||
+                statusFilter !== "all" ||
+                typeFilter !== "all" ||
+                categoryFilter.length > 0
                   ? "Thử thay đổi bộ lọc tìm kiếm"
                   : "Chưa có chương trình nào trong hệ thống"}
               </p>

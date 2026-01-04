@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import OrganizationStats from "../../components/organization/OrganizationStats";
+import OrganizationStats from "../../components/status-badge/OrganizationStats";
 import PendingRegistrations from "../../components/organization/PendingRegistrations";
 import { useOrganizationDashboard } from "../../hooks/use-organization-dashboard";
 

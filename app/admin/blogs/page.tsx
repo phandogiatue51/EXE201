@@ -9,7 +9,7 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { blogAPI } from "../../../services/api";
 import { BlogPost } from "../../../lib/type";
-import { BlogStatusBadge } from "@/components/BlogStatusBadge";
+import { BlogStatusBadge } from "@/components/status-badge/BlogStatusBadge";
 
 import {
   Search,

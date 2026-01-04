@@ -9,7 +9,7 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { organizationAPI } from "../../services/api";
 import { Organization } from "../../lib/type";
-import {  OrganizationStatusBadge } from "@/components/organization/OrganizationStatusBadge";
+import { OrganizationStatusBadge } from "@/components/status-badge/OrganizationStatusBadge";
 import {
   Eye,
   Search,
@@ -133,7 +133,8 @@ export default function OrganizationsPage() {
                           {org.typeName}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
-                          Ngày thành lập: {new Date(org.createAt).toLocaleDateString("vi-VN")}
+                          Ngày thành lập:{" "}
+                          {new Date(org.createAt).toLocaleDateString("vi-VN")}
                         </p>
                       </div>
                     </div>
