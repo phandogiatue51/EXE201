@@ -404,13 +404,13 @@ export default function ProjectForm({
               <div className="p-3 bg-gray-50 rounded-lg border">
                 <p className="text-foreground">
                   {formData.startDate
-                    ? new Date(formData.startDate).toLocaleDateString("vi-VN")
+                    ? new Date(formData.startDate).toLocaleString("vi-VN")
                     : "—"}
                 </p>
               </div>
             ) : (
               <Input
-                type="date"
+                type="datetime-local"
                 name="startDate"
                 value={formData.startDate}
                 onChange={onInputChange}
@@ -427,13 +427,13 @@ export default function ProjectForm({
               <div className="p-3 bg-gray-50 rounded-lg border">
                 <p className="text-foreground">
                   {formData.endDate
-                    ? new Date(formData.endDate).toLocaleDateString("vi-VN")
+                    ? new Date(formData.endDate).toLocaleString("vi-VN")
                     : "—"}
                 </p>
               </div>
             ) : (
               <Input
-                type="date"
+                type="datetime-local"
                 name="endDate"
                 value={formData.endDate}
                 onChange={onInputChange}

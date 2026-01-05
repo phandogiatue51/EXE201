@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI } from "../../../../services/api";
-import ProjectDetailCard from "@/components/card/ProjectDetailCard";
+import { ProjectDetailCard } from "@/components/card/ProjectDetailCard";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { Edit, Trash2, Globe, Users } from "lucide-react";

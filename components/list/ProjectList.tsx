@@ -1,18 +1,15 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import {
-  ProjectStatusBadge,
-  ProjectStatus,
-  toProjectStatus,
-} from "@/components/status-badge/ProjectStatusBadge";
+import { ProjectStatusBadge, ProjectStatus, toProjectStatus, } from "@/components/status-badge/ProjectStatusBadge";
 import { Project } from "@/lib/type";
 import { Calendar, MapPin, Users, Tag, Building2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Pen, Eye } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { formatDate } from "@/lib/date";
+import { formatDateTime } from "@/lib/date";
+import { useRouter } from "next/navigation";
 
 interface ProjectListProps {
   projects: Project[];
@@ -29,6 +26,7 @@ export function ProjectList({
   organizationName,
 }: ProjectListProps) {
   const { user } = useAuth();
+  const router = useRouter();
 
   if (loading) {
     return (
@@ -67,6 +65,7 @@ export function ProjectList({
             key={project.id}
             className="overflow-hidden hover:shadow-lg transition-shadow group"
           >
+            {/* Whole card is a link */}
             <Link href={`/programs/${project.id}`} className="block">
               <div className="h-48 bg-gradient-to-br from-blue-500 to-blue-600 relative overflow-hidden">
                 {project.imageUrl ? (
@@ -81,9 +80,7 @@ export function ProjectList({
                   </div>
                 )}
                 <div className="absolute top-4 right-4">
-                  <span
-                    className={`px-3 py-1 text-xs font-semibold rounded-full`}
-                  >
+                  <span className="px-3 py-1 text-xs font-semibold rounded-full">
                     <ProjectStatusBadge
                       status={toProjectStatus(project.status)}
                       showIcon={false}
@@ -96,22 +93,20 @@ export function ProjectList({
 
               {/* Project Info */}
               <div className="p-5">
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <h3 className="text-lg font-semibold text-foreground line-clamp-1">
-                    {project.title}
-                  </h3>
-                </div>
+                <h3 className="text-lg font-semibold text-foreground line-clamp-1 mb-3">
+                  {project.title}
+                </h3>
 
                 <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
                   {project.description}
                 </p>
+
                 <ProjectStatusBadge
-                  status={toProjectStatus(
-                    project.status || ProjectStatus.Draft
-                  )}
+                  status={toProjectStatus(project.status || ProjectStatus.Draft)}
                   showIcon={false}
                   showText={true}
                 />
+
                 {/* Project Details */}
                 <div className="space-y-3 mt-3">
                   {project.location && (
@@ -125,8 +120,8 @@ export function ProjectList({
                     <div className="flex items-center gap-2 text-sm text-foreground">
                       <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       <span>
-                        {project.startDate && formatDate(project.startDate)}
-                        {project.endDate && ` - ${formatDate(project.endDate)}`}
+                        {project.startDate && formatDateTime(project.startDate)}
+                        {project.endDate && ` - ${formatDateTime(project.endDate)}`}
                       </span>
                     </div>
                   )}
@@ -138,8 +133,8 @@ export function ProjectList({
                     </span>
                   </div>
 
-                  {project.categories && project.categories.length > 0 && (
-                    <div className="col-span-2 mt-2">
+                  {project.categories?.length > 0 && (
+                    <div className="col-span-2 mt-2 mb-4">
                       <div className="flex flex-wrap gap-2">
                         {project.categories.slice(0, 2).map((cat: any) => (
                           <span
@@ -164,47 +159,38 @@ export function ProjectList({
                   )}
                 </div>
 
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    asChild
-                  >
-                    <Link href={`/programs/${project.id}`}>
-                      <Eye className="w-3 h-3 mr-1" />
-                      Xem
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    asChild
-                  >
-                    {user?.accountId ? (
-                      <Link
-                        href={`/programs/${project.id}/certificate-selection`}
-                      >
-                        <Pen className="w-3 h-3 mr-1" />
-                        Đăng ký
-                      </Link>
-                    ) : (
-                      <div
-                        onClick={() => {
-                          alert("Bạn cần đăng nhập để tiếp tục");
-                        }}
-                        className="flex items-center cursor-pointer"
-                      >
-                        <Pen className="w-3 h-3 mr-1" />
-                        Đăng ký
-                      </div>
-                    )}
-                  </Button>
+                {/* Action buttons (not links) */}
+                <div className="flex gap-2 mt-3">
+                  {user?.accountId ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        router.push(`/programs/${project.id}/certificate-selection`);
+                      }}
+                    >
+                      <Pen className="w-3 h-3 mr-1" />
+                      Đăng ký
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        alert("Bạn cần đăng nhập để tiếp tục");
+                      }}
+                    >
+                      <Pen className="w-3 h-3 mr-1" />
+                      Đăng ký
+                    </Button>
+                  )}
                 </div>
               </div>
             </Link>
           </Card>
+
         );
       })}
     </div>

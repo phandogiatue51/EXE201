@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { OrganizationStatusBadge } from "./OrganizationStatusBadge";
+import { OrganizationStatusBadge } from "./../status-badge/OrganizationStatusBadge";
 import { Organization as OrganizationType } from "@/lib/type";
 import {
   Building2,

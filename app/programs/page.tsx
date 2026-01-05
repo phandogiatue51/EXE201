@@ -8,10 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI } from "../../services/api";
-import {
-  ProjectStatusBadge,
-  toProjectStatus,
-} from "@/components/status-badge/ProjectStatusBadge";
+import { formatDateTime } from "@/lib/date";
+import { ProjectStatusBadge, toProjectStatus, } from "@/components/status-badge/ProjectStatusBadge";
 import {
   Eye,
   Search,
@@ -205,9 +203,7 @@ export default function ProjectsPage() {
                         <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         <span className="text-xs text-muted-foreground">
                           {project.startDate
-                            ? new Date(project.startDate).toLocaleDateString(
-                                "vi-VN"
-                              )
+                            ? formatDateTime(project.startDate)
                             : "Chưa có"}
                         </span>
                       </div>
@@ -260,16 +256,14 @@ export default function ProjectsPage() {
                           Xem
                         </Link>
                       </Button>
+
                       <Button
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        asChild
                       >
                         {user?.accountId ? (
-                          <Link
-                            href={`/programs/${project.id}/certificate-selection`}
-                          >
+                          <Link href={`/programs/${project.id}/certificate-selection`}>
                             <Pen className="w-3 h-3 mr-1" />
                             Đăng ký
                           </Link>
@@ -285,6 +279,7 @@ export default function ProjectsPage() {
                           </div>
                         )}
                       </Button>
+
                     </div>
                   </div>
                 </Card>
