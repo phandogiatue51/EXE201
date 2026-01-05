@@ -204,6 +204,15 @@
     }
   }
 
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-100% + 100%));
+    }
+  }
+
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
