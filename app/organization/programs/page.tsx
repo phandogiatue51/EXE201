@@ -365,7 +365,7 @@ export default function ProjectsPage() {
                         <Button
                           variant="default"
                           size="sm"
-                          className="w-full bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600"
+                          className="w-full bg-gradient-to-r from-green-100 to-green-300 text-green-800 hover:from-green-200 hover:to-green-400"
                           asChild
                         >
                           <Link href={`/attendace/${project.id}/check-out`}>
@@ -381,7 +381,7 @@ export default function ProjectsPage() {
                         <Button
                           variant="default"
                           size="sm"
-                          className="w-full bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600"
+                          className="w-full bg-gradient-to-r from-blue-100 to-blue-300 text-blue-800 hover:from-blue-200 hover:to-blue-400"
                           asChild
                         >
                           <Link href={`/attendace/${project.id}/check-in`}>
@@ -397,7 +397,7 @@ export default function ProjectsPage() {
                         <Button
                           variant="default"
                           size="sm"
-                          className="w-full bg-gradient-to-r from-purple-400 to-purple-500 hover:from-purple-500 hover:to-purple-600"
+                          className="w-full bg-gradient-to-r from-purple-100 to-purple-300 text-purple-800 hover:from-purple-200 hover:to-purple-400"
                           asChild
                         >
                           <Link
