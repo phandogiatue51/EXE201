@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { accountAPI } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft,
   Upload,
@@ -26,6 +27,7 @@ import { toast } from "sonner";
 
 export default function EditVolunteerProfilePage() {
   const params = useParams();
+  const { toast } = useToast();
   const router = useRouter();
   const volunteerId = params.id as string;
 
@@ -96,16 +98,6 @@ export default function EditVolunteerProfilePage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("File ảnh không được vượt quá 5MB");
-        return;
-      }
-
-      if (!file.type.startsWith("image/")) {
-        toast.error("Vui lòng chọn file ảnh hợp lệ");
-        return;
-      }
-
       setProfileImage(file);
 
       const previewUrl = URL.createObjectURL(file);
@@ -155,17 +147,21 @@ export default function EditVolunteerProfilePage() {
         formDataObj
       );
 
-      alert("Cập nhật hồ sơ thành công!");
-
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
       setTimeout(() => {
         router.push(`/volunteer/profile/${volunteerId}`);
       }, 1500);
-    } catch (err: any) {
-      console.error("Error updating profile:", err);
-      const errorMessage =
-        err.message || "Cập nhật thất bại. Vui lòng thử lại.";
-      setError(errorMessage);
-      toast.error(errorMessage);
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setIsSubmitting(false);
     }

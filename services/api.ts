@@ -175,11 +175,12 @@ const apiRequest = async <T = any>(
       }
 
       const error: ApiError = new Error(
-        parsedError?.title ||
-          parsedError?.message ||
+        parsedError?.message ||
+          parsedError?.title ||
           errorText ||
           `HTTP ${response.status}`
       );
+
       error.status = response.status;
       error.data = parsedError;
 

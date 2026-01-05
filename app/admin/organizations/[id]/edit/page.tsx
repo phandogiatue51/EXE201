@@ -10,7 +10,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { organizationAPI } from "../../../../../services/api";
-import { ArrowLeft, Upload, Building2, Mail, Phone, MapPin, Globe } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  ArrowLeft,
+  Upload,
+  Building2,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+} from "lucide-react";
 
 export default function EditOrganizationPage({
   params,
@@ -19,7 +28,7 @@ export default function EditOrganizationPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const { user } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -59,11 +68,15 @@ export default function EditOrganizationPage({
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'type' ? parseInt(value as string) : value
+      [name]: name === "type" ? parseInt(value as string) : value,
     }));
   };
 
@@ -85,37 +98,44 @@ export default function EditOrganizationPage({
 
     try {
       const formDataToSend = new FormData();
-      
-      // Append form data (use backend field names)
+
       const keyMap: Record<string, string> = {
-        name: 'Name',
-        description: 'Description',
-        type: 'Type',
-        website: 'Website',
-        email: 'Email',
-        phoneNumber: 'PhoneNumber',
-        address: 'Address',
+        name: "Name",
+        description: "Description",
+        type: "Type",
+        website: "Website",
+        email: "Email",
+        phoneNumber: "PhoneNumber",
+        address: "Address",
       };
 
       Object.entries(formData).forEach(([key, value]) => {
-        if (value !== undefined && value !== '') {
+        if (value !== undefined && value !== "") {
           const mapped = keyMap[key] || key;
           formDataToSend.append(mapped, value.toString());
         }
       });
 
-      // Append image file if exists (match DTO property)
       if (imageFile) {
-        formDataToSend.append('ImageFile', imageFile);
+        formDataToSend.append("ImageFile", imageFile);
       }
 
       await organizationAPI.update(parseInt(id), formDataToSend);
-      alert("Cập nhật tổ chức thành công")
+      toast({
+        title: "Thành công",
+        description: "Cập nhật tổ chức thành công!",
+        duration: 3000,
+      });
       router.push(`/admin/organizations/${id}`);
       router.refresh();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating organization:", error);
-      alert("Không thể cập nhật tổ chức. Vui lòng thử lại.");
+      toast({
+        title: "Lỗi",
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -144,7 +164,9 @@ export default function EditOrganizationPage({
 
           <div className="max-w-2xl mx-auto">
             <Card className="p-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Chỉnh sửa tổ chức</h1>
+              <h1 className="text-2xl font-bold text-foreground mb-2">
+                Chỉnh sửa tổ chức
+              </h1>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Logo Upload */}
@@ -239,8 +261,10 @@ export default function EditOrganizationPage({
 
                 {/* Contact Info */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-foreground">Thông tin liên hệ</h3>
-                  
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Thông tin liên hệ
+                  </h3>
+
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
                       <Mail className="w-4 h-4 inline mr-2" />

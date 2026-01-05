@@ -13,6 +13,8 @@ import { accountAPI } from "@/services/api";
 import { useAuth } from "@/hooks/use-auth";
 import { User, Mail, Phone, Calendar, UserCircle, Info } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AccountBadge } from "./status-badge/AccountBadge";
+import { formatDate } from "@/lib/date";
 
 interface ProfileData {
   id: number;
@@ -35,7 +37,11 @@ interface ProfileModalProps {
   userId?: number;
 }
 
-export function ProfileModal({ open, onOpenChange, userId }: ProfileModalProps) {
+export function ProfileModal({
+  open,
+  onOpenChange,
+  userId,
+}: ProfileModalProps) {
   const { user } = useAuth();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,61 +54,26 @@ export function ProfileModal({ open, onOpenChange, userId }: ProfileModalProps) 
   }, [open, userId]);
 
   const fetchProfileData = async () => {
+    if (!user?.accountId) {
+      setError("Không tìm thấy thông tin tài khoản");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
+
     try {
-      let data: ProfileData;
-      
-      if (userId) {
-        // Fetch specific user by ID - GET /api/Account/{id}
-        data = await accountAPI.getById(userId);
-      } else {
-        // Fetch current user - GET /api/Account returns current user's account
-        const response = await accountAPI.getAll();
-        
-        // Handle both single object and array responses
-        if (Array.isArray(response)) {
-          const currentUserId = user?.accountId || user?.id;
-          if (currentUserId) {
-            // Try to find user in array by ID, or fetch by ID
-            const foundUser = response.find((u: ProfileData) => u.id === currentUserId);
-            if (foundUser) {
-              data = foundUser;
-            } else {
-              data = await accountAPI.getById(currentUserId);
-            }
-          } else if (response.length > 0) {
-            // Fallback to first item if no user ID available
-            data = response[0];
-          } else {
-            throw new Error("Không tìm thấy thông tin tài khoản");
-          }
-        } else {
-          // Single object response
-          data = response;
-        }
-      }
-      
+      const data = await accountAPI.getById(user.accountId);
       setProfileData(data);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error fetching profile:", err);
-      setError("Không thể tải thông tin profile. Vui lòng thử lại.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Không thể tải thông tin profile. Vui lòng thử lại."
+      );
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "Chưa cập nhật";
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return dateString;
     }
   };
 
@@ -114,19 +85,6 @@ export function ProfileModal({ open, onOpenChange, userId }: ProfileModalProps) 
       .join("")
       .toUpperCase()
       .slice(0, 2);
-  };
-
-  const getStatusColor = (status: number) => {
-    switch (status) {
-      case 0:
-        return "bg-green-100 text-green-800 border-green-200";
-      case 1:
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case 2:
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
   };
 
   return (
@@ -182,13 +140,11 @@ export function ProfileModal({ open, onOpenChange, userId }: ProfileModalProps) 
                     {profileData.name}
                   </h2>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge
-                      className={`px-3 py-1 text-sm font-medium border ${getStatusColor(
-                        profileData.status
-                      )}`}
-                    >
-                      {profileData.statusName}
-                    </Badge>
+                    <AccountBadge
+                      role={profileData.role}
+                      status={profileData.status}
+                    />
+
                     <Badge className="px-3 py-1 text-sm font-medium bg-[#77E5C8]/10 text-[#6085F0] border border-[#77E5C8]/30">
                       {profileData.roleName}
                     </Badge>
@@ -248,7 +204,9 @@ export function ProfileModal({ open, onOpenChange, userId }: ProfileModalProps) 
                   <UserCircle className="h-5 w-5 text-[#6085F0]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground mb-1">Giới tính</p>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Giới tính
+                  </p>
                   <p className="text-sm font-medium text-foreground">
                     {profileData.isFemale ? "Nữ" : "Nam"}
                   </p>
@@ -297,4 +255,3 @@ export function ProfileModal({ open, onOpenChange, userId }: ProfileModalProps) 
     </Dialog>
   );
 }
-

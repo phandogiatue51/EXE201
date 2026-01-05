@@ -8,6 +8,7 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { organizationAPI } from "../../../../services/api";
 import { Organization } from "../../../../lib/type";
+import { useToast } from "@/hooks/use-toast";
 import {
   OrganizationStatusBadge,
   OrganizationStatus,
@@ -35,7 +36,7 @@ export default function OrganizationDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { user } = useAuth();
+  const { toast } = useToast();
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -59,11 +60,19 @@ export default function OrganizationDetailPage({
     if (!confirm("Bạn có chắc chắn muốn xóa tổ chức này?")) return;
 
     try {
-      await organizationAPI.delete(parseInt(id));
+      const response = await organizationAPI.delete(parseInt(id));
       window.location.href = "/admin/organizations";
-    } catch (error) {
-      console.error("Error deleting organization:", error);
-      alert("Không thể xóa tổ chức");
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (err: any) {
+      toast({
+        description: err.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
