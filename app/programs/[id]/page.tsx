@@ -6,7 +6,6 @@ import { projectAPI } from "../../../services/api";
 import { ProjectDetailCard } from "@/components/card/ProjectDetailCard";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
-import { formatDateTime } from "@/lib/date";
 
 export default function ProjectDetailPage({
   params,
