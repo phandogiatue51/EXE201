@@ -19,7 +19,17 @@ import {
   MapPin,
   Calendar,
   Users,
+  LogIn,
+  LogOut,
+  FileText,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { TextMarquee } from "@/components/ui/text-marquee";
 
 export default function ProjectsPage() {
   const { user } = useAuth();
@@ -178,14 +188,14 @@ export default function ProjectsPage() {
             </div>
           ) : (
             /* Projects Grid */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {projects.map((project) => (
                 <Card
                   key={project.id}
-                  className="overflow-hidden hover:shadow-lg transition-shadow"
+                  className="overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full text-sm"
                 >
                   {/* Project Image */}
-                  <div className="h-48 bg-gradient-to-br from-blue-500 to-blue-600 relative overflow-hidden">
+                  <div className="h-40 bg-gradient-to-br from-blue-500 to-blue-600 relative overflow-hidden flex-shrink-0">
                     {project.imageUrl ? (
                       <img
                         src={project.imageUrl}
@@ -216,35 +226,39 @@ export default function ProjectsPage() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-6">
+                  <div className="p-4 flex flex-col flex-1">
                     {/* Title and Type */}
-                    <div className="mb-4">
-                      <h3 className="font-semibold text-lg text-foreground mb-2 line-clamp-2">
-                        {project.title}
+                    <div className="mb-3 flex-shrink-0">
+                      <h3 className="font-semibold text-base text-foreground mb-1 min-h-[3rem]">
+                        <TextMarquee maxLines={2} className="line-clamp-2">
+                          {project.title}
+                        </TextMarquee>
                       </h3>
                       <div className="flex items-center gap-2">
-                        <Tag className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
+                        <Tag className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <TextMarquee maxLines={1} className="text-sm text-muted-foreground">
                           {project.typeName}
-                        </span>
+                        </TextMarquee>
                       </div>
                     </div>
 
                     {/* Organization */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <Building2 className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground truncate">
+                    <div className="flex items-center gap-2 mb-3 flex-shrink-0">
+                      <Building2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <TextMarquee maxLines={1} className="text-sm text-muted-foreground">
                         {project.organizationName}
-                      </span>
+                      </TextMarquee>
                     </div>
 
                     {/* Description */}
-                    <p className="text-sm text-muted-foreground mb-6 line-clamp-3">
-                      {project.description}
+                    <p className="text-sm text-muted-foreground mb-4 flex-shrink-0 min-h-[3.5rem]">
+                      <TextMarquee maxLines={3} className="line-clamp-3">
+                        {project.description}
+                      </TextMarquee>
                     </p>
 
                     {/* Info Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="grid grid-cols-2 gap-2 mb-4 flex-shrink-0">
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         <span
@@ -303,8 +317,11 @@ export default function ProjectsPage() {
                       )}
                     </div>
 
+                    {/* Spacer to push actions to bottom */}
+                    <div className="flex-1"></div>
+
                     {/* Actions */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mt-auto flex-shrink-0">
                       <Button
                         variant="outline"
                         size="sm"
@@ -341,6 +358,57 @@ export default function ProjectsPage() {
                         Xóa
                       </Button>
                     </div>
+
+                    {/* Status-based Actions */}
+                    {project.status === 4 && (
+                      <div className="mt-3 flex-shrink-0">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="w-full bg-gradient-to-r from-green-100 to-green-300 text-green-800 hover:from-green-200 hover:to-green-400"
+                          asChild
+                        >
+                          <Link href={`/attendace/${project.id}/check-out`}>
+                            <LogOut className="w-3 h-3 mr-1" />
+                            Check out
+                          </Link>
+                        </Button>
+                      </div>
+                    )}
+
+                    {project.status === 3 && (
+                      <div className="mt-3 flex-shrink-0">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="w-full bg-gradient-to-r from-blue-100 to-blue-300 text-blue-800 hover:from-blue-200 hover:to-blue-400"
+                          asChild
+                        >
+                          <Link href={`/attendace/${project.id}/check-in`}>
+                            <LogIn className="w-3 h-3 mr-1" />
+                            Check in
+                          </Link>
+                        </Button>
+                      </div>
+                    )}
+
+                    {project.status === 2 && (
+                      <div className="mt-3 flex-shrink-0">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="w-full bg-gradient-to-r from-purple-100 to-purple-300 text-purple-800 hover:from-purple-200 hover:to-purple-400"
+                          asChild
+                        >
+                          <Link
+                            href={`/organization/programs/${project.id}/applications`}
+                          >
+                            <FileText className="w-3 h-3 mr-1" />
+                            Quản lý đơn đăng ký
+                          </Link>
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </Card>
               ))}
