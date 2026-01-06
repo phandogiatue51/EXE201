@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { ClientLayout } from "@/components/client-layout";
-import { Toaster } from "@/components/toaster"; 
+import { Toaster } from "@/components/ui/toaster"; 
 import "./globals.css";
 
 const _inter = Inter({ subsets: ["latin"] });

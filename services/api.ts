@@ -17,12 +17,6 @@ interface ApiRequestOptions extends RequestInit {
   timeout?: number;
 }
 
-interface ApiError extends Error {
-  status?: number;
-  data?: any;
-}
-
-// Add request timeout helper
 const fetchWithTimeout = async (
   url: string,
   options: RequestInit & { timeout?: number } = {}
@@ -45,103 +39,40 @@ const fetchWithTimeout = async (
   }
 };
 
-// Generic API request function
 const apiRequest = async <T = any>(
   endpoint: string,
   options: ApiRequestOptions = {}
 ): Promise<T> => {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  // Determine the body type and process accordingly
-  const isFormData = options.body instanceof FormData;
-  const isSearchParams = options.body instanceof URLSearchParams;
-  const isStringBody = typeof options.body === "string";
-
-  // Process body based on type
-  let processedBody: BodyInit | null | undefined;
-  let contentType: string | undefined;
-
-  if (isFormData) {
-    // FormData - browser will set Content-Type with boundary
-    processedBody = options.body as FormData;
-    contentType = undefined;
-  } else if (isSearchParams) {
-    // URLSearchParams
-    processedBody = options.body as URLSearchParams;
-    contentType = "application/x-www-form-urlencoded";
-  } else if (options.body !== undefined && options.body !== null) {
-    // If body exists and is not FormData/URLSearchParams, stringify it as JSON
-    processedBody = JSON.stringify(options.body);
-    contentType = "application/json";
-  } else {
-    // No body or null/undefined
-    processedBody = options.body;
-    contentType = options.headers?.["Content-Type"];
-  }
-
-  // Token handling
-  let token: string | null = null;
-  if (typeof window !== "undefined") {
-    token =
-      localStorage.getItem("jwtToken") || sessionStorage.getItem("jwtToken");
-  }
-
-  // Build headers
   const headers: Record<string, string> = {
     accept: "application/json",
     ...options.headers,
   };
 
-  // Add Content-Type header if we determined it and it's not already set
-  if (contentType && !headers["Content-Type"]) {
-    headers["Content-Type"] = contentType;
+  if (options.body && !(options.body instanceof FormData)) {
+    if (!headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
   }
 
-  // Add Authorization header if needed
-  if (!options.skipAuth && token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  // For FormData, remove Content-Type header to let browser set it with boundary
-  if (
-    isFormData &&
-    headers["Content-Type"] &&
-    headers["Content-Type"].startsWith("application/json")
-  ) {
-    delete headers["Content-Type"];
+  let token: string | null = null;
+  if (typeof window !== "undefined" && !options.skipAuth) {
+    token =
+      localStorage.getItem("jwtToken") || sessionStorage.getItem("jwtToken");
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
   }
 
   const config: RequestInit = {
     method: options.method || "GET",
     headers,
-    mode: "cors",
-    credentials: options.credentials || (options.skipAuth ? "omit" : "include"),
     ...options,
-    body: processedBody,
   };
 
-  // Development logging
-  if (process.env.NODE_ENV === "development") {
-    console.log(
-      `%cAPI Request: ${config.method} ${url}`,
-      "color: #4CAF50; font-weight: bold"
-    );
-    console.log("Headers:", headers);
-    console.log("Body type:", typeof processedBody);
-
-    if (processedBody instanceof FormData) {
-      console.log("FormData entries:");
-      for (const [key, value] of processedBody.entries()) {
-        console.log(
-          `  ${key}:`,
-          value instanceof File
-            ? `File(${value.name}, ${value.size} bytes, ${value.type})`
-            : value
-        );
-      }
-    } else if (processedBody) {
-      console.log("Request body:", processedBody);
-    }
+  if (options.body && !(options.body instanceof FormData)) {
+    config.body = JSON.stringify(options.body);
   }
 
   try {
@@ -152,114 +83,36 @@ const apiRequest = async <T = any>(
 
     if (!response.ok) {
       const errorText = await response.text();
-      let parsedError: any = null;
 
-      try {
-        parsedError = JSON.parse(errorText);
-      } catch {
-        // Not JSON, use text as error
+      let errorMessage = `Error ${response.status}`;
+
+      if (errorText) {
+        try {
+          const data = JSON.parse(errorText);
+          errorMessage = data.message;
+        } catch {
+          errorMessage = errorText;
+        }
       }
 
-      // Special handling for 'me' validation errors
-      const isMeIdValidation =
-        response.status === 400 &&
-        parsedError?.errors?.id?.some(
-          (m: any) => typeof m === "string" && m.includes("'me'")
-        );
-
-      if (isMeIdValidation) {
-        console.warn(
-          "API returned validation error for 'me' id; returning null for fallback handling"
-        );
-        return null as T;
-      }
-
-      const error: ApiError = new Error(
-        parsedError?.message ||
-        parsedError?.title ||
-        errorText ||
-        `HTTP ${response.status}`
-      );
-
-      error.status = response.status;
-      error.data = parsedError;
-
-      throw error;
+      console.log("DEBUG: About to throw error:", errorMessage);
+      throw new Error(errorMessage);
     }
 
-    // Handle empty responses (204 No Content)
     if (response.status === 204) {
       return undefined as T;
     }
 
-    // Parse response based on content type
-    const contentTypeHeader = response.headers.get("content-type");
-
-    if (contentTypeHeader && contentTypeHeader.includes("application/json")) {
-      try {
-        const data = await response.json();
-
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `%cAPI Response: ${response.status} ${url}`,
-            "color: #2196F3; font-weight: bold",
-            data
-          );
-        }
-
-        return data;
-      } catch (e) {
-        console.warn("Failed to parse JSON response:", e);
-        return null as T;
-      }
+    try {
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      console.warn("Failed to parse JSON response:", e);
+      return null as T;
     }
-
-    // Handle non-JSON responses
-    const text = await response.text();
-
-    if (process.env.NODE_ENV === "development") {
-      console.log(
-        `%cAPI Response (non-JSON): ${response.status} ${url}`,
-        "color: #FF9800; font-weight: bold",
-        text
-      );
-    }
-
-    // Try to parse as JSON anyway
-    if (text && (text.trim().startsWith("{") || text.trim().startsWith("["))) {
-      try {
-        return JSON.parse(text);
-      } catch {
-        return text as T;
-      }
-    }
-
-    return text as T;
   } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      const timeoutError: ApiError = new Error(
-        "Request timeout - the server took too long to respond"
-      );
-      timeoutError.status = 408;
-      throw timeoutError;
-    }
-
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      const networkError: ApiError = new Error(
-        "Unable to connect to the server. Please check your internet connection and ensure the backend is running."
-      );
-      networkError.status = 0;
-      throw networkError;
-    }
-
-    if ((error as ApiError).status !== undefined) {
-      throw error;
-    }
-
-    const apiError: ApiError = new Error("An unexpected error occurred");
-    apiError.status = 500;
-    apiError.data = error;
-    throw apiError;
+    console.error("API request failed:", error);
+    throw error;
   }
 };
 
@@ -626,6 +479,7 @@ export const organizationAPI = {
 
 export const projectAPI = {
   getAll: () => apiRequest("/Projects"),
+  getHomePageProject: () => apiRequest("Projects/homepage-project"),
 
   getById: (id: any) => apiRequest(`/Projects/${id}`),
 
@@ -768,8 +622,8 @@ export const staffAPI = {
   },
 
   changeStatus: (staffId: any) => {
-    return apiRequest(`/Staff/${staffId}/status`, { 
-      method: "PUT", 
+    return apiRequest(`/Staff/${staffId}/status`, {
+      method: "PUT",
     });
   },
 

@@ -115,7 +115,6 @@ export default function OrganizationDetailPage({
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
 
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
@@ -155,7 +154,7 @@ export default function OrganizationDetailPage({
                       </h1>
                       <div className="flex items-center gap-3">
                         <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                          {organization.type}
+                          {organization.typeName}
                         </span>
                         <span
                           className={`px-3 py-1 rounded-full text-sm font-medium border ${organization.status}`}

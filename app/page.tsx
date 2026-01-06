@@ -5,23 +5,37 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { mockPrograms } from "@/lib/mock-data";
 import { Heart, Users, Award, ArrowRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { LoadingState } from "@/components/LoadingState";
+import SimpleProjectCard from "@/components/card/SimpleProjectCard";
+import { Project } from "@/lib/type";
+import { projectAPI } from "@/services/api";
 
 export default function HomePage() {
   const { user } = useAuth();
-  const [allPrograms, setAllPrograms] = useState(mockPrograms);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const customPrograms = JSON.parse(
-      localStorage.getItem("customPrograms") || "[]",
-    );
-    setAllPrograms([...mockPrograms, ...customPrograms]);
+  const fetchProjects = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await projectAPI.getHomePageProject();
+      setProjects(data);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
-
-  const featuredPrograms = allPrograms.slice(0, 3);
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchProjects();
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [fetchProjects]);
+  if (loading) return <LoadingState />;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -38,10 +52,11 @@ export default function HomePage() {
           <div className="container mx-auto px-4 relative">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-6xl md:text-7xl font-bold text-gradient-primary mb-8 text-balance leading-tight mt-8">
-                Phổ cập AI cho trẻ em vùng cao
+                Phổ cập công nghệ cho trẻ em vùng cao
               </h1>
               <p className="text-xl md:text-2xl text-muted-foreground mb-12 text-balance max-w-3xl mx-auto leading-relaxed">
-                Kết nối với các chương trình giáo dục AI và công nghệ, giúp trẻ em vùng cao tiếp cận với tri thức hiện đại
+                Kết nối với các chương trình giáo dục công nghệ, giúp trẻ em
+                vùng cao tiếp cận với tri thức hiện đại
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <Button
@@ -74,7 +89,8 @@ export default function HomePage() {
                 Tác động của chúng ta
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Những con số ấn tượng thể hiện tác động của chúng ta trong việc phổ cập kiến thức AI
+                Những con số ấn tượng thể hiện tác động của chúng ta trong việc
+                phổ cập kiến thức công nghệ
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -121,63 +137,23 @@ export default function HomePage() {
                 Chương trình nổi bật
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Tham gia các chương trình giáo dục AI đang hoạt động và giúp trẻ em vùng cao tiếp cận công nghệ
+                Tham gia các chương trình giáo dục AI đang hoạt động và giúp trẻ
+                em vùng cao tiếp cận công nghệ
               </p>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredPrograms.map((program, index) => (
-                <Card
-                  key={program.id}
-                  className="group overflow-hidden border-0 bg-white/80 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 flex flex-col"
-                >
-                  <div className="aspect-video bg-muted overflow-hidden relative flex-shrink-0">
-                    <img
-                      src={program.image || "/placeholder.svg"}
-                      alt={program.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-
-                    {/* International diagonal badge */}
-                    {program.isInternational && (
-                      <div className="absolute top-0 left-0 w-24 h-24 overflow-hidden">
-                        <div className="absolute top-6 -left-8 w-32 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs font-bold py-1 text-center transform -rotate-45 shadow-lg">
-                          Quốc tế
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="absolute top-4 right-4 flex flex-col gap-2">
-                      <span className="text-xs font-semibold text-white bg-[#6085F0] px-3 py-1 rounded-full shadow-lg">
-                        {program.category}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-6 flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-[#6085F0] transition-colors duration-200 min-h-[3.5rem]">
-                      {program.name}
-                    </h3>
-                    <p className="text-muted-foreground text-sm mb-4 line-clamp-3 flex-1">
-                      {program.description}
-                    </p>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-6">
-                      <span className="flex items-center gap-1">
-                        📍 {program.location}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        👥 {program.volunteersJoined}/{program.volunteersNeeded}
-                      </span>
-                    </div>
-                    <Button
-                      className="w-full gradient-primary text-white shadow-lg hover:opacity-90 transition-all duration-300"
-                      asChild
-                    >
-                      <Link href={`/programs/${program.id}`}>Xem chi tiết</Link>
-                    </Button>
-                  </div>
-                </Card>
+              {projects.map((project) => (
+                <SimpleProjectCard
+                  key={project.id}
+                  project={project}
+                  showBackButton={false}
+                  showOrganizationLink={false}
+                  className="border-0 shadow-none p-0 w-full"
+                />
               ))}
             </div>
+
             <div className="text-center mt-16">
               <Button
                 size="lg"
@@ -202,7 +178,8 @@ export default function HomePage() {
                 Đối tác tin cậy
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Hợp tác cùng các tổ chức giáo dục công nghệ uy tín hàng đầu Việt Nam
+                Hợp tác cùng các tổ chức giáo dục công nghệ uy tín hàng đầu Việt
+                Nam
               </p>
             </div>
 
@@ -244,7 +221,8 @@ export default function HomePage() {
                 Sẵn sàng tham gia?
               </h2>
               <p className="text-white/90 text-xl mb-12 max-w-3xl mx-auto leading-relaxed">
-                Đăng ký ngay để trở thành tình nguyện viên và giúp phổ cập kiến thức AI cho trẻ em vùng cao
+                Đăng ký ngay để trở thành tình nguyện viên và giúp phổ cập kiến
+                thức công nghệ cho trẻ em vùng cao
               </p>
               <Button
                 size="lg"

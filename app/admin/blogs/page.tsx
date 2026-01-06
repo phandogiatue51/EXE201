@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Header } from "@/components/header";
-import { useAuth } from "@/hooks/use-auth";
 import { blogAPI } from "../../../services/api";
 import { BlogPost } from "../../../lib/type";
 import { BlogStatusBadge } from "@/components/status-badge/BlogStatusBadge";

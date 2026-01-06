@@ -5,11 +5,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Building2,
   Calendar,
   MapPin,
-  Users,
-  ExternalLink,
 } from "lucide-react";
 import {
   ProjectStatusBadge,

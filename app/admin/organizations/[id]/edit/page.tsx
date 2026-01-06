@@ -119,11 +119,14 @@ export default function EditOrganizationPage({
       if (imageFile) {
         formDataToSend.append("ImageFile", imageFile);
       }
-
+      console.log("All FormData entries:");
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(`${key}:`, value);
+      }
       await organizationAPI.update(parseInt(id), formDataToSend);
       toast({
-        title: "Thành công",
         description: "Cập nhật tổ chức thành công!",
+        variant: "success",
         duration: 3000,
       });
       router.push(`/admin/organizations/${id}`);
@@ -150,8 +153,6 @@ export default function EditOrganizationPage({
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <Button variant="ghost" asChild className="mb-6">
