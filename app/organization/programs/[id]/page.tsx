@@ -45,7 +45,7 @@ export default function ProjectDetailPage({
     try {
       const response = await projectAPI.delete(parseInt(id));
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

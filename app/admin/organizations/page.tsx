@@ -76,7 +76,7 @@ export default function OrganizationsPage() {
       const response = await organizationAPI.delete(id);
       setOrganizations(organizations.filter((org) => org.id !== id));
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });
@@ -120,7 +120,7 @@ export default function OrganizationsPage() {
         )
       );
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

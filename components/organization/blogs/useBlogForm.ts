@@ -252,14 +252,14 @@ export const useBlogForm = ({ blog = null, isEdit = false }: UseBlogFormProps) =
             if (isEdit && blog?.id) {
                 const response = await blogAPI.update(blog.id, blogData);
                 toast({
-                    description: response,
+                    description: response.message,
                     variant: "success",
                     duration: 3000,
                 });
             } else {
                 const response = await blogAPI.create(blogData);
                 toast({
-                    description: response,
+                    description: response.message,
                     variant: "success",
                     duration: 3000,
                 });

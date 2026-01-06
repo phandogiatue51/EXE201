@@ -58,7 +58,7 @@ export default function EmployeeDetailPage({
         ...employee,
       });
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

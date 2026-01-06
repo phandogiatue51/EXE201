@@ -116,7 +116,7 @@ export default function ProjectsPage() {
     try {
       const response = await projectAPI.delete(id);
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

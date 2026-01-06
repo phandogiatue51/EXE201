@@ -156,7 +156,7 @@ export default function CreateEmployeePage() {
       const response = await staffAPI.create(formDataToSend);
 
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       }); router.push("/organization/employees");

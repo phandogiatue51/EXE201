@@ -255,7 +255,7 @@ export default function ProjectForm({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Yêu cầu
+            Yêu cầu *
           </label>
           {readOnly ? (
             <div className="p-3 bg-gray-50 rounded-lg border min-h-[100px]">

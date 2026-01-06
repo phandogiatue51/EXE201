@@ -17,7 +17,6 @@ const decodeJWT = (token: string): DecodedJWT | null => {
 
     const payload = parts[1];
 
-    // Base64 decode with proper padding
     const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
     const paddedBase64 = base64.padEnd(
       base64.length + ((4 - (base64.length % 4)) % 4),
@@ -73,7 +72,6 @@ export function useAuth() {
   const router = useRouter();
   const { toast } = useToast();
 
-  // Transform decoded JWT to user data
   const transformUserData = useCallback((decoded: DecodedJWT): UserData => {
     return {
       accountId: decoded.AccountId,
@@ -88,7 +86,6 @@ export function useAuth() {
     };
   }, []);
 
-  // Sync user from token (client-side only)
   const syncUserFromToken = useCallback((): UserData | null => {
     if (typeof window === "undefined") return null;
 
@@ -99,7 +96,6 @@ export function useAuth() {
       return null;
     }
 
-    // Check token expiration
     if (isTokenExpired(token)) {
       console.warn("Token expired, clearing auth");
       localStorage.removeItem("jwtToken");
@@ -119,7 +115,6 @@ export function useAuth() {
     return userData;
   }, [transformUserData]);
 
-  // Initialize auth state on mount
   useEffect(() => {
     const initAuth = () => {
       const userData = syncUserFromToken();
@@ -129,7 +124,6 @@ export function useAuth() {
 
     const userData = initAuth();
 
-    // Set up auto-logout when token expires
     if (userData?.exp) {
       const expirationTime = userData.exp * 1000 - Date.now();
       if (expirationTime > 0) {
@@ -144,14 +138,12 @@ export function useAuth() {
       }
     }
 
-    // Listen for auth changes from other tabs/windows
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "jwtToken") {
         syncUserFromToken();
       }
     };
 
-    // Listen for custom auth events
     const handleAuthStateChanged = () => {
       syncUserFromToken();
     };
@@ -188,11 +180,9 @@ export function useAuth() {
         throw new Error("No token received from server");
       }
 
-      // Store token based on rememberMe preference
       const storage = rememberMe ? localStorage : sessionStorage;
       storage.setItem("jwtToken", data.token);
 
-      // Decode token to get user info
       const decoded = decodeJWT(data.token);
       if (!decoded) {
         throw new Error("Failed to decode authentication token");
@@ -207,10 +197,8 @@ export function useAuth() {
         duration: 3000,
       });
 
-      // Dispatch auth change event
       window.dispatchEvent(new CustomEvent("authStateChanged"));
 
-      // Navigate based on role
       const role = userData.role || data.role || "User";
       switch (role) {
         case "Admin":
@@ -242,30 +230,24 @@ export function useAuth() {
   };
 
   const logout = useCallback(() => {
-    // Clear all auth storage (no server-side logout needed)
     localStorage.removeItem("jwtToken");
     sessionStorage.removeItem("jwtToken");
 
-    // Clear state
     setUser(null);
     setError("");
 
     toast({
-      title: "Logged out successfully!",
-      description: "See you next time!",
+      description: "Đăng xuất thành công!",
       duration: 3000,
     });
 
-    // Dispatch auth change event
     window.dispatchEvent(new CustomEvent("authStateChanged"));
 
-    // Redirect to login
     router.push("/login");
   }, [router, toast]);
 
   const isAuthenticated = useCallback(() => {
     if (!user) {
-      // Check token directly if user state is not set
       if (typeof window !== "undefined") {
         const token =
           localStorage.getItem("jwtToken") ||

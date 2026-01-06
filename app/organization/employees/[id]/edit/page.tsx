@@ -163,7 +163,7 @@ export default function EditEmployeePage({
       const response = await staffAPI.update(parseInt(id), formDataToSend);
 
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

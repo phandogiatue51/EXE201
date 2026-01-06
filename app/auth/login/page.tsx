@@ -27,8 +27,6 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-
-    console.log("11. End of function");
   };
 
   return (

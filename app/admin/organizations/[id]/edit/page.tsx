@@ -123,9 +123,12 @@ export default function EditOrganizationPage({
       for (let [key, value] of formDataToSend.entries()) {
         console.log(`${key}:`, value);
       }
-      await organizationAPI.update(parseInt(id), formDataToSend);
+      const response = await organizationAPI.update(
+        parseInt(id),
+        formDataToSend
+      );
       toast({
-        description: "Cập nhật tổ chức thành công!",
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

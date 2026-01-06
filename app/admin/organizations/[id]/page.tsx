@@ -63,7 +63,7 @@ export default function OrganizationDetailPage({
       const response = await organizationAPI.delete(parseInt(id));
       window.location.href = "/admin/organizations";
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

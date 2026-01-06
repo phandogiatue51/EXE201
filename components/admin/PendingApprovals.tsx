@@ -38,7 +38,7 @@ export default function PendingApprovals() {
     try {
       const response = await organizationAPI.verify(orgId, { status: 1 });
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });
@@ -61,7 +61,7 @@ export default function PendingApprovals() {
     try {
       const response = await organizationAPI.verify(orgId, { status: 2 });
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

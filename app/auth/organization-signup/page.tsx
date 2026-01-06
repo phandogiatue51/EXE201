@@ -109,7 +109,7 @@ export default function OrganizationSignupPage() {
 
       const response = await organizationAPI.createWithManager(formDataToSend);
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

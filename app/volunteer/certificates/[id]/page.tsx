@@ -67,7 +67,7 @@ export default function CertificateDetailPage() {
       setDeleting(true);
       const response = await certificateAPI.delete(certificateId);
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       }); router.push("/volunteer");

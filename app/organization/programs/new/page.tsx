@@ -184,7 +184,7 @@ export default function CreateProjectPage() {
       const response = await projectAPI.create(projectData);
 
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

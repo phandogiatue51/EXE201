@@ -58,7 +58,7 @@ export default function UserDetailPage() {
       const response = await accountAPI.update(userId, updatedUser);
       setUser(updatedUser);
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });
@@ -84,7 +84,7 @@ export default function UserDetailPage() {
     try {
       const response = await accountAPI.delete(userId);
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       }); router.push("/admin/users");

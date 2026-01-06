@@ -77,7 +77,7 @@ export default function VolunteerDashboardPage() {
       const response = await certificateAPI.delete(id);
       setCertificates(prev => prev.filter(cert => cert.id !== id));
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

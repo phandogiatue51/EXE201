@@ -125,7 +125,7 @@ export function ApplicationDetailView({
       };
       const response = await applicationAPI.review(id, reviewData);
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       }); fetchApplication();

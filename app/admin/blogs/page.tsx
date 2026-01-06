@@ -87,7 +87,7 @@ export default function BlogsPage() {
       const response = await blogAPI.delete(id);
       setBlogs(blogs.filter((blog) => blog.id !== id));
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });
@@ -110,7 +110,7 @@ export default function BlogsPage() {
         )
       );
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

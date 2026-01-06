@@ -71,7 +71,7 @@ export default function UsersPage() {
       var response = await accountAPI.delete(id);
       setUsers(users.filter((user) => user.id !== id));
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

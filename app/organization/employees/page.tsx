@@ -109,7 +109,7 @@ export default function StaffPage() {
       ));
 
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

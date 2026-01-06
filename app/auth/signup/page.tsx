@@ -49,7 +49,7 @@ export default function SignupPage() {
       const response = await accountAPI.signUp(formDataObj);
 
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

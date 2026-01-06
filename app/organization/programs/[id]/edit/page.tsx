@@ -230,7 +230,7 @@ export default function EditProjectPage({
       const response = await projectAPI.update(parseInt(id), projectData);
 
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       }); router.push("/organization/programs");

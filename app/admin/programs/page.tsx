@@ -72,7 +72,7 @@ export default function ProjectsPage() {
       const response = await projectAPI.delete(id);
       setProjects(projects.filter(project => project.id !== id));
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

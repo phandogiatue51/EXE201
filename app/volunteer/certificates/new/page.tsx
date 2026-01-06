@@ -128,7 +128,7 @@ export default function CreateCertificatePage() {
       const response = await certificateAPI.create(formDataToSend);
 
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });

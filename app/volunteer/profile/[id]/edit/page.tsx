@@ -148,7 +148,7 @@ export default function EditVolunteerProfilePage() {
       );
 
       toast({
-        description: response,
+        description: response.message,
         variant: "success",
         duration: 3000,
       });
