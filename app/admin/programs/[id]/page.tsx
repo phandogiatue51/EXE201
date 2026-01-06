@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI } from "../../../../services/api";
+import { useToast } from "@/hooks/use-toast";
 import {
   ProjectStatusBadge,
   toProjectStatus,
@@ -29,7 +30,7 @@ export default function ProjectDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { user } = useAuth();
+  const { toast } = useToast();
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,11 +54,20 @@ export default function ProjectDetailPage({
     if (!confirm("Bạn có chắc chắn muốn xóa chương trình này?")) return;
 
     try {
-      await projectAPI.delete(parseInt(id));
+      var response = await projectAPI.delete(parseInt(id));
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
       window.location.href = "/admin/programs";
-    } catch (error) {
-      console.error("Error deleting project:", error);
-      alert("Không thể xóa chương trình");
+    } catch (error: any) {
+      console.error("Error deleting program:", error);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
@@ -282,8 +292,8 @@ export default function ProjectDetailPage({
                         <p className="font-medium text-foreground">
                           {project.startDate
                             ? new Date(project.startDate).toLocaleDateString(
-                                "vi-VN"
-                              )
+                              "vi-VN"
+                            )
                             : "Chưa có"}
                         </p>
                       </div>
@@ -300,8 +310,8 @@ export default function ProjectDetailPage({
                         <p className="font-medium text-foreground">
                           {project.endDate
                             ? new Date(project.endDate).toLocaleDateString(
-                                "vi-VN"
-                              )
+                              "vi-VN"
+                            )
                             : "Chưa có"}
                         </p>
                       </div>
@@ -332,7 +342,7 @@ export default function ProjectDetailPage({
                       {Math.round(
                         (project.currentVolunteers /
                           project.requiredVolunteers) *
-                          100
+                        100
                       )}
                       %
                     </span>
@@ -345,7 +355,7 @@ export default function ProjectDetailPage({
                           100,
                           (project.currentVolunteers /
                             project.requiredVolunteers) *
-                            100
+                          100
                         )}%`,
                       }}
                     />
@@ -375,9 +385,9 @@ export default function ProjectDetailPage({
                             <span className="text-xs text-white">
                               {cat.categoryIcon
                                 ? cat.categoryIcon
-                                    .replace("fa-", "")
-                                    .charAt(0)
-                                    .toUpperCase()
+                                  .replace("fa-", "")
+                                  .charAt(0)
+                                  .toUpperCase()
                                 : "C"}
                             </span>
                           </div>

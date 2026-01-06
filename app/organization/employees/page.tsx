@@ -5,9 +5,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { staffAPI } from "../../../services/api";
+import { useToast } from "@/hooks/use-toast";
 import {
   PlusCircle,
   Eye,
@@ -18,7 +18,6 @@ import {
   User,
   Phone,
   Mail,
-  Building2,
   Calendar,
   Shield,
   UserCheck,
@@ -26,7 +25,6 @@ import {
   Users,
 } from "lucide-react";
 
-// Staff role mapping
 const STAFF_ROLES: Record<number, { name: string; color: string; bgColor: string }> = {
   0: { name: "Quản lý", color: "text-orange-700", bgColor: "bg-orange-100" },
   1: { name: "Cộng tác viên", color: "text-blue-700", bgColor: "bg-blue-100" },
@@ -35,6 +33,7 @@ const STAFF_ROLES: Record<number, { name: string; color: string; bgColor: string
 
 export default function StaffPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const OrganizationId = user?.organizationId;
   const StaffRole = user?.staffRole;
   const AccountId = user?.accountId;
@@ -99,31 +98,28 @@ export default function StaffPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa nhân sự này?")) return;
-
+  const handleStatusChange = async (id: number) => {
     try {
-      await staffAPI.delete(id);
-      setStaff(staff.filter(member => member.id !== id));
-      alert("Đã xóa nhân sự thành công");
-    } catch (error) {
-      console.error("Error deleting staff:", error);
-      alert("Không thể xóa nhân sự");
-    }
-  };
+      const response = await staffAPI.changeStatus(id);
 
-  const handleStatusChange = async (id: number, isActive: boolean) => {
-    try {
-      // await staffAPI.updateStatus(id, isActive);
       setStaff(staff.map(member =>
         member.id === id
-          ? { ...member, isActive, leftAt: isActive ? null : new Date() }
+          ? { ...member, ...response }
           : member
       ));
-      alert(isActive ? "Đã kích hoạt nhân sự" : "Đã vô hiệu hóa nhân sự");
-    } catch (error) {
+
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
       console.error("Error updating staff status:", error);
-      alert("Không thể cập nhật trạng thái");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
@@ -147,9 +143,9 @@ export default function StaffPage() {
   });
 
   const STAFF_ROLES: Record<number, { name: string; color: string; bgColor: string }> = {
-    0: { name: "Quản lý", color: "text-orange-700", bgColor: "bg-orange-100" },  
-    1: { name: "Người đánh giá", color: "text-purple-700", bgColor: "bg-purple-100" }, 
-    2: { name: "Nhân viên", color: "text-blue-700", bgColor: "bg-blue-100" },    
+    0: { name: "Quản lý", color: "text-orange-700", bgColor: "bg-orange-100" },
+    1: { name: "Người đánh giá", color: "text-purple-700", bgColor: "bg-purple-100" },
+    2: { name: "Nhân viên", color: "text-blue-700", bgColor: "bg-blue-100" },
   };
 
   const uniqueRoles = staff
@@ -166,7 +162,7 @@ export default function StaffPage() {
     if (StaffRole === "Manager") return true;
 
     if (StaffRole === "Manager") {
-      return staffMember.role > 2; 
+      return staffMember.role > 2;
     }
 
     return false;
@@ -378,7 +374,7 @@ export default function StaffPage() {
                           variant="outline"
                           size="sm"
                           className="flex-1"
-                          onClick={() => handleStatusChange(member.id, !member.isActive)}
+                          onClick={() => handleStatusChange(member.id)}
                         >
                           {member.isActive ? (
                             <>
@@ -391,18 +387,6 @@ export default function StaffPage() {
                               Kích hoạt
                             </>
                           )}
-                        </Button>
-                      )}
-
-                      {canDeleteStaff(member) && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => handleDelete(member.id)}
-                        >
-                          <Trash2 className="w-3 h-3 mr-1" />
-                          Xóa
                         </Button>
                       )}
                     </div>

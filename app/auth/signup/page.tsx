@@ -8,10 +8,11 @@ import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { accountAPI } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [role] = useState("volunteer");
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
@@ -30,34 +31,38 @@ export default function SignupPage() {
 
     try {
       const formDataObj = new FormData();
-      
+
       formDataObj.append('Name', formData.name);
       formDataObj.append('Email', formData.email);
       formDataObj.append('Password', formData.password);
-      
+
       if (formData.phoneNumber) {
         formDataObj.append('PhoneNumber', formData.phoneNumber);
       }
-      
+
       if (formData.dateOfBirth) {
         formDataObj.append('DateOfBirth', formData.dateOfBirth);
       }
-      
+
       formDataObj.append('IsFemale', formData.isFemale.toString());
 
-      const result = await accountAPI.signUp(formDataObj);
-      
-      console.log("Signup successful:", result);
-      
-      alert("Đăng ký thành công! Bạn có thể đăng nhập ngay.");
+      const response = await accountAPI.signUp(formDataObj);
+
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
+
       router.push("/auth/login");
-      
-    } catch (err) {
-      console.error("Signup error:", err);
-      
-      const errorMessage = (err as any)?.message || (err as any)?.toString() || "Đăng ký thất bại. Vui lòng thử lại.";
-      setError(errorMessage);
-      alert(errorMessage);
+
+    } catch (error: any) {
+      console.error("Error signing up:", error);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +70,7 @@ export default function SignupPage() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    
+
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
@@ -190,7 +195,7 @@ export default function SignupPage() {
                         type="radio"
                         name="isFemale"
                         checked={formData.isFemale === true}
-                        onChange={() => setFormData({...formData, isFemale: true})}
+                        onChange={() => setFormData({ ...formData, isFemale: true })}
                         className="mr-2"
                         disabled={isLoading}
                       />
@@ -201,7 +206,7 @@ export default function SignupPage() {
                         type="radio"
                         name="isFemale"
                         checked={formData.isFemale === false}
-                        onChange={() => setFormData({...formData, isFemale: false})}
+                        onChange={() => setFormData({ ...formData, isFemale: false })}
                         className="mr-2"
                         disabled={isLoading}
                       />

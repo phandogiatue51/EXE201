@@ -3,8 +3,7 @@
 import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import { projectAPI } from "../../../../services/api";
 import { ProjectDetailCard } from "@/components/card/ProjectDetailCard";
 import { LoadingState } from "@/components/LoadingState";
@@ -17,7 +16,7 @@ export default function ProjectDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { user } = useAuth();
+  const { toast } = useToast();
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,11 +43,20 @@ export default function ProjectDetailPage({
     if (!confirm("Bạn có chắc chắn muốn xóa chương trình này?")) return;
 
     try {
-      await projectAPI.delete(parseInt(id));
+      const response = await projectAPI.delete(parseInt(id));
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
       window.location.href = "/organization/programs";
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting project:", error);
-      alert("Không thể xóa chương trình");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 

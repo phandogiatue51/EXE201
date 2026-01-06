@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect,  } from "react";
+import { useState, useEffect, } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { StatsCards } from "../../components/volunteer/stats-cards";
@@ -9,6 +9,8 @@ import { CertificatesList } from "../../components/list/certificates-list";
 import { ProfileSidebar } from "../../components/volunteer/profile-sidebar";
 import { accountAPI, certificateAPI, applicationAPI, projectAPI } from "@/services/api";
 import { VolunteerApplication, Certificate, Account, Project } from "../../lib/type"
+import { useToast } from "@/hooks/use-toast";
+
 export default function VolunteerDashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -17,6 +19,7 @@ export default function VolunteerDashboardPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [volunteerProfile, setVolunteerProfile] = useState<Account | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user?.accountId) {
@@ -26,13 +29,13 @@ export default function VolunteerDashboardPage() {
 
   const fetchDashboardData = async () => {
     if (!user?.accountId) return;
-    
+
     setIsLoading(true);
     try {
       const [profileData, certificatesData, applicationsData] = await Promise.all([
         accountAPI.getById(user.accountId),
-        certificateAPI.getByAccountId(user.accountId), 
-        applicationAPI.filter({ volunteerId: user.accountId }), 
+        certificateAPI.getByAccountId(user.accountId),
+        applicationAPI.filter({ volunteerId: user.accountId }),
       ]);
 
       setVolunteerProfile(profileData);
@@ -69,14 +72,22 @@ export default function VolunteerDashboardPage() {
 
   const handleDelete = async (id: string | number) => {
     if (!confirm("Bạn có chắc chắn muốn xóa chứng chỉ này?")) return;
-    
+
     try {
-      await certificateAPI.delete(id);
+      const response = await certificateAPI.delete(id);
       setCertificates(prev => prev.filter(cert => cert.id !== id));
-      alert("Xóa chứng chỉ thành công!");
-    } catch (error) {
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
       console.error("Error deleting certificate:", error);
-      alert("Có lỗi xảy ra khi xóa chứng chỉ");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
   if (isLoading) {
@@ -103,15 +114,15 @@ export default function VolunteerDashboardPage() {
       </div>
 
       {/* Stats Section */}
-      <StatsCards 
-        registrations={enrichedRegistrations} 
-        certificates={certificates} 
+      <StatsCards
+        registrations={enrichedRegistrations}
+        certificates={certificates}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
         <div className="lg:col-span-2 space-y-8">
           <ProgramsList registrations={enrichedRegistrations} />
-          
+
           <CertificatesList
             certificates={certificates}
             onView={handleView}

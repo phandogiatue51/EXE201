@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { staffAPI } from "../../../../../services/api";
 import { ArrowLeft, UserCog } from "lucide-react";
 import StaffForm from "../../../../../components/form/StaffForm";
+import { useToast } from "@/hooks/use-toast";
 
 export default function EditEmployeePage({
   params,
@@ -18,8 +19,7 @@ export default function EditEmployeePage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const { user } = useAuth();
-
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -160,28 +160,23 @@ export default function EditEmployeePage({
         console.log(key, value instanceof File ? `File: ${value.name}` : value);
       }
 
-      await staffAPI.update(parseInt(id), formDataToSend);
+      const response = await staffAPI.update(parseInt(id), formDataToSend);
 
-      alert("Employee updated successfully!");
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
       router.push("/organization/employees");
       router.refresh();
     } catch (error: any) {
       console.error("Error updating employee:", error);
 
-      let errorMessage = "Unable to update employee. Please try again.";
-
-      if (error?.response?.data) {
-        const errorData = error.response.data;
-        if (typeof errorData === "string") {
-          errorMessage = errorData;
-        } else if (errorData.message) {
-          errorMessage = errorData.message;
-        }
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-
-      alert(errorMessage);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }

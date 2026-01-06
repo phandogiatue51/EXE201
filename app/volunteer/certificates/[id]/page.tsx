@@ -10,12 +10,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { certificateAPI, categoryAPI } from "@/services/api";
 import { ArrowLeft, Trash2, UserPlus } from "lucide-react";
 import CertificateForm from "@/components/form/CertificateForm";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CertificateDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { user } = useAuth();
-
+  const { toast } = useToast();
   const certificateId = params.id as string;
 
   const [loading, setLoading] = useState(true);
@@ -64,12 +65,19 @@ export default function CertificateDetailPage() {
 
     try {
       setDeleting(true);
-      await certificateAPI.delete(certificateId);
-      alert("Xóa chứng chỉ thành công!");
-      router.push("/volunteer");
+      const response = await certificateAPI.delete(certificateId);
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      }); router.push("/volunteer");
     } catch (error: any) {
       console.error("Error deleting certificate:", error);
-      alert(error.message || "Có lỗi xảy ra khi xóa chứng chỉ");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setDeleting(false);
     }

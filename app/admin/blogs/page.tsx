@@ -95,7 +95,6 @@ export default function BlogsPage() {
     } catch (error: any) {
       console.error("Error deleting blog:", error);
       toast({
-        title: "Lỗi",
         description: error?.message || "Có lỗi xảy ra!",
         variant: "destructive",
         duration: 5000,

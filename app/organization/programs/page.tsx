@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
-import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI, categoryAPI } from "../../../services/api";
 import { ProjectFilters } from "../../../components/filter/ProjectFilter";
@@ -23,18 +23,13 @@ import {
   LogOut,
   FileText,
 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import { TextMarquee } from "@/components/ui/text-marquee";
 
 export default function ProjectsPage() {
   const { user } = useAuth();
   const organizationId = user?.organizationId;
-
+  const { toast } = useToast();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -119,11 +114,20 @@ export default function ProjectsPage() {
     if (!confirm("Bạn có chắc chắn muốn xóa chương trình này?")) return;
 
     try {
-      await projectAPI.delete(id);
+      const response = await projectAPI.delete(id);
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
       fetchProjects();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting project:", error);
-      alert("Không thể xóa chương trình");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
@@ -210,15 +214,14 @@ export default function ProjectsPage() {
                     {/* Status Badge */}
                     <div className="absolute top-4 right-4">
                       <span
-                        className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                          project.status === 3
-                            ? "bg-green-100 text-green-800" // Active
-                            : project.status === 2
+                        className={`px-3 py-1 text-xs font-semibold rounded-full ${project.status === 3
+                          ? "bg-green-100 text-green-800" // Active
+                          : project.status === 2
                             ? "bg-blue-100 text-blue-800" // Recruiting
                             : project.status === 4
-                            ? "bg-purple-100 text-purple-800" // Completed
-                            : "bg-gray-100 text-gray-800"
-                        }`}
+                              ? "bg-purple-100 text-purple-800" // Completed
+                              : "bg-gray-100 text-gray-800"
+                          }`}
                       >
                         {project.statusName}
                       </span>
@@ -295,13 +298,11 @@ export default function ProjectsPage() {
                                 key={cat.categoryId || cat.id}
                                 className="px-2 py-1 text-xs rounded-full"
                                 style={{
-                                  backgroundColor: `${
-                                    cat.categoryColor || cat.color
-                                  }20`,
+                                  backgroundColor: `${cat.categoryColor || cat.color
+                                    }20`,
                                   color: cat.categoryColor || cat.color,
-                                  border: `1px solid ${
-                                    cat.categoryColor || cat.color
-                                  }40`,
+                                  border: `1px solid ${cat.categoryColor || cat.color
+                                    }40`,
                                 }}
                               >
                                 {cat.categoryName || cat.name}
@@ -426,9 +427,9 @@ export default function ProjectsPage() {
               </h3>
               <p className="text-muted-foreground mb-4">
                 {search ||
-                statusFilter !== "all" ||
-                typeFilter !== "all" ||
-                categoryFilter.length > 0
+                  statusFilter !== "all" ||
+                  typeFilter !== "all" ||
+                  categoryFilter.length > 0
                   ? "Thử thay đổi bộ lọc tìm kiếm"
                   : "Chưa có chương trình nào trong hệ thống"}
               </p>

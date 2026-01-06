@@ -131,7 +131,6 @@ export default function EditOrganizationPage({
     } catch (error: any) {
       console.error("Error updating organization:", error);
       toast({
-        title: "Lỗi",
         description: error?.message || "Có lỗi xảy ra!",
         variant: "destructive",
         duration: 5000,

@@ -128,7 +128,6 @@ export default function CreateOrganizationPage() {
     } catch (error: any) {
       console.error("Error creating organization:", error);
       toast({
-        title: "Lỗi",
         description: error?.message || "Có lỗi xảy ra!",
         variant: "destructive",
         duration: 5000,

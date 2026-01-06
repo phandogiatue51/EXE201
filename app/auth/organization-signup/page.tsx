@@ -11,9 +11,11 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { organizationAPI } from "@/services/api";
 import { Upload, Building2, Mail, Phone, MapPin, Globe, User } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function OrganizationSignupPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -101,23 +103,24 @@ export default function OrganizationSignupPage() {
       formDataToSend.append("PhoneNumber", organizationData.phoneNumber);
       formDataToSend.append("Address", organizationData.address);
 
-      // Append image file if exists
       if (imageFile) {
         formDataToSend.append("ImageFile", imageFile);
       }
 
-      await organizationAPI.createWithManager(formDataToSend);
-
-      alert("Đăng ký tổ chức thành công! Vui lòng đợi quản trị viên phê duyệt.");
+      const response = await organizationAPI.createWithManager(formDataToSend);
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
       router.push("/auth/login");
-    } catch (err) {
-      console.error("Organization signup error:", err);
-      const errorMessage =
-        (err as any)?.message ||
-        (err as any)?.toString() ||
-        "Đăng ký thất bại. Vui lòng thử lại.";
-      setError(errorMessage);
-      alert(errorMessage);
+    } catch (error: any) {
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
+
     } finally {
       setIsLoading(false);
     }

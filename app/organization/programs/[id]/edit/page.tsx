@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Header } from "@/components/header";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI, categoryAPI } from "../../../../../services/api";
 import { ArrowLeft } from "lucide-react";
@@ -19,6 +19,7 @@ export default function EditProjectPage({
   const { id } = use(params);
   const router = useRouter();
   const { user } = useAuth();
+  const { toast } = useToast();
   const userOrganizationId = user?.organizationId;
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -219,7 +220,6 @@ export default function EditProjectPage({
         projectData.endDate = new Date(formData.endDate).toISOString();
       }
 
-      // Handle image
       if (imageFile) {
         projectData.imageUrl = imageFile;
       }
@@ -227,31 +227,23 @@ export default function EditProjectPage({
       console.log("Updating project with data:", projectData);
       console.log("Categories array:", projectData.categoryIds);
 
-      await projectAPI.update(parseInt(id), projectData);
+      const response = await projectAPI.update(parseInt(id), projectData);
 
-      alert("Cập nhật chương trình thành công!");
-      router.push("/organization/programs");
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      }); router.push("/organization/programs");
       router.refresh();
     } catch (error: any) {
       console.error("Error updating project:", error);
 
-      let errorMessage = "Không thể cập nhật chương trình. Vui lòng thử lại.";
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
 
-      if (error?.data?.errors) {
-        const validationErrors = error.data.errors;
-        const errorList = Object.entries(validationErrors)
-          .map(
-            ([field, errors]) => `${field}: ${(errors as string[]).join(", ")}`
-          )
-          .join("\n");
-        errorMessage = `Lỗi xác thực:\n${errorList}`;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (error?.data?.message) {
-        errorMessage = error.data.message;
-      }
-
-      alert(errorMessage);
     } finally {
       setLoading(false);
     }

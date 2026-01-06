@@ -176,9 +176,9 @@ const apiRequest = async <T = any>(
 
       const error: ApiError = new Error(
         parsedError?.message ||
-          parsedError?.title ||
-          errorText ||
-          `HTTP ${response.status}`
+        parsedError?.title ||
+        errorText ||
+        `HTTP ${response.status}`
       );
 
       error.status = response.status;
@@ -764,6 +764,12 @@ export const staffAPI = {
   delete: (staffId: any) => {
     return apiRequest(`/Staff/${staffId}?staffId=${staffId}`, {
       method: "DELETE",
+    });
+  },
+
+  changeStatus: (staffId: any) => {
+    return apiRequest(`/Staff/${staffId}/status`, { 
+      method: "PUT", 
     });
   },
 

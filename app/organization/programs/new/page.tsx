@@ -9,12 +9,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { projectAPI, categoryAPI } from "../../../../services/api";
 import { ArrowLeft } from "lucide-react";
 import ProjectForm from "../../../../components/form/ProjectForm";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CreateProjectPage() {
   const router = useRouter();
   const { user } = useAuth();
   const userOrganizationId = user?.organizationId;
-
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -180,31 +181,23 @@ export default function CreateProjectPage() {
       }
 
       console.log("Sending project data:", projectData);
-      await projectAPI.create(projectData);
+      const response = await projectAPI.create(projectData);
 
-      alert("Tạo chương trình thành công!");
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
       router.push("/organization/programs");
       router.refresh();
     } catch (error: any) {
       console.error("Error creating project:", error);
 
-      let errorMessage = "Không thể tạo chương trình. Vui lòng thử lại.";
-
-      if (error?.data?.errors) {
-        const validationErrors = error.data.errors;
-        const errorList = Object.entries(validationErrors)
-          .map(
-            ([field, errors]) => `${field}: ${(errors as string[]).join(", ")}`
-          )
-          .join("\n");
-        errorMessage = `Lỗi xác thực:\n${errorList}`;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (error?.data?.message) {
-        errorMessage = error.data.message;
-      }
-
-      alert(errorMessage);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }

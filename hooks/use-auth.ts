@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { accountAPI } from "../services/api";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "./use-toast";
 
 const decodeJWT = (token: string): DecodedJWT | null => {
   try {
@@ -31,17 +31,17 @@ const decodeJWT = (token: string): DecodedJWT | null => {
       AccountId:
         userData.AccountId ||
         userData[
-          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
         ],
       Email:
         userData.Email ||
         userData[
-          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
         ],
       Role:
         userData.Role ||
         userData[
-          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         ],
       StaffId: userData.StaffId,
       OrganizationId: userData.OrganizationId,
@@ -184,8 +184,6 @@ export function useAuth() {
         rememberMe,
       });
 
-      console.log("Login successful:", data);
-
       if (!data.token) {
         throw new Error("No token received from server");
       }
@@ -204,8 +202,8 @@ export function useAuth() {
       setUser(userData);
 
       toast({
-        title: "Login Successful!",
-        description: "Welcome back!",
+        description: data.message,
+        variant: "success",
         duration: 3000,
       });
 
@@ -231,21 +229,13 @@ export function useAuth() {
       }
 
       return data;
-    } catch (err: any) {
-      const errorMessage =
-        err?.message ||
-        err?.data?.message ||
-        "Login failed. Please check your credentials.";
-      setError(errorMessage);
-
+    } catch (error: any) {
       toast({
-        title: "Login Failed",
-        description: errorMessage,
+        description: error?.message || "Có lỗi xảy ra!",
         variant: "destructive",
         duration: 5000,
       });
 
-      throw err;
     } finally {
       setLoading(false);
     }

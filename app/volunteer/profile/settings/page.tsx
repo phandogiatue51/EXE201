@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { accountAPI } from "@/services/api";
 import { ArrowLeft, Lock, Eye, EyeOff, Shield, KeyRound } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProfileSettingsPage() {
   const { user } = useAuth();
@@ -144,7 +144,7 @@ export default function ProfileSettingsPage() {
             <Card className="p-0 border-0 bg-white/90 backdrop-blur-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-700 delay-400 hover:shadow-3xl transition-all duration-500">
               {/* Decorative Header */}
               <div className="relative h-32 bg-gradient-to-br from-[#77E5C8] via-[#6085F0] to-[#A7CBDC] overflow-hidden">
-                <div 
+                <div
                   className="absolute inset-0 opacity-20"
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
@@ -280,19 +280,19 @@ export default function ProfileSettingsPage() {
                         )}
                       </button>
                     </div>
-                    {passwordData.confirmNewPassword && 
-                     passwordData.newPassword !== passwordData.confirmNewPassword && (
-                      <p className="text-sm text-red-600 flex items-center gap-1">
-                        <span>❌</span> Mật khẩu không khớp
-                      </p>
-                    )}
-                    {passwordData.confirmNewPassword && 
-                     passwordData.newPassword === passwordData.confirmNewPassword && 
-                     passwordData.newPassword.length >= 6 && (
-                      <p className="text-sm text-green-600 flex items-center gap-1">
-                        <span>✅</span> Mật khẩu khớp
-                      </p>
-                    )}
+                    {passwordData.confirmNewPassword &&
+                      passwordData.newPassword !== passwordData.confirmNewPassword && (
+                        <p className="text-sm text-red-600 flex items-center gap-1">
+                          <span>❌</span> Mật khẩu không khớp
+                        </p>
+                      )}
+                    {passwordData.confirmNewPassword &&
+                      passwordData.newPassword === passwordData.confirmNewPassword &&
+                      passwordData.newPassword.length >= 6 && (
+                        <p className="text-sm text-green-600 flex items-center gap-1">
+                          <span>✅</span> Mật khẩu khớp
+                        </p>
+                      )}
                   </div>
 
                   {/* Submit Button */}

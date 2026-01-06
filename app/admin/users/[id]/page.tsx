@@ -7,15 +7,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Account } from "@/lib/type";
 import { AccountBadge } from "@/components/status-badge/AccountBadge";
-import { formatDate } from "@/lib/date";
 import { ArrowLeft, Mail, Phone, Trash2, Award } from "lucide-react";
 import { accountAPI, certificateAPI } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 export default function UserDetailPage() {
   const params = useParams();
   const router = useRouter();
   const userId = params.id as string;
-
+  const { toast } = useToast();
   const [user, setUser] = useState<Account | null>(null);
   const [loading, setLoading] = useState(true);
   const [certificates, setCertificates] = useState<any[]>([]);
@@ -55,11 +55,20 @@ export default function UserDetailPage() {
 
     try {
       const updatedUser = { ...user, isActive: !user.status };
-      await accountAPI.update(userId, updatedUser);
+      const response = await accountAPI.update(userId, updatedUser);
       setUser(updatedUser);
-      alert(`Đã ${user.status ? "vô hiệu hóa" : "kích hoạt"} người dùng!`);
-    } catch (error) {
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
       console.error("Error updating user status:", error);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
@@ -73,12 +82,19 @@ export default function UserDetailPage() {
     }
 
     try {
-      await accountAPI.delete(userId);
-      alert("Xóa người dùng thành công!");
-      router.push("/admin/users");
-    } catch (error) {
+      const response = await accountAPI.delete(userId);
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      }); router.push("/admin/users");
+    } catch (error: any) {
       console.error("Error deleting user:", error);
-      alert("Có lỗi xảy ra khi xóa người dùng!");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
@@ -131,11 +147,10 @@ export default function UserDetailPage() {
           <div className="border-b">
             <div className="flex gap-2">
               <button
-                className={`px-4 py-2 font-medium ${
-                  activeTab === "info"
-                    ? "text-[#6085F0] border-b-2 border-[#6085F0]"
-                    : "text-gray-500"
-                }`}
+                className={`px-4 py-2 font-medium ${activeTab === "info"
+                  ? "text-[#6085F0] border-b-2 border-[#6085F0]"
+                  : "text-gray-500"
+                  }`}
                 onClick={() => setActiveTab("info")}
               >
                 Thông tin
@@ -143,11 +158,10 @@ export default function UserDetailPage() {
               {user.role === 0 && (
                 <>
                   <button
-                    className={`px-4 py-2 font-medium ${
-                      activeTab === "certificates"
-                        ? "text-[#6085F0] border-b-2 border-[#6085F0]"
-                        : "text-gray-500"
-                    }`}
+                    className={`px-4 py-2 font-medium ${activeTab === "certificates"
+                      ? "text-[#6085F0] border-b-2 border-[#6085F0]"
+                      : "text-gray-500"
+                      }`}
                     onClick={() => setActiveTab("certificates")}
                   >
                     Chứng chỉ

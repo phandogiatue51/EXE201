@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { blogAPI } from "@/services/api";
 import { BlogPost } from "@/lib/type";
+import { useToast } from "@/hooks/use-toast";
 
 interface UseBlogFormProps {
     blog?: BlogPost | null;
@@ -15,7 +16,7 @@ export const useBlogForm = ({ blog = null, isEdit = false }: UseBlogFormProps) =
     const router = useRouter();
     const { user } = useAuth();
     const organizationId = user?.organizationId;
-
+    const { toast } = useToast();
     // State
     const [loading, setLoading] = useState(false);
     const [featuredImagePreview, setFeaturedImagePreview] = useState<string | null>(null);
@@ -249,19 +250,31 @@ export const useBlogForm = ({ blog = null, isEdit = false }: UseBlogFormProps) =
 
             let result;
             if (isEdit && blog?.id) {
-                result = await blogAPI.update(blog.id, blogData);
-                alert("Cập nhật bài viết thành công!");
+                const response = await blogAPI.update(blog.id, blogData);
+                toast({
+                    description: response,
+                    variant: "success",
+                    duration: 3000,
+                });
             } else {
-                result = await blogAPI.create(blogData);
-                alert("Tạo bài viết thành công!");
+                const response = await blogAPI.create(blogData);
+                toast({
+                    description: response,
+                    variant: "success",
+                    duration: 3000,
+                });
             }
 
             router.push(`/organization/blogs`);
             router.refresh();
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error saving blog:", error);
-            alert("Có lỗi xảy ra khi lưu bài viết!");
+            toast({
+                description: error?.message || "Có lỗi xảy ra!",
+                variant: "destructive",
+                duration: 5000,
+            });
         } finally {
             setLoading(false);
         }

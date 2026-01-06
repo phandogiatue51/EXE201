@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { blogAPI } from "../../../services/api";
 import { BlogPost } from "../../../lib/type";
 import { BlogStatusBadge } from "@/components/status-badge/BlogStatusBadge";
+import { useToast } from "@/hooks/use-toast";
 
 import {
   Search,
@@ -27,6 +28,7 @@ import { BlogFilterDto } from "@/lib/filter-type";
 
 export default function BlogsPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const organizationId = user?.organizationId;
   const staffRole = user?.staffRole;
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
@@ -109,26 +111,44 @@ export default function BlogsPage() {
     if (!confirm("Bạn có chắc muốn xóa bài viết này?")) return;
 
     try {
-      await blogAPI.delete(id);
+      const response = await blogAPI.delete(id);
       setBlogs(blogs.filter((blog) => blog.id !== id));
-      alert("Đã xóa bài viết!");
-    } catch (error) {
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
       console.error("Error deleting blog:", error);
-      alert("Có lỗi xảy ra!");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
   const handleStatusChange = async (id: number, newStatus: number) => {
     try {
-      await blogAPI.updateStatus(id, newStatus);
+      const response = await blogAPI.updateStatus(id, newStatus);
       setBlogs(
         blogs.map((blog) =>
           blog.id === id ? { ...blog, status: newStatus } : blog
         )
       );
-      alert("Đã cập nhật trạng thái!");
-    } catch (error) {
+      toast({
+        description: response,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
       console.error("Error updating status:", error);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
+
     }
   };
 
