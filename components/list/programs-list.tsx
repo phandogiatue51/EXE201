@@ -109,17 +109,6 @@ export function ProgramsList({ registrations }: ProgramsListProps) {
                           Xem đơn đăng ký
                         </Link>
                       </Button>
-
-                      {reg.status === 1 &&
-                        reg.selectedCertificates &&
-                        reg.selectedCertificates.length > 0 && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Award className="w-4 h-4 text-[#6085F0]" />
-                            <span className="font-medium">
-                              {reg.selectedCertificates.length} chứng chỉ
-                            </span>
-                          </div>
-                        )}
                     </div>
                   </div>
                 </div>

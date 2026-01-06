@@ -124,33 +124,49 @@ export default function CreateProjectPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (loading) return;
+    const validationErrors: string[] = [];
 
-    // Validate required fields
-    if (!formData.title.trim()) {
-      alert("Vui lòng nhập tên chương trình");
-      setLoading(false);
-      return;
-    }
+    const requiredTextFields = [
+      { key: "title" as const, label: "Tên chương trình" },
+      { key: "description" as const, label: "Mô tả" },
+      { key: "goals" as const, label: "Mục tiêu" },
+      { key: "activities" as const, label: "Hoạt động" },
+      { key: "requirements" as const, label: "Yêu cầu" },
+    ];
 
-    if (!formData.description.trim()) {
-      alert("Vui lòng nhập mô tả chương trình");
-      setLoading(false);
-      return;
+    requiredTextFields.forEach(({ key, label }) => {
+      if (!formData[key]?.toString()?.trim()) {
+        validationErrors.push(`${label} không được để trống`);
+      }
+    });
+
+    if (!formData.requiredVolunteers || formData.requiredVolunteers < 1) {
+      validationErrors.push("Số lượng tình nguyện viên phải ít nhất là 1");
     }
 
     if (formData.categories.length === 0) {
-      alert("Vui lòng chọn ít nhất một danh mục cho chương trình");
+      validationErrors.push("Vui lòng chọn ít nhất một danh mục");
+    }
+
+    if (formData.startDate && formData.endDate) {
+      const start = new Date(formData.startDate);
+      const end = new Date(formData.endDate);
+
+      if (end < start) {
+        validationErrors.push("Ngày kết thúc phải sau ngày bắt đầu");
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      toast({
+        description: validationErrors[0],
+        variant: "destructive",
+        duration: 5000,
+      });
       setLoading(false);
       return;
     }
-
-    if (organizationId === 0) {
-      alert("Không tìm thấy thông tin tổ chức. Vui lòng đăng nhập lại.");
-      setLoading(false);
-      return;
-    }
-
     try {
       const toUTCISOString = (dateString: string) => {
         if (!dateString) return null;

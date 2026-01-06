@@ -396,6 +396,7 @@ export default function ProjectForm({
                 name="startDate"
                 value={formData.startDate}
                 onChange={onInputChange}
+                min={new Date().toISOString().slice(0, 16)}
               />
             )}
           </div>
@@ -419,6 +420,7 @@ export default function ProjectForm({
                 name="endDate"
                 value={formData.endDate}
                 onChange={onInputChange}
+                min={new Date().toISOString().slice(0, 16)}
               />
             )}
           </div>
@@ -481,7 +483,6 @@ export default function ProjectForm({
             <p className="text-yellow-700">Không có danh mục nào khả dụng</p>
           </div>
         ) : readOnly ? (
-          // View mode: show selected categories as badges
           <div className="flex flex-wrap gap-2">
             {formData.categories && formData.categories.length > 0 ? (
               formData.categories.map((categoryId: number) => {

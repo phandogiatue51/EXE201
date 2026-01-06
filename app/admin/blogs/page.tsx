@@ -5,11 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Header } from "@/components/header";
 import { blogAPI } from "../../../services/api";
 import { BlogPost } from "../../../lib/type";
 import { BlogStatusBadge } from "@/components/status-badge/BlogStatusBadge";
 import { useToast } from "@/hooks/use-toast";
+import { LoadingState } from "@/components/LoadingState";
 
 import {
   Search,
@@ -25,7 +25,6 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  ExternalLink,
 } from "lucide-react";
 
 export default function BlogsPage() {
@@ -124,18 +123,7 @@ export default function BlogsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-12">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6085F0]"></div>
-          </div>
-        </main>
-      </div>
-    );
-  }
+  if (loading) return <LoadingState />;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

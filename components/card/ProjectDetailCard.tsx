@@ -11,7 +11,10 @@ import {
   Users,
   ExternalLink,
 } from "lucide-react";
-import { ProjectStatusBadge, toProjectStatus, } from "@/components/status-badge/ProjectStatusBadge";
+import {
+  ProjectStatusBadge,
+  toProjectStatus,
+} from "@/components/status-badge/ProjectStatusBadge";
 import { formatDateTime } from "@/lib/date";
 
 export function ProjectDetailCard({
@@ -204,9 +207,7 @@ function ProjectInfoGrid({
           <div>
             <p className="text-sm text-muted-foreground">Ngày bắt đầu</p>
             <p className="font-medium text-foreground">
-              {startDate
-                ? formatDateTime(startDate)
-                : "Chưa có"}
+              {startDate ? formatDateTime(startDate) : "Chưa có"}
             </p>
           </div>
         </div>
@@ -218,9 +219,7 @@ function ProjectInfoGrid({
           <div>
             <p className="text-sm text-muted-foreground">Ngày kết thúc</p>
             <p className="font-medium text-foreground">
-              {endDate
-                ? formatDateTime(endDate)
-                : "Chưa có"}
+              {endDate ? formatDateTime(endDate) : "Chưa có"}
             </p>
           </div>
         </div>
@@ -298,9 +297,7 @@ function ProjectCategories({
               style={{ backgroundColor: cat.categoryColor }}
             >
               <span className="text-xs text-white">
-                {cat.categoryIcon
-                  ? cat.categoryIcon.replace("fa-", "").charAt(0).toUpperCase()
-                  : "C"}
+                {cat.categoryIcon ? <i className={cat.categoryIcon}></i> : "C"}
               </span>
             </div>
             <div>

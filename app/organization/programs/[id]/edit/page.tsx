@@ -67,19 +67,19 @@ export default function EditProjectPage({
         setFormData({
           title: data.title,
           description: data.description,
-          challenges: data.challenges,
-          goals: data.goals,
+          challenges: data.challenges || "",
+          goals: data.goals || "",
           activities: data.activities,
-          impacts: data.impacts,
-          benefits: data.benefits,
+          impacts: data.impacts || "",
+          benefits: data.benefits || "",
           requirements: data.requirements,
           type: data.type,
           location: data.location || "",
           startDate: data.startDate
-            ? new Date(data.startDate).toISOString().split("T")[0]
+            ? new Date(data.startDate).toISOString().slice(0, 16)
             : "",
           endDate: data.endDate
-            ? new Date(data.endDate).toISOString().split("T")[0]
+            ? new Date(data.endDate).toISOString().slice(0, 16)
             : "",
           requiredVolunteers: data.requiredVolunteers,
           categories:
@@ -174,26 +174,50 @@ export default function EditProjectPage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (loading) return;
 
-    if (!formData.title.trim()) {
-      alert("Vui lòng nhập tên chương trình");
-      setLoading(false);
-      return;
-    }
+    const validationErrors: string[] = [];
 
-    if (!formData.description.trim()) {
-      alert("Vui lòng nhập mô tả chương trình");
-      setLoading(false);
-      return;
+    const requiredTextFields = [
+      { key: "title" as const, label: "Tên chương trình" },
+      { key: "description" as const, label: "Mô tả" },
+      { key: "goals" as const, label: "Mục tiêu" },
+      { key: "activities" as const, label: "Hoạt động" },
+      { key: "requirements" as const, label: "Yêu cầu" },
+    ];
+
+    requiredTextFields.forEach(({ key, label }) => {
+      if (!formData[key]?.toString()?.trim()) {
+        validationErrors.push(`${label} không được để trống`);
+      }
+    });
+
+    if (!formData.requiredVolunteers || formData.requiredVolunteers < 1) {
+      validationErrors.push("Số lượng tình nguyện viên phải ít nhất là 1");
     }
 
     if (formData.categories.length === 0) {
-      alert("Vui lòng chọn ít nhất một danh mục cho chương trình");
+      validationErrors.push("Vui lòng chọn ít nhất một danh mục");
+    }
+
+    if (formData.startDate && formData.endDate) {
+      const start = new Date(formData.startDate);
+      const end = new Date(formData.endDate);
+
+      if (end < start) {
+        validationErrors.push("Ngày kết thúc phải sau ngày bắt đầu");
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      toast({
+        description: validationErrors[0],
+        variant: "destructive",
+        duration: 5000,
+      });
       setLoading(false);
       return;
     }
-
     try {
       const projectData: any = {
         title: formData.title,
@@ -233,7 +257,8 @@ export default function EditProjectPage({
         description: response.message,
         variant: "success",
         duration: 3000,
-      }); router.push("/organization/programs");
+      });
+      router.push("/organization/programs");
       router.refresh();
     } catch (error: any) {
       console.error("Error updating project:", error);
@@ -243,7 +268,6 @@ export default function EditProjectPage({
         variant: "destructive",
         duration: 5000,
       });
-
     } finally {
       setLoading(false);
     }

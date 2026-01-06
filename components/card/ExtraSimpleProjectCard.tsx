@@ -9,29 +9,15 @@ import {
   toProjectStatus,
 } from "@/components/status-badge/ProjectStatusBadge";
 
-export default function ProjectDetailCard({
+export default function ExtraSimpleProjectCard({
   project,
-  showBackButton = true,
-  backHref = "/programs",
-  showOrganizationLink = true,
-  className = "",
 }: ProjectDetailCardProps) {
   return (
-    <div className={className}>
-      {/* Navigation */}
-      {showBackButton && (
-        <Button variant="ghost" asChild className="mb-6">
-          <Link href={backHref}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Quay lại
-          </Link>
-        </Button>
-      )}
-
+    <div>
       <Card className="overflow-hidden border rounded-lg shadow-sm">
         <div className="p-6 space-y-2">
           <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-lg font-bold text-foreground">
               {project.title}
             </h1>
 
@@ -48,22 +34,10 @@ export default function ProjectDetailCard({
             </div>
           </div>
 
-          <ProjectDetailSection
-            title="Mô tả chương trình"
-            content={project.description}
-          />
-
-          <ProjectDetailSection
-            title="Yêu cầu từ tình nguyện viên"
-            content={project.requirements}
-          />
-
           <ProjectInfoGrid
             location={project.location}
             startDate={project.startDate}
             endDate={project.endDate}
-            currentVolunteers={project.currentVolunteers}
-            requiredVolunteers={project.requiredVolunteers}
           />
 
           <VolunteerProgress
@@ -82,85 +56,55 @@ export default function ProjectDetailCard({
   );
 }
 
-// Sub-component for each detail section
-function ProjectDetailSection({
-  title,
-  content,
-}: {
-  title: string;
-  content?: string;
-}) {
-  if (!content) return null;
-
-  return (
-    <div className="mb-4">
-      <h2 className="text-lg font-semibold text-foreground mb-3">{title}</h2>
-      <p className="text-muted-foreground whitespace-pre-line">{content}</p>
-    </div>
-  );
-}
-
-// Sub-component for info grid
 function ProjectInfoGrid({
   location,
   startDate,
   endDate,
-  currentVolunteers,
-  requiredVolunteers,
 }: {
   location?: string;
   startDate?: string;
   endDate?: string;
-  currentVolunteers: number;
-  requiredVolunteers: number;
 }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 text-sm">
-      <Card className="flex flex-col items-center justify-center text-center">
-        <div className="flex items-center gap-3">
-          <MapPin className="w-5 h-5 text-blue-600" />
-          <div>
-            <p className="text-sm text-muted-foreground">Địa điểm</p>
-            <p className="font-medium text-foreground">
-              {location || "Chưa cập nhật"}
-            </p>
-          </div>
+    <div className="space-y-2 text-xs">
+      {/* Địa điểm */}
+      <div className="flex items-center justify-between p-2 rounded">
+        <div className="flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-blue-600" />
+          <span className="text-sm text-muted-foreground">Địa điểm</span>
         </div>
-      </Card>
+        <span className="text-sm font-medium text-foreground">
+          {location || "Chưa cập nhật"}
+        </span>
+      </div>
 
-      <Card className="p-6 flex flex-col items-center justify-center text-center">
-        {" "}
-        <div className="flex items-center gap-3">
-          <Calendar className="w-5 h-5 text-blue-600" />
-          <div>
-            <p className="text-sm text-muted-foreground">Ngày bắt đầu</p>
-            <p className="font-medium text-foreground">
-              {startDate
-                ? new Date(startDate).toLocaleDateString("vi-VN")
-                : "Chưa có"}
-            </p>
-          </div>
+      {/* Ngày bắt đầu */}
+      <div className="flex items-center justify-between p-2 rounded">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-blue-600" />
+          <span className="text-sm text-muted-foreground">Ngày bắt đầu</span>
         </div>
-      </Card>
+        <span className="text-sm font-medium text-foreground">
+          {startDate
+            ? new Date(startDate).toLocaleDateString("vi-VN")
+            : "Chưa có"}
+        </span>
+      </div>
 
-      <Card className="p-6 flex flex-col items-center justify-center text-center">
-        <div className="flex items-center gap-3">
-          <Calendar className="w-5 h-5 text-blue-600" />
-          <div>
-            <p className="text-sm text-muted-foreground">Ngày kết thúc</p>
-            <p className="font-medium text-foreground">
-              {endDate
-                ? new Date(endDate).toLocaleDateString("vi-VN")
-                : "Chưa có"}
-            </p>
-          </div>
+      {/* Ngày kết thúc */}
+      <div className="flex items-center justify-between p-2 rounded">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-blue-600" />
+          <span className="text-sm text-muted-foreground">Ngày kết thúc</span>
         </div>
-      </Card>
+        <span className="text-sm font-medium text-foreground">
+          {endDate ? new Date(endDate).toLocaleDateString("vi-VN") : "Chưa có"}
+        </span>
+      </div>
     </div>
   );
 }
 
-// Sub-component for volunteer progress
 function VolunteerProgress({
   currentVolunteers,
   requiredVolunteers,
@@ -171,7 +115,7 @@ function VolunteerProgress({
   const percentage = Math.round((currentVolunteers / requiredVolunteers) * 100);
 
   return (
-    <div className="mb-8">
+    <div>
       <div className="flex justify-between text-sm text-muted-foreground mb-2">
         <span>Tiến độ tuyển tình nguyện viên</span>
         <span>{percentage}%</span>
@@ -188,7 +132,6 @@ function VolunteerProgress({
   );
 }
 
-// Sub-component for categories
 function ProjectCategories({
   categories,
 }: {
@@ -201,7 +144,7 @@ function ProjectCategories({
 }) {
   return (
     <div>
-      <h2 className="text-lg font-semibold text-foreground mb-3">Danh mục</h2>
+      <h2 className="text-md font-semibold text-foreground mb-3">Danh mục</h2>
       <div className="flex flex-wrap gap-3">
         {categories.map((cat) => (
           <div
@@ -213,7 +156,7 @@ function ProjectCategories({
             }}
           >
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center"
+              className="w-6 h-6 rounded-full flex items-center justify-center"
               style={{ backgroundColor: cat.categoryColor }}
             >
               <span className="text-xs text-white">
@@ -221,7 +164,7 @@ function ProjectCategories({
               </span>
             </div>
             <div>
-              <p className="font-medium" style={{ color: cat.categoryColor }}>
+              <p className="font-small" style={{ color: cat.categoryColor }}>
                 {cat.categoryName}
               </p>
             </div>

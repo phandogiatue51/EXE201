@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Heart, Users, Award, ArrowRight } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingState } from "@/components/LoadingState";
 import SimpleProjectCard from "@/components/card/SimpleProjectCard";
@@ -18,23 +18,21 @@ export default function HomePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchProjects = useCallback(async () => {
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
     try {
       setLoading(true);
-      const data = await projectAPI.getHomePageProject();
+      const data = await projectAPI.getAll();
       setProjects(data);
     } catch (error) {
       console.error("Error fetching projects:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchProjects();
-    }, 500);
-    return () => clearTimeout(timeoutId);
-  }, [fetchProjects]);
+  };
   if (loading) return <LoadingState />;
 
   return (
