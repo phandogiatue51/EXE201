@@ -8,6 +8,7 @@ import {
   ProjectStatusBadge,
   toProjectStatus,
 } from "@/components/status-badge/ProjectStatusBadge";
+import { formatDateTime } from "@/lib/date";
 
 export default function ExtraSimpleProjectCard({
   project,
@@ -86,7 +87,7 @@ function ProjectInfoGrid({
         </div>
         <span className="text-sm font-medium text-foreground">
           {startDate
-            ? new Date(startDate).toLocaleDateString("vi-VN")
+            ? formatDateTime(startDate)
             : "Chưa có"}
         </span>
       </div>
@@ -98,7 +99,9 @@ function ProjectInfoGrid({
           <span className="text-sm text-muted-foreground">Ngày kết thúc</span>
         </div>
         <span className="text-sm font-medium text-foreground">
-          {endDate ? new Date(endDate).toLocaleDateString("vi-VN") : "Chưa có"}
+          {endDate
+            ? formatDateTime(endDate)
+            : "Chưa có"}
         </span>
       </div>
     </div>
