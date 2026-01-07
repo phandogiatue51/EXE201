@@ -117,8 +117,18 @@ export default function OrganizationDashboardPage() {
                 </p>
               </div>
             </div>
+            {organization?.id && (
+              <Button
+                className="w-full mt-6 bg-[#77E5C8] hover:opacity-90"
+                asChild
+              >
+                <Link href={`/organization/${organization.id}/edit`}>
+                  Chỉnh sửa thông tin
+                </Link>
+              </Button>
+            )}
             <Button
-              className="w-full mt-6 bg-[#6085F0] hover:opacity-90"
+              className="w-full mt-4 bg-[#6085F0] hover:opacity-90"
               asChild
             >
               <Link href="/organization/programs/new">
