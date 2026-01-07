@@ -9,12 +9,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import { organizationAPI } from "../../../../services/api";
-import { ArrowLeft, Upload, Building2, Mail, Phone, MapPin, Globe, User } from "lucide-react";
+import {
+  ArrowLeft,
+  Upload,
+  Building2,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  User,
+} from "lucide-react";
 
 export default function CreateOrganizationPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -88,7 +98,10 @@ export default function CreateOrganizationPage() {
       if (managerData.dateOfBirth) {
         formDataToSend.append("Manager.DateOfBirth", managerData.dateOfBirth);
       }
-      formDataToSend.append("Manager.IsFemale", managerData.isFemale.toString());
+      formDataToSend.append(
+        "Manager.IsFemale",
+        managerData.isFemale.toString()
+      );
       formDataToSend.append("Manager.Role", managerData.role.toString());
 
       // Append Organization data
@@ -100,17 +113,25 @@ export default function CreateOrganizationPage() {
       formDataToSend.append("PhoneNumber", organizationData.phoneNumber);
       formDataToSend.append("Address", organizationData.address);
 
-      // Append image file if exists
       if (imageFile) {
         formDataToSend.append("ImageFile", imageFile);
       }
 
       await organizationAPI.createWithManager(formDataToSend);
+      toast({
+        title: "Thành công",
+        description: "Tạo tài khoản tổ chức thành công!",
+        duration: 3000,
+      });
       router.push("/admin/organizations");
       router.refresh();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating organization:", error);
-      alert("Không thể tạo tổ chức. Vui lòng thử lại.");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -139,7 +160,9 @@ export default function CreateOrganizationPage() {
 
           <div className="max-w-4xl mx-auto">
             <Card className="p-8 border-[#77E5C8]">
-              <h1 className="text-3xl font-bold text-foreground mb-2">Thêm tổ chức mới</h1>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                Thêm tổ chức mới
+              </h1>
               <p className="text-muted-foreground mb-8">
                 Tạo tổ chức mới với thông tin người quản lý
               </p>
@@ -252,7 +275,10 @@ export default function CreateOrganizationPage() {
                             name="isFemale"
                             checked={managerData.isFemale === false}
                             onChange={() =>
-                              setManagerData({ ...managerData, isFemale: false })
+                              setManagerData({
+                                ...managerData,
+                                isFemale: false,
+                              })
                             }
                             className="mr-2"
                             disabled={loading}

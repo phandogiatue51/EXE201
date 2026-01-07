@@ -20,19 +20,10 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-
     try {
-      const result = await apiLogin(email, password);
-
-      console.log("Login successful:", result);
-    } catch (err) {
-      console.error("Login error:", err);
-
-      const errorMessage =
-        (err as any)?.message ||
-        (err as any)?.toString() ||
-        "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.";
-      setError(errorMessage);
+      await apiLogin(email, password);
+    } catch (error: any) {
+      console.log("CATCH: Error message:", error?.message);
     } finally {
       setIsLoading(false);
     }

@@ -10,11 +10,12 @@ import { certificateAPI, categoryAPI } from "../../../../services/api";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import CertificateForm from "@/components/form/CertificateForm";
 import { Category } from "@/lib/type";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CreateCertificatePage() {
   const router = useRouter();
   const { user } = useAuth();
-
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
@@ -124,27 +125,22 @@ export default function CreateCertificatePage() {
         console.log(`${key}: ${value}`);
       }
 
-      await certificateAPI.create(formDataToSend);
+      const response = await certificateAPI.create(formDataToSend);
 
-      alert("Tạo chứng chỉ thành công!");
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
       router.push("/volunteer");
       router.refresh();
     } catch (error: any) {
       console.error("Error creating certificate:", error);
-      console.error("Error details:", {
-        message: error.message,
-        status: error.status,
-        data: error.data,
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
       });
-
-      if (error.data?.errors) {
-        const errorMessages = Object.values(error.data.errors)
-          .flat()
-          .join(", ");
-        alert(`Lỗi xác thực: ${errorMessages}`);
-      } else {
-        alert(error.message || "Có lỗi xảy ra khi tạo chứng chỉ");
-      }
     } finally {
       setLoading(false);
     }

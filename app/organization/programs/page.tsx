@@ -3,28 +3,27 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Header } from "@/components/header";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI, categoryAPI } from "../../../services/api";
 import { ProjectFilters } from "../../../components/filter/ProjectFilter";
 import { ProjectFilterDto } from "../../../lib/filter-type";
 import {
   PlusCircle,
+  Building2,
+  LogIn,
+  LogOut,
+  FileText,
   Eye,
   Edit,
   Trash2,
-  Building2,
-  Tag,
-  MapPin,
-  Calendar,
-  Users,
 } from "lucide-react";
+import ExtraSimpleProjectCard from "@/components/card/ExtraSimpleProjectCard";
 
 export default function ProjectsPage() {
   const { user } = useAuth();
   const organizationId = user?.organizationId;
-
+  const { toast } = useToast();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -109,11 +108,20 @@ export default function ProjectsPage() {
     if (!confirm("Bạn có chắc chắn muốn xóa chương trình này?")) return;
 
     try {
-      await projectAPI.delete(id);
+      const response = await projectAPI.delete(id);
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
       fetchProjects();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting project:", error);
-      alert("Không thể xóa chương trình");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
@@ -121,14 +129,6 @@ export default function ProjectsPage() {
   const uniqueStatuses = [...new Set(projects.map((p) => p.status))];
 
   const filteredCount = projects.length;
-
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString("vi-VN");
-    } catch {
-      return "Chưa có";
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -177,172 +177,101 @@ export default function ProjectsPage() {
               <p className="text-muted-foreground">Đang tải...</p>
             </div>
           ) : (
-            /* Projects Grid */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {projects.map((project) => (
-                <Card
-                  key={project.id}
-                  className="overflow-hidden hover:shadow-lg transition-shadow"
-                >
-                  {/* Project Image */}
-                  <div className="h-48 bg-gradient-to-br from-blue-500 to-blue-600 relative overflow-hidden">
-                    {project.imageUrl ? (
-                      <img
-                        src={project.imageUrl}
-                        alt={project.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Building2 className="w-16 h-16 text-white/50" />
-                      </div>
-                    )}
-                    {/* Status Badge */}
-                    <div className="absolute top-4 right-4">
-                      <span
-                        className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                          project.status === 3
-                            ? "bg-green-100 text-green-800" // Active
-                            : project.status === 2
-                            ? "bg-blue-100 text-blue-800" // Recruiting
-                            : project.status === 4
-                            ? "bg-purple-100 text-purple-800" // Completed
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {project.statusName}
-                      </span>
-                    </div>
+                <div key={project.id} className="flex flex-col">
+                  <ExtraSimpleProjectCard
+                    project={project}
+                    showBackButton={false}
+                    showOrganizationLink={false}
+                    className="h-full flex-1"
+                  />
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      asChild
+                    >
+                      <Link href={`/organization/programs/${project.id}`}>
+                        <Eye className="w-3 h-3 mr-1" />
+                        Xem
+                      </Link>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      asChild
+                    >
+                      <Link href={`/organization/programs/${project.id}/edit`}>
+                        <Edit className="w-3 h-3 mr-1" />
+                        Sửa
+                      </Link>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDelete(project.id)}
+                    >
+                      <Trash2 className="w-3 h-3 mr-1" />
+                      Xóa
+                    </Button>
                   </div>
 
-                  {/* Content */}
-                  <div className="p-6">
-                    {/* Title and Type */}
-                    <div className="mb-4">
-                      <h3 className="font-semibold text-lg text-foreground mb-2 line-clamp-2">
-                        {project.title}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <Tag className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          {project.typeName}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Organization */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <Building2 className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground truncate">
-                        {project.organizationName}
-                      </span>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-sm text-muted-foreground mb-6 line-clamp-3">
-                      {project.description}
-                    </p>
-
-                    {/* Info Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <span
-                          className="text-xs text-muted-foreground truncate"
-                          title={project.location}
-                        >
-                          {project.location || "Chưa có địa điểm"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-xs text-muted-foreground">
-                          {project.startDate
-                            ? formatDate(project.startDate)
-                            : "Chưa có"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-xs text-muted-foreground">
-                          {project.currentVolunteers || 0}/
-                          {project.requiredVolunteers || 0}
-                        </span>
-                      </div>
-
-                      {/* Categories */}
-                      {project.categories && project.categories.length > 0 && (
-                        <div className="col-span-2 mt-2">
-                          <div className="flex flex-wrap gap-2">
-                            {project.categories.slice(0, 2).map((cat: any) => (
-                              <span
-                                key={cat.categoryId || cat.id}
-                                className="px-2 py-1 text-xs rounded-full"
-                                style={{
-                                  backgroundColor: `${
-                                    cat.categoryColor || cat.color
-                                  }20`,
-                                  color: cat.categoryColor || cat.color,
-                                  border: `1px solid ${
-                                    cat.categoryColor || cat.color
-                                  }40`,
-                                }}
-                              >
-                                {cat.categoryName || cat.name}
-                              </span>
-                            ))}
-                            {project.categories.length > 2 && (
-                              <span className="text-xs text-muted-foreground">
-                                +{project.categories.length - 2} khác
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2">
+                  {project.status === 4 && (
+                    <div className="mt-3 flex-shrink-0">
                       <Button
-                        variant="outline"
+                        variant="default"
                         size="sm"
-                        className="flex-1"
+                        className="w-full bg-gradient-to-r from-green-100 to-green-300 text-green-800 hover:from-green-200 hover:to-green-400"
                         asChild
                       >
-                        <Link href={`/organization/programs/${project.id}`}>
-                          <Eye className="w-3 h-3 mr-1" />
-                          Xem
+                        <Link href={`/attendace/${project.id}/check-out`}>
+                          <LogOut className="w-3 h-3 mr-1" />
+                          Check out
                         </Link>
                       </Button>
+                    </div>
+                  )}
 
+                  {project.status === 3 && (
+                    <div className="mt-3 flex-shrink-0">
                       <Button
-                        variant="outline"
+                        variant="default"
                         size="sm"
-                        className="flex-1"
+                        className="w-full bg-gradient-to-r from-blue-100 to-blue-300 text-blue-800 hover:from-blue-200 hover:to-blue-400"
+                        asChild
+                      >
+                        <Link href={`/attendace/${project.id}/check-in`}>
+                          <LogIn className="w-3 h-3 mr-1" />
+                          Check in
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
+
+                  {project.status === 2 && (
+                    <div className="mt-3 flex-shrink-0">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="w-full bg-gradient-to-r from-purple-100 to-purple-300 text-purple-800 hover:from-purple-200 hover:to-purple-400"
                         asChild
                       >
                         <Link
-                          href={`/organization/programs/${project.id}/edit`}
+                          href={`/organization/programs/${project.id}/applications`}
                         >
-                          <Edit className="w-3 h-3 mr-1" />
-                          Sửa
+                          <FileText className="w-3 h-3 mr-1" />
+                          Quản lý đơn đăng ký
                         </Link>
                       </Button>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleDelete(project.id)}
-                      >
-                        <Trash2 className="w-3 h-3 mr-1" />
-                        Xóa
-                      </Button>
                     </div>
-                  </div>
-                </Card>
+                  )}
+                </div>
               ))}
             </div>
           )}

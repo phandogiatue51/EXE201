@@ -15,8 +15,9 @@ import {
   ProjectStatusBadge,
   toProjectStatus,
 } from "@/components/status-badge/ProjectStatusBadge";
+import { formatDateTime } from "@/lib/date";
 
-export default function ProjectDetailCard({
+export function ProjectDetailCard({
   project,
   showBackButton = true,
   backHref = "/programs",
@@ -188,7 +189,7 @@ function ProjectInfoGrid({
 }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <Card className="p-4">
+      <Card className="p-4 text-center">
         <div className="flex items-center gap-3">
           <MapPin className="w-5 h-5 text-blue-600" />
           <div>
@@ -200,35 +201,31 @@ function ProjectInfoGrid({
         </div>
       </Card>
 
-      <Card className="p-4">
+      <Card className="p-4 text-center">
         <div className="flex items-center gap-3">
           <Calendar className="w-5 h-5 text-blue-600" />
           <div>
             <p className="text-sm text-muted-foreground">Ngày bắt đầu</p>
             <p className="font-medium text-foreground">
-              {startDate
-                ? new Date(startDate).toLocaleDateString("vi-VN")
-                : "Chưa có"}
+              {startDate ? formatDateTime(startDate) : "Chưa có"}
             </p>
           </div>
         </div>
       </Card>
 
-      <Card className="p-4">
+      <Card className="p-4 text-center">
         <div className="flex items-center gap-3">
           <Calendar className="w-5 h-5 text-blue-600" />
           <div>
             <p className="text-sm text-muted-foreground">Ngày kết thúc</p>
             <p className="font-medium text-foreground">
-              {endDate
-                ? new Date(endDate).toLocaleDateString("vi-VN")
-                : "Chưa có"}
+              {endDate ? formatDateTime(endDate) : "Chưa có"}
             </p>
           </div>
         </div>
       </Card>
 
-      <Card className="p-4">
+      <Card className="p-4 text-center">
         <div className="flex items-center gap-3">
           <Users className="w-5 h-5 text-blue-600" />
           <div>
@@ -300,9 +297,7 @@ function ProjectCategories({
               style={{ backgroundColor: cat.categoryColor }}
             >
               <span className="text-xs text-white">
-                {cat.categoryIcon
-                  ? cat.categoryIcon.replace("fa-", "").charAt(0).toUpperCase()
-                  : "C"}
+                {cat.categoryIcon ? <i className={cat.categoryIcon}></i> : "C"}
               </span>
             </div>
             <div>

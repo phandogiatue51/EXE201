@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-auth";
 import { applicationAPI, projectAPI, categoryAPI } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 import {
   StatusBadge,
   APPLICATION_STATUS,
@@ -22,7 +23,6 @@ import CertificateForm from "../form/CertificateForm";
 
 import {
   ArrowLeft,
-  Calendar,
   FileText,
   CheckCircle,
   XCircle,
@@ -46,7 +46,7 @@ export function ApplicationDetailView({
 }: ApplicationDetailViewProps) {
   const params = useParams();
   const id = applicationId || Number(params?.id);
-
+  const { toast } = useToast();
   const { user } = useAuth();
   const [application, setApplication] = useState<VolunteerApplication | null>(
     null
@@ -123,12 +123,19 @@ export function ApplicationDetailView({
         rejectionReason: reason,
         reviewedByStaffId: user?.staffId ? parseInt(user.staffId) : undefined,
       };
-      await applicationAPI.review(id, reviewData);
-      alert("Đã từ chối đơn ứng tuyển!");
-      fetchApplication();
+      const response = await applicationAPI.review(id, reviewData);
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      }); fetchApplication();
     } catch (error: any) {
       console.error("Error rejecting application:", error);
-      alert(error?.message || "Không thể từ chối đơn ứng tuyển.");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setReviewing(false);
     }
@@ -283,11 +290,11 @@ export function ApplicationDetailView({
                   loadingCategories={false}
                   imagePreview={application.selectedCertificate.imageUrl || ""}
                   isViewMode={true}
-                  onInputChange={() => {}}
-                  onCategoryChange={() => {}}
-                  onImageChange={() => {}}
-                  onImageRemove={() => {}}
-                  onSubmit={() => {}}
+                  onInputChange={() => { }}
+                  onCategoryChange={() => { }}
+                  onImageChange={() => { }}
+                  onImageRemove={() => { }}
+                  onSubmit={() => { }}
                   loading={false}
                   submitText=""
                 />

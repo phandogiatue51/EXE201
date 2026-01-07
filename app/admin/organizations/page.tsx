@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Header } from "@/components/header";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { organizationAPI } from "../../../services/api";
 import { Organization } from "../../../lib/type";
@@ -27,6 +27,7 @@ import {
 
 export default function OrganizationsPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const adminId = user?.accountId;
   const router = useRouter();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -72,11 +73,20 @@ export default function OrganizationsPage() {
     if (!confirm("Bạn có chắc chắn muốn xóa tổ chức này?")) return;
 
     try {
-      await organizationAPI.delete(id);
+      const response = await organizationAPI.delete(id);
       setOrganizations(organizations.filter((org) => org.id !== id));
-    } catch (error) {
-      console.error("Error deleting organization:", error);
-      alert("Không thể xóa tổ chức");
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
+      console.error("Error deleting blog:", error);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
@@ -96,7 +106,7 @@ export default function OrganizationsPage() {
         ...(rejectionReason && { RejectionReason: rejectionReason }),
       };
 
-      await organizationAPI.verify(id, verifyData);
+      const response = await organizationAPI.verify(id, verifyData);
 
       setOrganizations(
         organizations.map((org) =>
@@ -109,12 +119,19 @@ export default function OrganizationsPage() {
             : org
         )
       );
-      alert("Xác thực tổ chức thành công");
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
       router.push(`/admin/organizations`);
       router.refresh();
-    } catch (error) {
-      console.error("Error updating status:", error);
-      alert("Không thể cập nhật trạng thái");
+    } catch (err: any) {
+      toast({
+        description: err.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 

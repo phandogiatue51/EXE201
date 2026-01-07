@@ -9,11 +9,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { staffAPI } from "../../../../services/api";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import StaffForm from "../../../../components/form/StaffForm";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CreateEmployeePage() {
   const router = useRouter();
   const { user } = useAuth();
   const OrganizationId = user?.organizationId;
+  const { toast } = useToast();
 
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -151,13 +153,21 @@ export default function CreateEmployeePage() {
       );
       formDataToSend.append("Role", formData.role.toString());
 
-      await staffAPI.create(formDataToSend);
+      const response = await staffAPI.create(formDataToSend);
 
-      alert("Employee added successfully!");
-      router.push("/organization/employees");
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      }); router.push("/organization/employees");
       router.refresh();
     } catch (error: any) {
       console.error("Error creating employee:", error);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }

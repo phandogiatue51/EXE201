@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react"; 
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI } from "../../../services/api";
+import { useToast } from "@/hooks/use-toast";
 import {
   PlusCircle,
   Eye,
@@ -23,7 +24,7 @@ import {
 
 export default function ProjectsPage() {
   useAuth();
-
+  const { toast } = useToast();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -33,21 +34,21 @@ export default function ProjectsPage() {
   const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       const filter: any = {};
-      
+
       if (search.trim()) {
         filter.title = search;
       }
-      
+
       if (statusFilter !== "all") {
         filter.status = statusFilter;
       }
-      
+
       if (typeFilter !== "all") {
         filter.type = typeFilter;
       }
-      
+
       const data = await projectAPI.filter(filter);
       setProjects(data);
     } catch (error) {
@@ -66,13 +67,22 @@ export default function ProjectsPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm("Bạn có chắc chắn muốn xóa chương trình này?")) return;
-    
+
     try {
-      await projectAPI.delete(id);
+      const response = await projectAPI.delete(id);
       setProjects(projects.filter(project => project.id !== id));
-    } catch (error) {
-      console.error("Error deleting project:", error);
-      alert("Không thể xóa chương trình");
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
+      console.error("Error deleting program:", error);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
@@ -170,7 +180,7 @@ export default function ProjectsPage() {
                       <img
                         src={project.imageUrl}
                         alt={project.title}
-                        className="w-full h-full object-cover"  
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
@@ -179,12 +189,11 @@ export default function ProjectsPage() {
                     )}
                     {/* Status Badge */}
                     <div className="absolute top-4 right-4">
-                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                        project.status === 3 ? 'bg-green-100 text-green-800' : // Active
-                        project.status === 2 ? 'bg-blue-100 text-blue-800' : // Recruiting
-                        project.status === 4 ? 'bg-purple-100 text-purple-800' : // Completed
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${project.status === 3 ? 'bg-green-100 text-green-800' : // Active
+                          project.status === 2 ? 'bg-blue-100 text-blue-800' : // Recruiting
+                            project.status === 4 ? 'bg-purple-100 text-purple-800' : // Completed
+                              'bg-gray-100 text-gray-800'
+                        }`}>
                         {project.statusName}
                       </span>
                     </div>
@@ -276,14 +285,14 @@ export default function ProjectsPage() {
                           Xem
                         </Link>
                       </Button>
-                      
+
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link href={`/admin/programs/${project.id}/edit`}>
                           <Edit className="w-3 h-3 mr-1" />
                           Sửa
                         </Link>
                       </Button>
-                      
+
                       <Button
                         variant="outline"
                         size="sm"

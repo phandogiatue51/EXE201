@@ -5,11 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Header } from "@/components/header";
-import { useAuth } from "@/hooks/use-auth";
 import { blogAPI } from "../../../services/api";
 import { BlogPost } from "../../../lib/type";
 import { BlogStatusBadge } from "@/components/status-badge/BlogStatusBadge";
+import { useToast } from "@/hooks/use-toast";
+import { LoadingState } from "@/components/LoadingState";
 
 import {
   Search,
@@ -25,11 +25,10 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  ExternalLink,
 } from "lucide-react";
 
 export default function BlogsPage() {
-  const { user } = useAuth();
+  const { toast } = useToast();
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [filteredBlogs, setFilteredBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,41 +83,47 @@ export default function BlogsPage() {
     if (!confirm("Bạn có chắc muốn xóa bài viết này?")) return;
 
     try {
-      await blogAPI.delete(id);
+      const response = await blogAPI.delete(id);
       setBlogs(blogs.filter((blog) => blog.id !== id));
-      alert("Đã xóa bài viết!");
-    } catch (error) {
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
       console.error("Error deleting blog:", error);
-      alert("Có lỗi xảy ra!");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
   const handleStatusChange = async (id: number, newStatus: number) => {
     try {
-      await blogAPI.updateStatus(id, newStatus);
+      const response = await blogAPI.updateStatus(id, newStatus);
       setBlogs(
         blogs.map((blog) =>
           blog.id === id ? { ...blog, status: newStatus } : blog
         )
       );
-      alert("Đã cập nhật trạng thái!");
-    } catch (error) {
-      console.error("Error updating status:", error);
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
+      console.error("Error deleting blog:", error);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-12">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6085F0]"></div>
-          </div>
-        </main>
-      </div>
-    );
-  }
+  if (loading) return <LoadingState />;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

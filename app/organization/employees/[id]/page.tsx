@@ -5,8 +5,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/header";
-import { useAuth } from "@/hooks/use-auth";
 import { staffAPI } from "../../../../services/api";
+import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft,
   User,
@@ -16,17 +16,10 @@ import {
   Building2,
   Shield,
   Edit,
-  Trash2,
-  ExternalLink,
-  Clock,
   CheckCircle,
   XCircle,
   UserCheck,
   UserX,
-  Briefcase,
-  MapPin,
-  Globe,
-  Mailbox,
   UserCog,
 } from "lucide-react";
 
@@ -36,7 +29,7 @@ export default function EmployeeDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { user } = useAuth();
+  const { toast } = useToast();
   const [employee, setEmployee] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -56,32 +49,26 @@ export default function EmployeeDetailPage({
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Bạn có chắc chắn muốn xóa nhân sự này?")) return;
-    
-    try {
-      // await staffAPI.delete(parseInt(id));
-      window.location.href = "/organization/employees";
-    } catch (error) {
-      console.error("Error deleting employee:", error);
-      alert("Không thể xóa nhân sự");
-    }
-  };
+  const handleStatusChange = async (id: any) => {
+    if (!confirm(`Bạn có chắc chắn muốn ${employee.isActive ? 'kích hoạt' : 'vô hiệu hóa'} nhân sự này?`)) return;
 
-  const handleStatusChange = async (isActive: boolean) => {
-    if (!confirm(`Bạn có chắc chắn muốn ${isActive ? 'kích hoạt' : 'vô hiệu hóa'} nhân sự này?`)) return;
-    
     try {
-      // await staffAPI.updateStatus(parseInt(id), isActive);
+      const response = await staffAPI.changeStatus(parseInt(id));
       setEmployee({
         ...employee,
-        isActive,
-        leftDate: isActive ? null : new Date().toISOString()
       });
-      alert(`Đã ${isActive ? 'kích hoạt' : 'vô hiệu hóa'} nhân sự`);
-    } catch (error) {
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
       console.error("Error updating employee status:", error);
-      alert("Không thể cập nhật trạng thái");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
@@ -156,7 +143,7 @@ export default function EmployeeDetailPage({
               {/* Profile Header */}
               <div className="h-48 bg-gradient-to-br from-blue-500 to-blue-600 relative">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                
+
                 {/* Profile Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
                   <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -190,7 +177,7 @@ export default function EmployeeDetailPage({
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Actions */}
                     <div className="flex gap-2">
                       <Button variant="secondary" size="sm" asChild>
@@ -217,18 +204,9 @@ export default function EmployeeDetailPage({
                           onClick={() => handleStatusChange(true)}
                         >
                           <UserCheck className="w-4 h-4 mr-1" />
-                          Kích hoạt lại
+                          Kích hoạt
                         </Button>
                       )}
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700"
-                        onClick={handleDelete}
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Xóa
-                      </Button>
                     </div>
                   </div>
                 </div>
@@ -259,7 +237,7 @@ export default function EmployeeDetailPage({
                           <p className="font-medium text-foreground">{employee.email}</p>
                         </div>
                       </div>
-                      
+
                       {employee.phoneNumber && (
                         <div className="flex items-center gap-3">
                           <Phone className="w-5 h-5 text-muted-foreground" />
@@ -317,7 +295,7 @@ export default function EmployeeDetailPage({
                   <div className="relative">
                     {/* Timeline line */}
                     <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200" />
-                    
+
                     <div className="space-y-6">
                       {/* Join Date */}
                       <div className="flex items-start gap-4 relative">
@@ -368,7 +346,7 @@ export default function EmployeeDetailPage({
                             {employee.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}
                           </p>
                           <p className="text-sm mt-1">
-                            {employee.isActive 
+                            {employee.isActive
                               ? "Nhân sự đang làm việc trong tổ chức"
                               : "Nhân sự đã ngừng làm việc trong tổ chức"}
                           </p>

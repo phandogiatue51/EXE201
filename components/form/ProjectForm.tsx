@@ -24,28 +24,7 @@ import {
   ProjectStatusBadge,
   toProjectStatus,
 } from "@/components/status-badge/ProjectStatusBadge";
-
-interface ProjectFormProps {
-  formData: any;
-  imagePreview: string | null;
-  categories: any[];
-  loadingCategories: boolean;
-  projectTypes?: { value: string | number; label: string }[];
-  statusOptions?: { value: number; label: string }[];
-  isEdit?: boolean;
-  isViewMode?: boolean;
-  onInputChange?: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => void;
-  onCategoryToggle?: (categoryId: number, checked: boolean) => void;
-  onImageChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onImageRemove?: () => void;
-  onSubmit?: (e: React.FormEvent) => void;
-  loading?: boolean;
-  submitText?: string;
-}
+import { ProjectFormProps } from "@/lib/interface/ProjectFormProps";
 
 export default function ProjectForm({
   formData,
@@ -74,7 +53,7 @@ export default function ProjectForm({
           Hình ảnh chương trình
         </label>
         <div className="flex items-center gap-6">
-          <div className="w-48 h-32 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+          <div className="w-full h-64 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
             {imagePreview ? (
               <img
                 src={imagePreview}
@@ -276,7 +255,7 @@ export default function ProjectForm({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Yêu cầu
+            Yêu cầu *
           </label>
           {readOnly ? (
             <div className="p-3 bg-gray-50 rounded-lg border min-h-[100px]">
@@ -312,13 +291,16 @@ export default function ProjectForm({
               </div>
             ) : (
               <Select
-                value={String(formData.type || "")}
+                value={formData.type?.toString() || ""}
                 onValueChange={(value) => {
                   if (onInputChange) {
-                    const event = {
-                      target: { name: "type", value },
-                    } as React.ChangeEvent<HTMLSelectElement>;
-                    onInputChange(event);
+                    const syntheticEvent = {
+                      target: {
+                        name: "type",
+                        value: parseInt(value),
+                      },
+                    } as unknown as React.ChangeEvent<HTMLInputElement>;
+                    onInputChange(syntheticEvent);
                   }
                 }}
               >
@@ -327,7 +309,7 @@ export default function ProjectForm({
                 </SelectTrigger>
                 <SelectContent>
                   {projectTypes?.map((type) => (
-                    <SelectItem key={type.value} value={String(type.value)}>
+                    <SelectItem key={type.value} value={type.value.toString()}>
                       {type.label}
                     </SelectItem>
                   ))}
@@ -404,16 +386,17 @@ export default function ProjectForm({
               <div className="p-3 bg-gray-50 rounded-lg border">
                 <p className="text-foreground">
                   {formData.startDate
-                    ? new Date(formData.startDate).toLocaleDateString("vi-VN")
+                    ? new Date(formData.startDate).toLocaleString("vi-VN")
                     : "—"}
                 </p>
               </div>
             ) : (
               <Input
-                type="date"
+                type="datetime-local"
                 name="startDate"
                 value={formData.startDate}
                 onChange={onInputChange}
+                min={new Date().toISOString().slice(0, 16)}
               />
             )}
           </div>
@@ -427,16 +410,17 @@ export default function ProjectForm({
               <div className="p-3 bg-gray-50 rounded-lg border">
                 <p className="text-foreground">
                   {formData.endDate
-                    ? new Date(formData.endDate).toLocaleDateString("vi-VN")
+                    ? new Date(formData.endDate).toLocaleString("vi-VN")
                     : "—"}
                 </p>
               </div>
             ) : (
               <Input
-                type="date"
+                type="datetime-local"
                 name="endDate"
                 value={formData.endDate}
                 onChange={onInputChange}
+                min={new Date().toISOString().slice(0, 16)}
               />
             )}
           </div>
@@ -499,7 +483,6 @@ export default function ProjectForm({
             <p className="text-yellow-700">Không có danh mục nào khả dụng</p>
           </div>
         ) : readOnly ? (
-          // View mode: show selected categories as badges
           <div className="flex flex-wrap gap-2">
             {formData.categories && formData.categories.length > 0 ? (
               formData.categories.map((categoryId: number) => {

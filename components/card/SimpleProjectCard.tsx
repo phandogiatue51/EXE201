@@ -3,14 +3,8 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Building2,
-  Calendar,
-  MapPin,
-  Users,
-  ExternalLink,
-} from "lucide-react";
+import { ArrowLeft, Calendar, MapPin } from "lucide-react";
+import { formatDateTime } from "@/lib/date";
 import {
   ProjectStatusBadge,
   toProjectStatus,
@@ -143,7 +137,7 @@ function ProjectInfoGrid({
             <p className="text-sm text-muted-foreground">Ngày bắt đầu</p>
             <p className="font-medium text-foreground">
               {startDate
-                ? new Date(startDate).toLocaleDateString("vi-VN")
+                ? formatDateTime(startDate)
                 : "Chưa có"}
             </p>
           </div>
@@ -157,7 +151,7 @@ function ProjectInfoGrid({
             <p className="text-sm text-muted-foreground">Ngày kết thúc</p>
             <p className="font-medium text-foreground">
               {endDate
-                ? new Date(endDate).toLocaleDateString("vi-VN")
+                ? formatDateTime(endDate)
                 : "Chưa có"}
             </p>
           </div>
@@ -224,9 +218,7 @@ function ProjectCategories({
               style={{ backgroundColor: cat.categoryColor }}
             >
               <span className="text-xs text-white">
-                {cat.categoryIcon
-                  ? cat.categoryIcon.replace("fa-", "").charAt(0).toUpperCase()
-                  : "C"}
+                {cat.categoryIcon ? <i className={cat.categoryIcon}></i> : "C"}
               </span>
             </div>
             <div>

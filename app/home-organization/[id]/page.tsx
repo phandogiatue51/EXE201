@@ -7,7 +7,7 @@ import { Header } from "@/components/header";
 import { organizationAPI } from "../../../services/api";
 import { projectAPI, categoryAPI } from "../../../services/api";
 import { Organization, Project } from "../../../lib/type";
-import { OrganizationView } from "@/components/organization/OrganizationForm";
+import { OrganizationView } from "@/components/form/OrganizationForm";
 import { ProjectFilters } from "@/components/filter/ProjectFilter";
 import { ProjectList } from "@/components/list/ProjectList";
 import { ArrowLeft } from "lucide-react";

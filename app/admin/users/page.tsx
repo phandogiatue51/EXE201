@@ -15,15 +15,16 @@ import {
   Building,
   Shield,
   Eye,
-  Edit,
   Trash2,
 } from "lucide-react";
 import { accountAPI } from "../../../services/api";
 import { Account } from "../../../lib/type";
+import { useToast } from "@/hooks/use-toast";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<Account[]>([]);
   const [search, setSearch] = useState("");
+  const { toast } = useToast();
   const [roleFilter, setRoleFilter] = useState<number | "all">("all");
   const [statusFilter, setStatusFilter] = useState<number | "all">("all");
   const [loading, setLoading] = useState(true);
@@ -67,28 +68,36 @@ export default function UsersPage() {
     if (!confirm("Bạn có chắc muốn xóa người dùng này?")) return;
 
     try {
-      await accountAPI.delete(id);
+      var response = await accountAPI.delete(id);
       setUsers(users.filter((user) => user.id !== id));
-      alert("Xóa người dùng thành công!");
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      alert("Có lỗi xảy ra khi xóa người dùng!");
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (error: any) {
+      console.error("Error deleting blog:", error);
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
-  const handleToggleStatus = async (user: Account) => {
-    try {
-      const newStatus = user.status === 0 ? 1 : 0;
+  // const handleToggleStatus = async (user: Account) => {
+  //   try {
+  //     const newStatus = user.status === 0 ? 1 : 0;
 
-      await accountAPI.update(user.id, { ...user, status: newStatus });
-      setUsers(
-        users.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u))
-      );
-      alert(`Đã ${newStatus === 0 ? "kích hoạt" : "vô hiệu hóa"} người dùng!`);
-    } catch (error) {
-      console.error("Error updating user:", error);
-    }
-  };
+  //     await accountAPI.update(user.id, { ...user, status: newStatus });
+  //     setUsers(
+  //       users.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u))
+  //     );
+  //     alert(`Đã ${newStatus === 0 ? "kích hoạt" : "vô hiệu hóa"} người dùng!`);
+  //   } catch (error) {
+  //     console.error("Error updating user:", error);
+  //   }
+  // };
 
   if (loading) {
     return (

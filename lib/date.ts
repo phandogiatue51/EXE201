@@ -5,5 +5,13 @@ export function formatDate(date: string | Date | undefined | null) {
 
 export function formatDateTime(date: string | Date | undefined | null) {
   if (!date) return "Chưa có";
-  return new Date(date).toLocaleString("vi-VN");
+  const d = new Date(date);
+
+  const datePart = d.toLocaleDateString("vi-VN");
+  const timePart = d.toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }); 
+
+  return `${datePart} ${timePart}`;
 }

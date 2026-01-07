@@ -9,6 +9,7 @@ import { ProjectDetailCard } from "@/components/card/ProjectDetailCard";
 import CertificateForm from "@/components/form/CertificateForm";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
+import { useToast } from "@/hooks/use-toast";
 import {
   certificateAPI,
   categoryAPI,
@@ -30,6 +31,7 @@ export default function RegisterPreviewPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useAuth();
@@ -82,16 +84,24 @@ export default function RegisterPreviewPage({
         selectedCertificateId: certificate.id,
       };
 
-      const res = await applicationAPI.create(appData);
+      const response = await applicationAPI.create(appData);
 
-      const applicationId = res.id;
+      const applicationId = response.id;
 
-      alert("Đăng ký chương trình thành công");
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
 
       router.push(`/volunteer/application/${applicationId}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error registering:", error);
-      alert("Đăng ký thất bại. Vui lòng thử lại.");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -233,11 +243,11 @@ export default function RegisterPreviewPage({
                     loadingCategories={false}
                     imagePreview={certificate.imageUrl || ""}
                     isViewMode={true}
-                    onInputChange={() => {}}
-                    onCategoryChange={() => {}}
-                    onImageChange={() => {}}
-                    onImageRemove={() => {}}
-                    onSubmit={() => {}}
+                    onInputChange={() => { }}
+                    onCategoryChange={() => { }}
+                    onImageChange={() => { }}
+                    onImageRemove={() => { }}
+                    onSubmit={() => { }}
                     loading={false}
                   />
                 </div>

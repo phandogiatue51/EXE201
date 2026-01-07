@@ -4,19 +4,20 @@ import { Clock, Check, X } from "lucide-react";
 import { organizationAPI } from "@/services/api";
 import { useState, useEffect } from "react";
 import { Organization } from "@/lib/type";
+import { useToast } from "@/hooks/use-toast";
 
 export default function PendingApprovals() {
   const [pendingItems, setPendingItems] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadPendingOrganizations = async () => {
       try {
         setLoading(true);
         const organizations = await organizationAPI.getAll();
-        
+
         if (organizations && Array.isArray(organizations)) {
-          // Filter organizations with status 0 (pending)
           const pending = organizations.filter((org: Organization) => org.status === 0);
           setPendingItems(pending.slice(0, 3));
         } else {
@@ -35,31 +36,47 @@ export default function PendingApprovals() {
 
   const handleApprove = async (orgId: number) => {
     try {
-      await organizationAPI.verify(orgId, { status: 1 }); // 1 = approved/active
-      // Refresh list
+      const response = await organizationAPI.verify(orgId, { status: 1 });
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
       const organizations = await organizationAPI.getAll();
       if (organizations && Array.isArray(organizations)) {
         const pending = organizations.filter((org: Organization) => org.status === 0);
         setPendingItems(pending.slice(0, 3));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error approving organization:", error);
-      alert("Không thể duyệt tổ chức");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
   const handleReject = async (orgId: number) => {
     try {
-      await organizationAPI.verify(orgId, { status: 2 }); // 2 = rejected
-      // Refresh list
+      const response = await organizationAPI.verify(orgId, { status: 2 });
+      toast({
+        description: response.message,
+        variant: "success",
+        duration: 3000,
+      });
       const organizations = await organizationAPI.getAll();
       if (organizations && Array.isArray(organizations)) {
         const pending = organizations.filter((org: Organization) => org.status === 0);
         setPendingItems(pending.slice(0, 3));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error rejecting organization:", error);
-      alert("Không thể từ chối tổ chức");
+      toast({
+        description: error?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
@@ -106,17 +123,17 @@ export default function PendingApprovals() {
               </span>
             </div>
             <div className="flex gap-2">
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 className="bg-green-500 hover:bg-green-600"
                 onClick={() => handleApprove(item.id)}
               >
                 <Check className="h-3 w-3 mr-1" />
                 Duyệt
               </Button>
-              <Button 
-                size="sm" 
-                variant="outline" 
+              <Button
+                size="sm"
+                variant="outline"
                 className="border-red-300 text-red-600 hover:bg-red-50"
                 onClick={() => handleReject(item.id)}
               >
