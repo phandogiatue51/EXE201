@@ -5,10 +5,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { qrAPI } from '@/services/api';
 import QRScanner from '@/components/qr-scanner/QRScanner';
-import './attendance.css';
 import { Button } from '@/components/ui/button';
+import './attendance.css';
 import { useToast } from '@/hooks/use-toast';
-export default function CheckoutPage() {
+export default function CheckinPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user } = useAuth();
@@ -39,17 +39,18 @@ export default function CheckoutPage() {
             if (response.success) {
                 const actionData = response.data;
 
-                if (actionData.action === 'checkout') {
-                    const projectName = actionData.message?.match(/Checked out from (.+)/)?.[1] || 'Unknown Project';
-                    const hoursWorked = actionData.hoursWorked || 0;
+                if (actionData.action === 'checkin') {
+                    const projectName = actionData.message?.match(/Checked in to (.+)/)?.[1] || 'Unknown Project';
                     toast({
-                        description: "Checkout successfully!",
+                        description: "Checkin successfully!",
                         variant: "success",
                         duration: 3000,
                     });
-                    router.push(`/success?project=${projectName}&action=check-out&hours=${hoursWorked}`);
+                    router.push(`/success?project=${encodeURIComponent(projectName)}&action=check-in&timestamp=${Date.now()}`);
+
+
                 } else {
-                    setError('This is a check-in QR code. Please go to the check-in page.');
+                    setError('This is a check-out QR code. Please go to the check-out page.');
                 }
             } else {
                 throw new Error(response.message || 'Scan failed');
@@ -72,21 +73,21 @@ export default function CheckoutPage() {
             onScan={handleQRScan}
             onCancel={() => setShowScanner(false)}
             isLoading={loading}
-            mode="check-out"
+            mode="check-in"
         />;
     }
 
     return (
         <div className="attendance-container">
             <div className="attendance-header">
-                <h1>Check Out</h1>
-                <p className="subtitle">Scan QR code to check out</p>
+                <h1>Check In</h1>
+                <p className="subtitle">Scan QR code to check in</p>
             </div>
 
-            <div className="checkout-status">
+            <div className="checkin-status">
                 <div className="status-card">
-                    <h3>Status: Ready to Check Out</h3>
-                    <p>Scan the check-out QR code provided by the project manager to finish tracking your hours.</p>
+                    <h3>Status: Ready to Check In</h3>
+                    <p>Scan the QR code provided by the project manager to start tracking your hours.</p>
                 </div>
             </div>
 
@@ -95,7 +96,7 @@ export default function CheckoutPage() {
                     onClick={() => setShowScanner(true)}
                     disabled={loading}
                 >
-                    {loading ? 'Processing...' : 'Scan QR to Check Out'}
+                    {loading ? 'Processing...' : 'Scan QR to Check In'}
                 </Button>
             </div>
         </div>

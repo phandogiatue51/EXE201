@@ -1,215 +1,224 @@
-import { StyleSheet } from 'react-native';
+.container {
+  display: flex;
+  background-color: #f5f5f5;
+  padding: 60px 20px 0 20px; /* top right bottom left */
+}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-  },
-  header: {
-    marginBottom: 30,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 5,
-  },
-  statusCard: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 25,
-    alignItems: 'center',
-    marginBottom: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  statusIcon: {
-    fontSize: 50,
-    marginBottom: 15,
-  },
-  statusText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 5,
-  },
-  statusDescription: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 10,
-  },
-  projectName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-    marginVertical: 5,
-  },
-  timeText: {
-    fontSize: 14,
-    color: '#888',
-  },
-  scanButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 18,
-    borderRadius: 12,
-    marginBottom: 15,
-  },
-  checkinButton: {
-    backgroundColor: '#4CAF50',
-  },
-  checkoutButton: {
-    backgroundColor: '#FF9800',
-  },
-  scanButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginRight: 10,
-  },
-  scanButtonIcon: {
-    fontSize: 20,
-    color: 'white',
-  },
-  manualButton: {
-    paddingVertical: 15,
-    borderRadius: 12,
-    backgroundColor: '#f0f0f0',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  manualButtonText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  historyContainer: {
-    flex: 1,
-  },
-  historyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 15,
-  },
-  historyEmpty: {
-    color: '#888',
-    fontStyle: 'italic',
-  },
-  cameraContainer: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
-  cameraOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cameraFrame: {
-    width: 250,
-    height: 250,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  cornerTL: {
-    position: 'absolute',
-    top: -2,
-    left: -2,
-    width: 40,
-    height: 40,
-    borderTopWidth: 4,
-    borderLeftWidth: 4,
-    borderColor: '#4CAF50',
-  },
-  cornerTR: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 40,
-    height: 40,
-    borderTopWidth: 4,
-    borderRightWidth: 4,
-    borderColor: '#4CAF50',
-  },
-  cornerBL: {
-    position: 'absolute',
-    bottom: -2,
-    left: -2,
-    width: 40,
-    height: 40,
-    borderBottomWidth: 4,
-    borderLeftWidth: 4,
-    borderColor: '#4CAF50',
-  },
-  cornerBR: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 40,
-    height: 40,
-    borderBottomWidth: 4,
-    borderRightWidth: 4,
-    borderColor: '#4CAF50',
-  },
-  cameraControls: {
-    position: 'absolute',
-    bottom: 40,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  scanInstruction: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  cancelButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 25,
-  },
-  cancelButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: 'white',
-    marginTop: 15,
-    fontSize: 16,
-  },
-  errorText: {
-    color: '#f44336',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  description: {
-    color: '#666',
-    textAlign: 'center',
-    paddingHorizontal: 20,
-  },
-});
+.header {
+  margin-bottom: 30px;
+}
 
-export default styles;
+.title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.statusCard {
+  background-color: white;
+  border-radius: 15px;
+  padding: 25px;
+  text-align: center;
+  margin-bottom: 30px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+}
+
+.statusIcon {
+  font-size: 50px;
+  margin-bottom: 15px;
+}
+
+.statusText {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.statusDescription {
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.projectName {
+  font-size: 18px;
+  font-weight: bold;
+  color: #4CAF50;
+  margin: 5px 0;
+}
+
+.timeText {
+  font-size: 14px;
+  color: #888;
+}
+
+.scanButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 0;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.checkinButton {
+  background-color: #4CAF50;
+}
+
+.checkoutButton {
+  background-color: #FF9800;
+}
+
+.scanButtonText {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.scanButtonIcon {
+  font-size: 20px;
+  color: white;
+}
+
+.manualButton {
+  padding: 15px 0;
+  border-radius: 12px;
+  background-color: #f0f0f0;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.manualButtonText {
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.historyContainer {
+  display: flex;
+  flex: 1;
+}
+
+.historyTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.historyEmpty {
+  color: #888;
+  font-style: italic;
+}
+
+.cameraContainer {
+  background-color: black;
+  flex: 1;
+}
+
+.cameraFrame {
+  width: 250px;
+  height: 250px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.cornerTL, .cornerTR, .cornerBL, .cornerBR {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-color: #4CAF50;
+}
+
+.cornerTL {
+  top: -2px;
+  left: -2px;
+  border-top: 4px solid #4CAF50;
+  border-left: 4px solid #4CAF50;
+}
+
+.cornerTR {
+  top: -2px;
+  right: -2px;
+  border-top: 4px solid #4CAF50;
+  border-right: 4px solid #4CAF50;
+}
+
+.cornerBL {
+  bottom: -2px;
+  left: -2px;
+  border-bottom: 4px solid #4CAF50;
+  border-left: 4px solid #4CAF50;
+}
+
+.cornerBR {
+  bottom: -2px;
+  right: -2px;
+  border-bottom: 4px solid #4CAF50;
+  border-right: 4px solid #4CAF50;
+}
+
+.cameraControls {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.scanInstruction {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.cancelButton {
+  padding: 12px 40px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+}
+
+.cancelButtonText {
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loadingText {
+  color: white;
+  margin-top: 15px;
+  font-size: 16px;
+}
+
+.errorText {
+  color: #f44336;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.description {
+  color: #666;
+  text-align: center;
+  padding: 0 20px;
+}

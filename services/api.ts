@@ -6,9 +6,14 @@ import {
 } from "@/lib/type";
 import { Category } from "@/lib/type";
 
+// const API_BASE_URL =
+//   process.env.NODE_ENV === "development"
+//     ? "https://localhost:7085/api"
+//     : process.env.REACT_APP_API_URL || "";
+
 const API_BASE_URL =
   process.env.NODE_ENV === "development"
-    ? "https://localhost:7085/api"
+    ? "https://together-backend-nw20.onrender.com/api"
     : process.env.REACT_APP_API_URL || "";
 
 interface ApiRequestOptions extends RequestInit {
@@ -641,5 +646,27 @@ export const staffAPI = {
     return apiRequest(url);
   },
 };
+
+export const qrAPI = {
+  generate: (data: { projectId: number; durationHours?: number }) => {
+    return apiRequest("/QR/generate", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+  },
+
+  scan: (data: { qrToken: string; actionTime?: string }) => {
+    return apiRequest("/QR/scan", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+  },
+}
 
 export default apiRequest;
