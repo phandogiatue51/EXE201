@@ -642,24 +642,22 @@ export const staffAPI = {
 };
 
 export const qrAPI = {
-  generateCheckin: (data: { projectId: number; durationHours?: number }) => {
-    return apiRequest("/QR/generate-checkin", {
+  generateCheckin: (projectId: number) => {
+    return apiRequest(`/QR/generate-checkin?projectId=${projectId}`, {
       method: "POST",
-      body: JSON.stringify(data),
     });
   },
 
-  generateCheckout: (data: { projectId: number; durationHours?: number }) => {
-    return apiRequest("/QR/generate-checkout", {
+  generateCheckout: (projectId: number) => {
+    return apiRequest(`/QR/generate-checkout?projectId=${projectId}`, {
       method: "POST",
-      body: JSON.stringify(data),
     });
   },
 
-  scan: (data: { qrToken: string; actionTime?: string }) => {
+  scan: (formData: FormData) => {
     return apiRequest("/QR/scan", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: formData,
     });
   },
 };

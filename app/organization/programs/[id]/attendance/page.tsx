@@ -58,9 +58,9 @@ export default function ProgramAttendancePage() {
     try {
       let response;
       if (action === "checkin") {
-        response = await qrAPI.generateCheckin({ projectId });
+        response = await qrAPI.generateCheckin(projectId);
       } else {
-        response = await qrAPI.generateCheckout({ projectId });
+        response = await qrAPI.generateCheckout(projectId);
       }
 
       if (response) {

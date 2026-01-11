@@ -30,10 +30,11 @@ export default function CheckoutPage({
     setShowScanner(false);
 
     try {
-      const response = await qrAPI.scan({
-        qrToken: token,
-        actionTime: new Date().toISOString(),
-      });
+      const formData = new FormData();
+      formData.append("qrToken", token);
+      formData.append("actionTime", new Date().toISOString());
+
+      const response = await qrAPI.scan(formData);
 
       if (response.success) {
         const actionData = response.data;
