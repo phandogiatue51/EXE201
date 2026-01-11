@@ -130,3 +130,17 @@ interface StaffFormProps {
   onSubmit: (e: React.FormEvent) => void;
   submitText?: string;
 }
+
+interface ViewRecordDto {
+  recordId: number;
+  volunteerApplicationId: number;
+  volunteer?: {
+    id: number;
+    name: string;
+    email?: string;
+    avatar?: string;
+  };
+  checkIn: string | null;
+  checkOut: string | null;
+  hours: number;
+}

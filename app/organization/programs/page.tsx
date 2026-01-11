@@ -222,37 +222,21 @@ export default function ProjectsPage() {
                     </Button>
                   </div>
 
-                  {project.status === 4 && (
-                    <div className="mt-3 flex-shrink-0">
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="w-full bg-gradient-to-r from-green-100 to-green-300 text-green-800 hover:from-green-200 hover:to-green-400"
-                        asChild
+                  <div className="mt-3 flex-shrink-0">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="w-full bg-gradient-to-r from-blue-100 to-blue-300 text-blue-800 hover:from-blue-200 hover:to-blue-400"
+                      asChild
+                    >
+                      <Link
+                        href={`/organization/programs/${project.id}/attendance`}
                       >
-                        <Link href={`/attendace/${project.id}/check-out`}>
-                          <LogOut className="w-3 h-3 mr-1" />
-                          Check out
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
-
-                  {project.status === 3 && (
-                    <div className="mt-3 flex-shrink-0">
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="w-full bg-gradient-to-r from-blue-100 to-blue-300 text-blue-800 hover:from-blue-200 hover:to-blue-400"
-                        asChild
-                      >
-                        <Link href={`/attendace/${project.id}/check-in`}>
-                          <LogIn className="w-3 h-3 mr-1" />
-                          Check in
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
+                        <LogIn className="w-3 h-3 mr-1" />
+                        Quản lý điểm danh
+                      </Link>
+                    </Button>
+                  </div>
 
                   {project.status === 2 && (
                     <div className="mt-3 flex-shrink-0">

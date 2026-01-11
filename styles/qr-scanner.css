@@ -1,0 +1,97 @@
+.qr-scanner-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.qr-scanner-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.qr-scanner-header h2 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 24px;
+}
+
+.qr-scanner-header .subtitle {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.qr-reader {
+    width: 100%;
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.scanner-error {
+    background: #fee;
+    color: #c00;
+    padding: 10px;
+    border-radius: 6px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.scanner-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-size: 14px;
+}
+
+.loading-indicator::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ddd;
+    border-top-color: #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.scanner-tips {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.scanner-tips .tips-title {
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: #555;
+}
+
+.scanner-tips ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #666;
+}
+
+.scanner-tips li {
+    margin: 4px 0;
+    font-size: 14px;
+}
