@@ -645,9 +645,6 @@ export const qrAPI = {
   generateCheckin: (data: { projectId: number; durationHours?: number }) => {
     return apiRequest("/QR/generate-checkin", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
   },
@@ -655,9 +652,6 @@ export const qrAPI = {
   generateCheckout: (data: { projectId: number; durationHours?: number }) => {
     return apiRequest("/QR/generate-checkout", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
   },
@@ -665,9 +659,6 @@ export const qrAPI = {
   scan: (data: { qrToken: string; actionTime?: string }) => {
     return apiRequest("/QR/scan", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(data),
     });
   },
