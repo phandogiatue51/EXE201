@@ -11,11 +11,12 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProgramAttendancePage() {
   const params = useParams();
   const projectId = parseInt(params.id as string);
-
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -52,8 +53,6 @@ export default function ProgramAttendancePage() {
 
   const handleGenerateQR = async (action: "checkin" | "checkout") => {
     setLoading(true);
-    setError("");
-    setSuccess("");
 
     try {
       let response;
@@ -69,17 +68,19 @@ export default function ProgramAttendancePage() {
           expiresAt: response.expiresAt,
           action: action,
         });
-        setSuccess(
-          `${
-            action === "checkin" ? "Check-in" : "Check-out"
-          } QR code generated successfully!`
-        );
 
-        setTimeout(() => setSuccess(""), 5000);
+        toast({
+          description: `Tạo mã QR ${action} thành công!`,
+          variant: "success",
+          duration: 3000,
+        });
       }
-    } catch (error: any) {
-      console.error("Error generating QR:", error);
-      setError(error.message || "Failed to generate QR code");
+    } catch (error: unknown) {
+      toast({
+        description: `Tạo mã QR ${action} thất bại!`,
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -126,22 +127,6 @@ export default function ProgramAttendancePage() {
         </div>
       </div>
 
-      {success && (
-        <Alert
-          variant="success"
-          onClose={() => setSuccess("")}
-          className="mb-6"
-        >
-          {success}
-        </Alert>
-      )}
-      {error && (
-        <Alert variant="error" onClose={() => setError("")} className="mb-6">
-          {error}
-        </Alert>
-      )}
-
-      {/* Main Content */}
       <Tabs
         value={selectedTab}
         onValueChange={setSelectedTab}
@@ -154,10 +139,13 @@ export default function ProgramAttendancePage() {
 
         <TabsContent value="generate" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - QR Generation */}
+            {/* Left Column */}
             <div className="space-y-6">
               <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Tạo mã QR</h2>
+                {/* Bigger h1 */}
+                <h1 className="mb-4 text-center text-3xl font-bold">
+                  Tạo mã QR
+                </h1>
 
                 <div className="space-y-4">
                   <div className="flex flex-col sm:flex-row gap-4">
@@ -182,18 +170,6 @@ export default function ProgramAttendancePage() {
                         : "Tạo mã QR Checkout"}
                     </Button>
                   </div>
-
-                  {/* QR Display */}
-                  {qrData.qrImage && qrData.action && (
-                    <div className="mt-6">
-                      <QRDisplay
-                        qrImage={qrData.qrImage}
-                        expiresAt={qrData.expiresAt}
-                        action={qrData.action}
-                        onRefresh={handleRefreshQR}
-                      />
-                    </div>
-                  )}
                 </div>
               </Card>
 
@@ -226,6 +202,20 @@ export default function ProgramAttendancePage() {
                   </li>
                 </ul>
               </Card>
+            </div>
+
+            {/* Right Column: QR Display */}
+            <div className="flex items-center justify-center">
+              {qrData.qrImage && qrData.action && (
+                <Card className="w-full h-full flex items-center justify-center p-6">
+                  <QRDisplay
+                    qrImage={qrData.qrImage}
+                    expiresAt={qrData.expiresAt}
+                    action={qrData.action}
+                    onRefresh={handleRefreshQR}
+                  />
+                </Card>
+              )}
             </div>
           </div>
         </TabsContent>

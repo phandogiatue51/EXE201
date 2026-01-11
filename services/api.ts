@@ -643,13 +643,17 @@ export const staffAPI = {
 
 export const qrAPI = {
   generateCheckin: (projectId: number) => {
-    return apiRequest(`/QR/generate-checkin?projectId=${projectId}`, {
+    const url = `/QR/generate-checkin?projectId=${projectId}`;
+
+    return apiRequest(url, {
       method: "POST",
     });
   },
 
   generateCheckout: (projectId: number) => {
-    return apiRequest(`/QR/generate-checkout?projectId=${projectId}`, {
+    const url = `/QR/generate-checkout?projectId=${projectId}`;
+
+    return apiRequest(url, {
       method: "POST",
     });
   },

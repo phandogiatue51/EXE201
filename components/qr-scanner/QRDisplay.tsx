@@ -16,7 +16,7 @@ export default function QRDisplay({
   onRefresh,
 }: QRDisplayProps) {
   return (
-    <div className="flex flex-col items-center gap-4 p-6 bg-white rounded shadow">
+    <div className="flex flex-col items-center gap-4">
       <h2 className="text-xl font-bold">
         {action === "checkin" ? "Check-In QR Code" : "Check-Out QR Code"}
       </h2>
@@ -25,11 +25,7 @@ export default function QRDisplay({
         <p className="text-gray-500">No QR code available</p>
       ) : (
         <>
-          <img
-            src={qrImage}
-            alt={`${action} QR Code`}
-            className="w-64 h-64 border rounded"
-          />
+          <img src={qrImage} alt={`${action} QR Code`} className="w-full h-full" />
           {expiresAt && (
             <p className="text-gray-600">
               Expires at: {new Date(expiresAt).toLocaleString()}

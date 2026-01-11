@@ -83,7 +83,6 @@ export default function ProjectDetailPage({
     );
   }
 
-  // Custom render function for action buttons in header
   const renderHeaderActions = () => (
     <div className="flex gap-2">
       <Button variant="secondary" size="sm" asChild>
