@@ -9,7 +9,8 @@ const alertVariants = cva(
     variants: {
       variant: {
         default: "bg-card text-card-foreground",
-        destructive: "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
+        destructive:
+          "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
         success: "bg-green-100 text-green-800",
         error: "bg-red-100 text-red-800",
       },
@@ -17,21 +18,34 @@ const alertVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 function Alert({
   className,
   variant,
+  onClose,
+  children,
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
+}: React.ComponentProps<"div"> &
+  VariantProps<typeof alertVariants> & { onClose?: () => void }) {
   return (
     <div
       data-slot="alert"
       role="alert"
       className={cn(alertVariants({ variant }), className)}
       {...props}
-    />
+    >
+      {children}
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+        >
+          ✕
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -41,7 +55,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="alert-title"
       className={cn(
         "col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight",
-        className,
+        className
       )}
       {...props}
     />
@@ -57,7 +71,7 @@ function AlertDescription({
       data-slot="alert-description"
       className={cn(
         "text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
-        className,
+        className
       )}
       {...props}
     />

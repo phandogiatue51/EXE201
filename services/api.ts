@@ -648,11 +648,21 @@ export const staffAPI = {
 };
 
 export const qrAPI = {
-  generate: (data: { projectId: number; durationHours?: number }) => {
-    return apiRequest("/QR/generate", {
+  generateCheckin: (data: { projectId: number; durationHours?: number }) => {
+    return apiRequest("/QR/generate-checkin", {
       method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+  },
+
+  generateCheckout: (data: { projectId: number; durationHours?: number }) => {
+    return apiRequest("/QR/generate-checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
@@ -662,11 +672,20 @@ export const qrAPI = {
     return apiRequest("/QR/scan", {
       method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
   },
+};
+
+export const hourAPI = {
+  getAll: () => apiRequest("/Hour"),
+
+  getById: (id: any) => apiRequest(`/Hour/${id}`),
+
+  getByProjectId: (projectId: any) => apiRequest(`/Hour/project/${projectId}`)
 }
+
 
 export default apiRequest;
