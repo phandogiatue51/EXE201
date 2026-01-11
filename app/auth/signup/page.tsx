@@ -32,19 +32,19 @@ export default function SignupPage() {
     try {
       const formDataObj = new FormData();
 
-      formDataObj.append('Name', formData.name);
-      formDataObj.append('Email', formData.email);
-      formDataObj.append('Password', formData.password);
+      formDataObj.append("Name", formData.name);
+      formDataObj.append("Email", formData.email);
+      formDataObj.append("Password", formData.password);
 
       if (formData.phoneNumber) {
-        formDataObj.append('PhoneNumber', formData.phoneNumber);
+        formDataObj.append("PhoneNumber", formData.phoneNumber);
       }
 
       if (formData.dateOfBirth) {
-        formDataObj.append('DateOfBirth', formData.dateOfBirth);
+        formDataObj.append("DateOfBirth", formData.dateOfBirth);
       }
 
-      formDataObj.append('IsFemale', formData.isFemale.toString());
+      formDataObj.append("IsFemale", formData.isFemale.toString());
 
       const response = await accountAPI.signUp(formDataObj);
 
@@ -55,7 +55,6 @@ export default function SignupPage() {
       });
 
       router.push("/auth/login");
-
     } catch (error: any) {
       console.error("Error signing up:", error);
       toast({
@@ -195,7 +194,9 @@ export default function SignupPage() {
                         type="radio"
                         name="isFemale"
                         checked={formData.isFemale === true}
-                        onChange={() => setFormData({ ...formData, isFemale: true })}
+                        onChange={() =>
+                          setFormData({ ...formData, isFemale: true })
+                        }
                         className="mr-2"
                         disabled={isLoading}
                       />
@@ -206,7 +207,9 @@ export default function SignupPage() {
                         type="radio"
                         name="isFemale"
                         checked={formData.isFemale === false}
-                        onChange={() => setFormData({ ...formData, isFemale: false })}
+                        onChange={() =>
+                          setFormData({ ...formData, isFemale: false })
+                        }
                         className="mr-2"
                         disabled={isLoading}
                       />

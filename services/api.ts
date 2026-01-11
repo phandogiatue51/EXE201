@@ -684,8 +684,7 @@ export const hourAPI = {
 
   getById: (id: any) => apiRequest(`/Hour/${id}`),
 
-  getByProjectId: (projectId: any) => apiRequest(`/Hour/project/${projectId}`)
-}
-
+  getByProjectId: (projectId: any) => apiRequest(`/Hour/project/${projectId}`),
+};
 
 export default apiRequest;

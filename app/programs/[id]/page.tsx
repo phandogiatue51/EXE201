@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/header";
 import { projectAPI } from "../../../services/api";
 import { ProjectDetailCard } from "@/components/card/ProjectDetailCard";
@@ -10,9 +10,9 @@ import { ErrorState } from "@/components/ErrorState";
 export default function ProjectDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
+  const { id } = params; 
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
