@@ -6,15 +6,9 @@ import {
 } from "@/lib/type";
 import { Category } from "@/lib/type";
 
-// const API_BASE_URL =
-//   process.env.NODE_ENV === "development"
-//     ? "https://localhost:7085/api"
-//     : process.env.REACT_APP_API_URL || "";
+// "https://localhost:7085/api"
 
-const API_BASE_URL =
-  process.env.NODE_ENV === "development"
-    ? "https://together-backend-nw20.onrender.com/api"
-    : process.env.REACT_APP_API_URL || "";
+const API_BASE_URL = "https://together-backend-nw20.onrender.com/api";
 
 interface ApiRequestOptions extends RequestInit {
   skipAuth?: boolean;
