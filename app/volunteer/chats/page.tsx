@@ -220,3 +220,6 @@
 //     </div>
 //   );
 // }
+export default function ChatsPage() {
+  return <div>Chats page coming soon...</div>;
+}
