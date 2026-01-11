@@ -1,39 +1,36 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { Header } from "@/components/header";
 import { projectAPI } from "../../../services/api";
 import { ProjectDetailCard } from "@/components/card/ProjectDetailCard";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 
-export default function ProjectDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { id } = params; 
+export default function ProjectDetailPage() {
+  const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchProject();
-  }, [id]);
+    const fetchProject = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await projectAPI.getById(parseInt(id));
+        setProject(data);
+      } catch (error) {
+        console.error("Error fetching project:", error);
+        setError("Không thể tải thông tin chương trình");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchProject = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await projectAPI.getById(parseInt(id));
-      setProject(data);
-    } catch (error) {
-      console.error("Error fetching project:", error);
-      setError("Không thể tải thông tin chương trình");
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (id) fetchProject();
+  }, [id]);
 
   if (loading) {
     return (
@@ -50,7 +47,7 @@ export default function ProjectDetailPage({
         <Header />
         <ErrorState
           message={error || "Không tìm thấy chương trình"}
-          onRetry={fetchProject}
+          onRetry={() => window.location.reload()}
         />
       </div>
     );

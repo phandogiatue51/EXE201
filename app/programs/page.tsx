@@ -9,7 +9,10 @@ import { Header } from "@/components/header";
 import { useAuth } from "@/hooks/use-auth";
 import { projectAPI } from "../../services/api";
 import { formatDateTime } from "@/lib/date";
-import { ProjectStatusBadge, toProjectStatus, } from "@/components/status-badge/ProjectStatusBadge";
+import {
+  ProjectStatusBadge,
+  toProjectStatus,
+} from "@/components/status-badge/ProjectStatusBadge";
 import { useRouter } from "next/navigation";
 import {
   Eye,
@@ -29,6 +32,7 @@ export default function ProjectsPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<number | "all">("all");
   const router = useRouter();
+
   const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
@@ -129,7 +133,11 @@ export default function ProjectsPage() {
             /* Projects Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => (
-                <Card key={project.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/programs/${project.id}`)}>
+                <Card
+                  key={project.id}
+                  className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => router.push(`/programs/${project.id}`)}
+                >
                   <div className="h-48 bg-gradient-to-br from-blue-500 to-blue-600 relative overflow-hidden">
                     {project.imageUrl ? (
                       <img
@@ -245,9 +253,12 @@ export default function ProjectsPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {user?.accountId ? (
-                          <Link href={`/programs/${project.id}/certificate-selection`}>
+                          <Link
+                            href={`/programs/${project.id}/certificate-selection`}
+                          >
                             <Pen className="w-3 h-3 mr-1" />
                             Đăng ký
                           </Link>
@@ -263,7 +274,6 @@ export default function ProjectsPage() {
                           </div>
                         )}
                       </Button>
-
                     </div>
                   </div>
                 </Card>

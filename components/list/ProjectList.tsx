@@ -1,7 +1,11 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { ProjectStatusBadge, ProjectStatus, toProjectStatus, } from "@/components/status-badge/ProjectStatusBadge";
+import {
+  ProjectStatusBadge,
+  ProjectStatus,
+  toProjectStatus,
+} from "@/components/status-badge/ProjectStatusBadge";
 import { Project } from "@/lib/type";
 import { Calendar, MapPin, Users, Tag, Building2 } from "lucide-react";
 import Link from "next/link";
@@ -102,7 +106,9 @@ export function ProjectList({
                 </p>
 
                 <ProjectStatusBadge
-                  status={toProjectStatus(project.status || ProjectStatus.Draft)}
+                  status={toProjectStatus(
+                    project.status || ProjectStatus.Draft
+                  )}
                   showIcon={false}
                   showText={true}
                 />
@@ -121,7 +127,8 @@ export function ProjectList({
                       <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       <span>
                         {project.startDate && formatDateTime(project.startDate)}
-                        {project.endDate && ` - ${formatDateTime(project.endDate)}`}
+                        {project.endDate &&
+                          ` - ${formatDateTime(project.endDate)}`}
                       </span>
                     </div>
                   )}
@@ -166,8 +173,12 @@ export function ProjectList({
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => {
-                        router.push(`/programs/${project.id}/certificate-selection`);
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(
+                          `/programs/${project.id}/certificate-selection`
+                        );
                       }}
                     >
                       <Pen className="w-3 h-3 mr-1" />
@@ -190,7 +201,6 @@ export function ProjectList({
               </div>
             </Link>
           </Card>
-
         );
       })}
     </div>
