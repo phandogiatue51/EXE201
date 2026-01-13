@@ -6,9 +6,9 @@ import {
 } from "@/lib/type";
 import { Category } from "@/lib/type";
 
-// "https://localhost:7085/api"
+// const API_BASE_URL = "https://together-backend-nw20.onrender.com/api";
 
-const API_BASE_URL = "https://together-backend-nw20.onrender.com/api";
+const API_BASE_URL = "https://localhost:7085/api";
 
 interface ApiRequestOptions extends RequestInit {
   skipAuth?: boolean;
@@ -641,27 +641,18 @@ export const staffAPI = {
   },
 };
 
-export const qrAPI = {
-  generateCheckin: (projectId: number) => {
-    const url = `/QR/generate-checkin?projectId=${projectId}`;
-
-    return apiRequest(url, {
+export const attendanceAPI = {
+  generateCode: (payload: any) => {
+    return apiRequest("/Attendance/generate-code", {
       method: "POST",
+      body: payload,
     });
   },
 
-  generateCheckout: (projectId: number) => {
-    const url = `/QR/generate-checkout?projectId=${projectId}`;
-
-    return apiRequest(url, {
+  verifyCode: (payload: any) => {
+    return apiRequest("/Attendance/verify-code", {
       method: "POST",
-    });
-  },
-
-  scan: (formData: FormData) => {
-    return apiRequest("/QR/scan", {
-      method: "POST",
-      body: formData,
+      body: payload,
     });
   },
 };

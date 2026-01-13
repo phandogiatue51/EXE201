@@ -40,7 +40,7 @@ interface Registration {
   programId: string;
   volunteerId: string;
   volunteerName: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   appliedDate: string;
   approvedDate?: string;
 }
@@ -49,7 +49,7 @@ interface Program {
   id: string;
   organizationId: string;
   title: string;
-  status: 'active' | 'completed' | 'draft';
+  status: "active" | "completed" | "draft";
   volunteersJoined?: number;
   [key: string]: any;
 }
@@ -94,7 +94,11 @@ interface ProjectFormProps {
   projectTypes: Array<{ value: number; label: string }>;
   statusOptions?: Array<{ value: number; label: string; color: string }>;
   isEdit?: boolean;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onInputChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
   onCategoryToggle: (categoryId: number, checked: boolean) => void;
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImageRemove: () => void;
@@ -121,7 +125,11 @@ interface StaffFormProps {
   showPassword: boolean;
   loading: boolean;
   staffRoles: Array<{ value: number; label: string; description: string }>;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onInputChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
   onGenderChange: (isFemale: boolean) => void;
   onRoleChange: (role: number) => void;
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -131,16 +139,17 @@ interface StaffFormProps {
   submitText?: string;
 }
 
-interface ViewRecordDto {
-  recordId: number;
-  volunteerApplicationId: number;
-  volunteer?: {
-    id: number;
-    name: string;
-    email?: string;
-    avatar?: string;
-  };
-  checkIn: string | null;
-  checkOut: string | null;
-  hours: number;
-}
+  interface ViewRecordDto {
+    recordId: number;
+    volunteerApplicationId: number;
+    volunteer?: {
+      id: number;
+      name: string;
+      email: string;
+      phoneNumber: string
+      profileImageUrl: string;
+    };
+    checkIn: string | null;
+    checkOut: string | null;
+    hours: number;
+  }

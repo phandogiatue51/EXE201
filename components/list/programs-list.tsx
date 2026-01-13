@@ -8,6 +8,7 @@ import {
   StatusBadge,
 } from "../status-badge/ApplicationStatusBadge";
 import { formatDate } from "@/lib/date";
+import { AttendanceCodeModal } from "@/components/volunteer/attendance-code-modal";
 
 interface ProgramsListProps {
   registrations: (VolunteerApplication & {
@@ -109,6 +110,8 @@ export function ProgramsList({ registrations }: ProgramsListProps) {
                           Xem đơn đăng ký
                         </Link>
                       </Button>
+
+                      <AttendanceCodeModal />
                     </div>
                   </div>
                 </div>

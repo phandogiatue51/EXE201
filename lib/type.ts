@@ -54,22 +54,22 @@ export interface Project {
 export interface VolunteerApplication {
   id: number;
   projectId: number;
-  projectTitle: string; 
-  organizationId: number; 
-  organizationName: string; 
+  projectTitle: string;
+  organizationId: number;
+  organizationName: string;
   selectedCertificateId: number;
   volunteerId: number;
   volunteerName: string;
   status: number;
   statusName: string;
-  relevantExperience?: string; 
+  relevantExperience?: string;
   appliedAt: Date;
-  reviewedAt?: Date; 
-  reviewedByStaffId?: number; 
-  rejectionReason?: string; 
-  feedback?: string; 
+  reviewedAt?: Date;
+  reviewedByStaffId?: number;
+  rejectionReason?: string;
+  feedback?: string;
   notes?: string;
-  selectedCertificate?: { 
+  selectedCertificate?: {
     id: number;
     accountId: number;
     certificateName: string;
@@ -122,6 +122,7 @@ export interface Account {
   passwordHash: string;
   phoneNumber?: string;
   bio?: string;
+  hour: number;
   profileImageUrl?: string;
   isFemale?: boolean;
   dateOfBirth?: Date;
@@ -168,7 +169,7 @@ export interface BlogPost {
   authorId?: number;
   authorName?: string;
   organizationId?: number;
-  organizationName?: string
+  organizationName?: string;
   author?: Account;
   organization?: Organization;
   publishedDate: string;
@@ -185,57 +186,57 @@ export interface ProjectCategory {
 
 export const mapToCreateDtoField = (key: string): string => {
   const mapping: Record<string, string> = {
-    title: 'Title',
-    subtitle: 'Subtitle',
-    excerpt: 'Excerpt',
-    status: 'Status',
-    authorId: 'AuthorId',
-    organizationId: 'OrganizationId',
-    paragraph1: 'Paragraph1',
-    paragraph2: 'Paragraph2',
-    paragraph3: 'Paragraph3',
-    paragraph4: 'Paragraph4',
-    paragraph5: 'Paragraph5',
-    
-    featuredImage: 'FeaturedImageUrl', 
-    image1: 'ImageUrl1',
-    image2: 'ImageUrl2',
-    image3: 'ImageUrl3',
-    image4: 'ImageUrl4',
-    image5: 'ImageUrl5',
+    title: "Title",
+    subtitle: "Subtitle",
+    excerpt: "Excerpt",
+    status: "Status",
+    authorId: "AuthorId",
+    organizationId: "OrganizationId",
+    paragraph1: "Paragraph1",
+    paragraph2: "Paragraph2",
+    paragraph3: "Paragraph3",
+    paragraph4: "Paragraph4",
+    paragraph5: "Paragraph5",
+
+    featuredImage: "FeaturedImageUrl",
+    image1: "ImageUrl1",
+    image2: "ImageUrl2",
+    image3: "ImageUrl3",
+    image4: "ImageUrl4",
+    image5: "ImageUrl5",
   };
-  
+
   return mapping[key] || key;
 };
 
 export const mapToUpdateDtoField = (key: string): string => {
   const mapping: Record<string, string> = {
-    title: 'Title',
-    subtitle: 'Subtitle',
-    excerpt: 'Excerpt',
-    status: 'Status',
-    authorId: 'AuthorId',
-    organizationId: 'OrganizationId',
-    paragraph1: 'Paragraph1',
-    paragraph2: 'Paragraph2',
-    paragraph3: 'Paragraph3',
-    paragraph4: 'Paragraph4',
-    paragraph5: 'Paragraph5',
-    
-    featuredImage: 'FeaturedImageFile', 
-    removeFeaturedImage: 'RemoveFeaturedImage',
-    image1: 'ImageFile1',
-    removeImage1: 'RemoveImage1',
-    image2: 'ImageFile2',
-    removeImage2: 'RemoveImage2',
-    image3: 'ImageFile3',
-    removeImage3: 'RemoveImage3',
-    image4: 'ImageFile4',
-    removeImage4: 'RemoveImage4',
-    image5: 'ImageFile5',
-    removeImage5: 'RemoveImage5',
+    title: "Title",
+    subtitle: "Subtitle",
+    excerpt: "Excerpt",
+    status: "Status",
+    authorId: "AuthorId",
+    organizationId: "OrganizationId",
+    paragraph1: "Paragraph1",
+    paragraph2: "Paragraph2",
+    paragraph3: "Paragraph3",
+    paragraph4: "Paragraph4",
+    paragraph5: "Paragraph5",
+
+    featuredImage: "FeaturedImageFile",
+    removeFeaturedImage: "RemoveFeaturedImage",
+    image1: "ImageFile1",
+    removeImage1: "RemoveImage1",
+    image2: "ImageFile2",
+    removeImage2: "RemoveImage2",
+    image3: "ImageFile3",
+    removeImage3: "RemoveImage3",
+    image4: "ImageFile4",
+    removeImage4: "RemoveImage4",
+    image5: "ImageFile5",
+    removeImage5: "RemoveImage5",
   };
-  
+
   return mapping[key] || key;
 };
 

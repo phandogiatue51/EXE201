@@ -1,23 +1,37 @@
 "use client";
 
-import { useState, useEffect, } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { StatsCards } from "../../components/volunteer/stats-cards";
 import { ProgramsList } from "../../components/list/programs-list";
 import { CertificatesList } from "../../components/list/certificates-list";
 import { ProfileSidebar } from "../../components/volunteer/profile-sidebar";
-import { accountAPI, certificateAPI, applicationAPI, projectAPI } from "@/services/api";
-import { VolunteerApplication, Certificate, Account, Project } from "../../lib/type"
+import {
+  accountAPI,
+  certificateAPI,
+  applicationAPI,
+  projectAPI,
+} from "@/services/api";
+import {
+  VolunteerApplication,
+  Certificate,
+  Account,
+  Project,
+} from "../../lib/type";
 import { useToast } from "@/hooks/use-toast";
 
 export default function VolunteerDashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [registrations, setRegistrations] = useState<VolunteerApplication[]>([]);
+  const [registrations, setRegistrations] = useState<VolunteerApplication[]>(
+    []
+  );
   const [certificates, setCertificates] = useState<Certificate[]>([]);
-  const [volunteerProfile, setVolunteerProfile] = useState<Account | null>(null);
+  const [volunteerProfile, setVolunteerProfile] = useState<Account | null>(
+    null
+  );
   const [projects, setProjects] = useState<Project[]>([]);
   const { toast } = useToast();
 
@@ -32,19 +46,22 @@ export default function VolunteerDashboardPage() {
 
     setIsLoading(true);
     try {
-      const [profileData, certificatesData, applicationsData] = await Promise.all([
-        accountAPI.getById(user.accountId),
-        certificateAPI.getByAccountId(user.accountId),
-        applicationAPI.filter({ volunteerId: user.accountId }),
-      ]);
+      const [profileData, certificatesData, applicationsData] =
+        await Promise.all([
+          accountAPI.getById(user.accountId),
+          certificateAPI.getByAccountId(user.accountId),
+          applicationAPI.filter({ volunteerId: user.accountId }),
+        ]);
 
       setVolunteerProfile(profileData);
       setCertificates(certificatesData || []);
       setRegistrations(applicationsData || []);
 
       if (applicationsData?.length > 0) {
-        const projectIds = [...new Set(applicationsData.map(app => app.projectId))];
-        const projectPromises = projectIds.map(id => projectAPI.getById(id));
+        const projectIds = [
+          ...new Set(applicationsData.map((app) => app.projectId)),
+        ];
+        const projectPromises = projectIds.map((id) => projectAPI.getById(id));
         const projectResults = await Promise.all(projectPromises);
         setProjects(projectResults);
       }
@@ -55,12 +72,13 @@ export default function VolunteerDashboardPage() {
     }
   };
 
-  const enrichedRegistrations = registrations.map(registration => {
-    const project = projects.find(p => p.id === registration.projectId);
+  const enrichedRegistrations = registrations.map((registration) => {
+    const project = projects.find((p) => p.id === registration.projectId);
     return {
       ...registration,
       projectTitle: project?.title || registration.projectTitle,
-      organizationName: project?.organizationName || registration.organizationName,
+      organizationName:
+        project?.organizationName || registration.organizationName,
       startDate: project?.startDate,
       endDate: project?.endDate,
       location: project?.location,
@@ -68,14 +86,16 @@ export default function VolunteerDashboardPage() {
     };
   });
 
-  const handleView = (id: string | number) => { router.push(`/volunteer/certificates/${id}`); };
+  const handleView = (id: string | number) => {
+    router.push(`/volunteer/certificates/${id}`);
+  };
 
   const handleDelete = async (id: string | number) => {
     if (!confirm("Bạn có chắc chắn muốn xóa chứng chỉ này?")) return;
 
     try {
       const response = await certificateAPI.delete(id);
-      setCertificates(prev => prev.filter(cert => cert.id !== id));
+      setCertificates((prev) => prev.filter((cert) => cert.id !== id));
       toast({
         description: response.message,
         variant: "success",
@@ -117,6 +137,7 @@ export default function VolunteerDashboardPage() {
       <StatsCards
         registrations={enrichedRegistrations}
         certificates={certificates}
+        info={volunteerProfile?.hour}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">

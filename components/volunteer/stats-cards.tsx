@@ -4,12 +4,17 @@ import { CheckCircle, Clock, Award } from "lucide-react";
 interface StatsCardsProps {
   registrations: any[];
   certificates: any[];
+  info: any;
 }
 
-export function StatsCards({ registrations, certificates }: StatsCardsProps) {
+export function StatsCards({
+  registrations,
+  certificates,
+  info,
+}: StatsCardsProps) {
   const totalHours = certificates.reduce(
     (sum, c) => sum + (c.hoursContributed || 0),
-    0,
+    0
   );
 
   const stats = [
@@ -20,8 +25,8 @@ export function StatsCards({ registrations, certificates }: StatsCardsProps) {
       color: "from-[#77E5C8] to-[#6085F0]",
     },
     {
-      title: "Đơn đăng ký chờ duyệt",
-      value: registrations.length,
+      title: "Tổng số giờ tình nguyện",
+      value: info,
       icon: Clock,
       color: "from-[#77E5C8] to-[#6085F0]",
     },

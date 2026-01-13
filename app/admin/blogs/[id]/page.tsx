@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,9 @@ import { BlogStatusBadge } from "@/components/status-badge/BlogStatusBadge";
 
 import { ArrowLeft, Calendar, User, Building2, Eye, Globe } from "lucide-react";
 
-export default function BlogDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+export default function BlogDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
+
   const router = useRouter();
   const { user } = useAuth();
   const [blog, setBlog] = useState<BlogPost | null>(null);
