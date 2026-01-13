@@ -207,7 +207,7 @@ export default function ProgramAttendancePage() {
             {/* Right Column: QR Display */}
             <div className="flex items-center justify-center">
               {qrData.qrImage && qrData.action && (
-                <Card className="w-full h-full flex items-center justify-center p-6">
+                <Card className="w-64 h-64 flex items-center justify-center p-6">
                   <QRDisplay
                     qrImage={qrData.qrImage}
                     expiresAt={qrData.expiresAt}

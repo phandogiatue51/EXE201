@@ -43,15 +43,15 @@ function SuccessPage({
       <CheckCircle className="text-green-600 w-20 h-20 mb-4" />
       <h1 className="text-2xl font-bold text-green-700 mb-2">
         {action === "checkin"
-          ? `Successfully checked in to ${projectName}!`
-          : `Successfully checked out from ${projectName}!`}
+          ? `Điểm danh Checkin cho chương trình ${projectName} thành công!`
+          : `Điểm danh Checkout cho chương trình ${projectName} thành công!`}
       </h1>
       <p className="text-gray-700 mb-2">
         {new Date(timestamp).toLocaleString()}
       </p>
       {action === "checkout" && hoursWorked !== undefined && (
         <p className="text-gray-700 mb-4">
-          Hours worked: {hoursWorked.toFixed(2)}
+          Giờ làm việc: {hoursWorked.toFixed(2)}
         </p>
       )}
       <div className="flex gap-4 w-full">
@@ -67,7 +67,7 @@ function SuccessPage({
           className="px-4 py-2 bg-gray-200 rounded"
           onClick={() => router.push("/volunteer")}
         >
-          Back to Dashboard
+          Trờ về
         </button>
       </div>
     </div>
